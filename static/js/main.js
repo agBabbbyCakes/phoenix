@@ -1,5 +1,6 @@
 (() => {
-  const connIndicator = () => document.getElementById("conn-indicator");
+  const connIndicator = () => document.getElementById("conn-status");
+  const sampleModeBadge = () => document.getElementById("sample-mode-ind");
   const successRateEl = () => document.getElementById("successRateValue");
   const throughputEl = () => document.getElementById("throughputValue");
   const logTableBody = () => document.getElementById("logTableBody");
@@ -133,13 +134,13 @@
     const el = connIndicator();
     if (!el) return;
     if (connected) {
+      el.textContent = "Connected";
       el.classList.remove("badge-error");
       el.classList.add("badge-success");
-      el.textContent = "Connected";
     } else {
+      el.textContent = "Disconnected";
       el.classList.remove("badge-success");
       el.classList.add("badge-error");
-      el.textContent = "Disconnected";
     }
   }
 
@@ -165,6 +166,11 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     initCharts();
+    // Show Sample Mode indicator if present on body dataset
+    const body = document.body;
+    if (body && body.dataset && body.dataset.sampleMode === "true" && sampleModeBadge()) {
+      sampleModeBadge().classList.remove("hidden");
+    }
   });
 
   // HTMX SSE lifecycle events

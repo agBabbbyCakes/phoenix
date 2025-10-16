@@ -2,12 +2,10 @@
 
 FastAPI + SSE + HTMX + Tailwind/DaisyUI + Chart.js dashboard for real-time Ethereum bot metrics.
 
-## Quickstart
+## Quickstart (uv)
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uv run uvicorn app.main:app --reload --port 8000
 ```
 
 Open `http://localhost:8000` in your browser.
@@ -25,29 +23,30 @@ Open `http://localhost:8000` in your browser.
 ```
 app/
   __init__.py
-  main.py           # FastAPI entrypoint + SSE stream
+  main.py           # FastAPI entrypoint
+  sse.py            # SSE broker and client stream
+  data.py           # in-memory store & mock generator
+  models.py         # Pydantic models (metrics payload)
 templates/
-  index.html        # Jinja2 template using HTMX, Tailwind, DaisyUI, Chart.js
+  base.html
+  index.html
+  partials/
+    metrics.html
+    logs.html
 static/
   js/
     main.js         # Frontend logic: charts, metrics, log updates
-requirements.txt
+  css/
+    .gitkeep
+pyproject.toml
 README.md
 ```
 
 ## SSE Contract
 
-SSE event name: `metrics`, payload JSON:
-
-```json
-{
-  "timestamp": "2025-01-01T00:00:00+00:00",
-  "bot_name": "arb-scout",
-  "latency_ms": 123,
-  "success_rate": 98.5,
-  "tx_hash": "0xabc12345...def789"
-}
-```
+- Event name used by the app: `metrics_update` (SSE sends server-rendered HTML partials)
+  - HTMX replaces `#metrics-panel` innerHTML via `sse-swap="metrics_update"`.
+  - The HTML partial includes data-* for charts and renders KPIs + recent events.
 
 ## Notes
 
@@ -55,14 +54,14 @@ SSE event name: `metrics`, payload JSON:
 - HTMX SSE extension listens and dispatches `sse:metrics` events to the page.
 - No WebSockets used per requirement.
 
-## Silverback Integration
+## Silverback Integration & Sample Mode
 
 This service can tail a Silverback Recorder JSON Lines file and broadcast real metrics to all connected SSE clients.
 
 Configure via environment variables:
 
-- `SILVERBACK_JSONL_PATH`: absolute path to the JSONL file written by Silverback Recorder.
-- `SILVERBACK_TAIL_FROM_START` (optional): `true|false` (default `false`). If `true`, reads from the beginning of the file; otherwise starts at the end.
+- `SILVERBACK_LOG_PATH`: absolute path to the JSONL file written by Silverback Recorder.
+- If not set, the app automatically starts in Sample Mode (mock generator with realistic jitter and statuses). A "Sample Mode" badge appears in the header.
 
 Run example:
 
@@ -71,22 +70,11 @@ SILVERBACK_JSONL_PATH=/var/log/silverback/recorder.jsonl \
 uvicorn app.main:app --reload --port 8000
 ```
 
-## Run Script (recommended)
+## Dev Commands
 
-The `scripts/run.sh` script will create a venv, install dependencies, load `.env` if present, and start the server.
-
-```bash
-chmod +x scripts/run.sh
-./scripts/run.sh
-```
-
-Use environment variables in `.env` to configure:
-
-```
-PORT=8000
-SILVERBACK_JSONL_PATH=/absolute/path/to/recorder.jsonl
-SILVERBACK_TAIL_FROM_START=false
-```
+- Run dev server: `uv run uvicorn app.main:app --reload --port 8000`
+- Lint: `uv run ruff check .`
+- Format: `uv run black .`
 
 Expected JSONL fields (flexible names are handled):
 
@@ -121,5 +109,9 @@ Notes:
 - chore: added `requirements.txt` with FastAPI, uvicorn, Jinja2, sse-starlette
 - docs: updated README with quickstart, structure, SSE contract, and changelog
 - feat: added Silverback JSONL tailer and SSE broadcaster; env var configuration
-- chore: added scripts/run.sh with venv, install, and server bootstrap
-- feat: frontend updates: bot name in header, throughput chart, error badges
+- build: migrated to uv + pyproject.toml; added dev tools (ruff, black)
+- refactor: modularized app into `app/sse.py`, `app/data.py`, `app/models.py`
+- feat: templating split into `base.html` and partials
+- feat: SSE streams server-rendered HTML partials (`metrics_update`) for HTMX
+- feat: Sample Mode auto-enabled without `SILVERBACK_LOG_PATH`, with warning/critical statuses and profit
+- ui: CMYK-inspired theme + Inter font; header cyan; KPI styling; error badges black/yellow
