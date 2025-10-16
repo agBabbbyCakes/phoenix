@@ -39,6 +39,12 @@ async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("index.html", {"request": request, "sample_mode": sample_mode})
 
 
+@app.get("/report", response_class=HTMLResponse)
+async def report(request: Request) -> HTMLResponse:
+    summary = store.daily_summary()
+    return templates.TemplateResponse("report.html", {"request": request, "summary": summary})
+
+
 @app.get("/stream")
 async def stream(request: Request):
     return EventSourceResponse(client_event_stream(request, broker))

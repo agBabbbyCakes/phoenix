@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Daily Report - BotScope{% endblock %}
+
+{% block content %}
+<div class="card bg-base-100 shadow glass-card">
+    <div class="card-body">
+        <h2 class="card-title">Daily Report</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="stat">
+                <div class="stat-title">Total Events</div>
+                <div class="stat-value">{{ summary.total_events }}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Avg Latency</div>
+                <div class="stat-value">{{ summary.avg_latency_ms }}ms</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Success Rate</div>
+                <div class="stat-value">{{ summary.success_rate_pct }}%</div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="card bg-base-100">
+                <div class="card-body">
+                    <h3 class="font-semibold">Status Counts</h3>
+                    <ul class="list-disc ml-6">
+                        <li>Ok: {{ summary.status_counts.ok }}</li>
+                        <li>Warning: {{ summary.status_counts.warning }}</li>
+                        <li>Critical: {{ summary.status_counts.critical }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card bg-base-100">
+                <div class="card-body">
+                    <h3 class="font-semibold">Top Bots by Profit</h3>
+                    <ul class="ml-1">
+                        {% for name, p in summary.top_bots %}
+                        <li class="flex justify-between"><span
+                                class="chip chip-cyan">{{ name }}</span><span>{{
+                                p }}</span></li>
+                        {% else %}
+                        <li class="opacity-70">No data</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end">
+            <button class="btn" onclick="window.print()">Print Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -23,14 +23,40 @@
     </div>
 </div>
 
-<!-- Latency Chart -->
-<div class="card bg-base-100 shadow mt-4"
-    data-latency-labels='{{ labels | tojson }}'
-    data-latency-values='{{ values | tojson }}'>
-    <div class="card-body">
-        <h2 class="card-title">Latency</h2>
-        <div class="h-64">
-            <canvas id="latencyChart"></canvas>
+<!-- View Selector -->
+<div class="flex items-center justify-between mt-4">
+    <h2 class="text-lg font-semibold">Live Charts</h2>
+    <select id="viewSelector"
+        class="select select-bordered bg-base-100 hover-glow">
+        <option value="latency">Latency</option>
+        <option value="throughput">Throughput</option>
+        <option value="profit">Cumulative Profit</option>
+        <option value="heatmap">Latency Heatmap</option>
+    </select>
+</div>
+
+<!-- Chart Containers -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
+    <div class="card bg-base-100 shadow glass-card p-2"
+        data-latency-labels='{{ labels | tojson }}'
+        data-latency-values='{{ values | tojson }}'
+        data-throughput-labels='{{ throughput_series | map(attribute=0) | list | tojson }}'
+        data-throughput-values='{{ throughput_series | map(attribute=1) | list | tojson }}'
+        data-profit-labels='{{ profit_series | map(attribute=0) | list | tojson }}'
+        data-profit-values='{{ profit_series | map(attribute=1) | list | tojson }}'
+        data-heat-cells='{{ heatmap.cells | tojson }}'
+        data-heat-cols='{{ heatmap.cols }}'>
+        <div class="card-body">
+            <div class="h-64">
+                <canvas id="chartPrimary"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow glass-card p-2">
+        <div class="card-body">
+            <div class="h-64">
+                <canvas id="chartSecondary"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -85,21 +111,82 @@
 
 <script>
 (function(){
-  const card = document.currentScript.closest('.card');
-  const labels = JSON.parse(card.dataset.latencyLabels || '[]');
-  const values = JSON.parse(card.dataset.latencyValues || '[]');
-  const ctx = document.getElementById('latencyChart');
-  if (!window.__latencyChart) {
-    window.__latencyChart = new Chart(ctx, {
-      type: 'line',
-      data: { labels, datasets: [{ label: 'Latency (ms)', data: values, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.2)', borderWidth: 2, tension: 0.25, pointRadius: 2 }] },
-      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-    });
-  } else {
-    const c = window.__latencyChart;
-    c.data.labels = labels;
-    c.data.datasets[0].data = values;
-    c.update('none');
+  const card = document.currentScript.closest('.grid').previousElementSibling.nextElementSibling;
+  const latencyLabels = JSON.parse(card.dataset.latencyLabels || '[]');
+  const latencyValues = JSON.parse(card.dataset.latencyValues || '[]');
+  const tpLabels = JSON.parse(card.dataset.throughputLabels || '[]');
+  const tpValues = JSON.parse(card.dataset.throughputValues || '[]');
+  const pfLabels = JSON.parse(card.dataset.profitLabels || '[]');
+  const pfValues = JSON.parse(card.dataset.profitValues || '[]');
+  const heatCells = JSON.parse(card.dataset.heatCells || '[]');
+  const heatCols = parseInt(card.dataset.heatCols || '12', 10);
+
+  const colors = {
+    cyan: 'hsl(191 100% 46%)',
+    magenta: 'hsl(320 90% 70%)',
+    yellow: 'hsl(45 100% 60%)'
+  };
+
+  const ctx1 = document.getElementById('chartPrimary');
+  const ctx2 = document.getElementById('chartSecondary');
+
+  function ensureLineChart(instanceRef, ctx, labels, data, label, color){
+    if (!instanceRef.value){
+      instanceRef.value = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color.replace('hsl', 'hsla').replace(')', '/.2)'), borderWidth: 2, tension: 0.25, pointRadius: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+    } else {
+      const c = instanceRef.value;
+      c.data.labels = labels; c.data.datasets[0].data = data; c.update('none');
+    }
   }
+
+  function ensureHeatmap(instanceRef, ctx, cells, cols){
+    const data = cells.map(c => ({x: c.x, y: c.y, v: c.v}));
+    const maxV = data.reduce((m, c) => Math.max(m, c.v), 1);
+    if (!instanceRef.value){
+      instanceRef.value = new Chart(ctx, {
+        type: 'matrix',
+        data: { datasets: [{
+          label: 'Latency Heatmap',
+          data,
+          backgroundColor(ctx){ const v = ctx.raw.v||0; const alpha = v/maxV; return `hsla(191 100% 46% / ${alpha})`; },
+          borderWidth: 1,
+          width: ({chart}) => (chart.chartArea.right - chart.chartArea.left)/cols - 2,
+          height: ({chart}) => (chart.chartArea.bottom - chart.chartArea.top)/4 - 2,
+          xAxisID: 'x', yAxisID: 'y'
+        }] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { display:false, offset:true }, y: { display:false, offset:true, reverse:true } } }
+      });
+    } else {
+      const c = instanceRef.value; c.data.datasets[0].data = data; c.update('none');
+    }
+  }
+
+  // Initialize with latency + throughput
+  window.__chartPrimary = window.__chartPrimary || { value: null };
+  window.__chartSecondary = window.__chartSecondary || { value: null };
+  ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+  ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+
+  // View selector behavior
+  const selector = document.getElementById('viewSelector');
+  selector && selector.addEventListener('change', () => {
+    if (selector.value === 'latency'){
+      ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+      ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+    } else if (selector.value === 'throughput'){
+      ensureLineChart(window.__chartPrimary, ctx1, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+      ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+    } else if (selector.value === 'profit'){
+      ensureLineChart(window.__chartPrimary, ctx1, pfLabels, pfValues, 'Cumulative Profit', colors.yellow);
+      ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+    } else if (selector.value === 'heatmap'){
+      ensureHeatmap(window.__chartPrimary, ctx1, heatCells, heatCols);
+      ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+    }
+  });
 })();
 </script>

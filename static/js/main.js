@@ -177,6 +177,36 @@
   document.body.addEventListener("htmx:sseOpen", function() { setSSEStatus(true); });
   document.body.addEventListener("htmx:sseError", function() { setSSEStatus(false); });
 
+  // Sidebar nav and hotkeys
+  function setView(view){
+    const selector = document.getElementById('viewSelector');
+    if (selector){ selector.value = view; selector.dispatchEvent(new Event('change')); }
+    const items = document.querySelectorAll('#viewNav .nav-view');
+    items.forEach(i => i.classList.toggle('active', i.dataset.view === view));
+  }
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#viewNav .nav-view');
+    if (btn){ setView(btn.dataset.view); }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === '1') setView('latency');
+    else if (e.key === '2') setView('throughput');
+    else if (e.key === '3') setView('profit');
+    else if (e.key === '4') setView('heatmap');
+    else if (e.key.toLowerCase() === 'n'){
+      const order = ['latency','throughput','profit','heatmap'];
+      const selector = document.getElementById('viewSelector');
+      const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
+      setView(order[(idx+1)%order.length]);
+    } else if (e.key.toLowerCase() === 'p'){
+      const order = ['latency','throughput','profit','heatmap'];
+      const selector = document.getElementById('viewSelector');
+      const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
+      setView(order[(idx-1+order.length)%order.length]);
+    }
+  });
+
   // Metrics events from htmx sse extension
   document.body.addEventListener("sse:metrics", function(e) {
     window.handleMetrics(e.detail);

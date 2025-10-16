@@ -1,62 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- KPI Row -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="stat bg-base-100 shadow rounded-box">
-        <div class="stat-title">Avg Latency</div>
-        <div id="kpi-avg-latency" class="stat-value">-</div>
-        <div class="stat-desc">Last 60s</div>
-    </div>
-    <div class="stat bg-base-100 shadow rounded-box">
-        <div class="stat-title">Success Rate</div>
-        <div id="kpi-success-rate" class="stat-value">-</div>
-        <div class="stat-desc">Last 60s</div>
-    </div>
-    <div class="stat bg-base-100 shadow rounded-box">
-        <div class="stat-title">Throughput</div>
-        <div id="kpi-throughput" class="stat-value">-</div>
-        <div class="stat-desc">Events/min</div>
-    </div>
-</div>
-
-<!-- Charts -->
-<div class="card bg-base-100 shadow mt-4">
-    <div class="card-body">
-        <h2 class="card-title">Latency</h2>
-        <div class="h-64">
-            <canvas id="latencyChart"></canvas>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+    <!-- Sidebar -->
+    <aside class="lg:col-span-1 glass-card p-3 h-full sticky top-4">
+        <h3 class="text-sm opacity-70 mb-2">Views</h3>
+        <ul id="viewNav" class="menu bg-transparent rounded-box">
+            <li><button class="justify-between nav-view active"
+                    data-view="latency">Latency <span
+                        class="chip chip-cyan">1</span></button></li>
+            <li><button class="justify-between nav-view"
+                    data-view="throughput">Throughput <span
+                        class="chip chip-magenta">2</span></button></li>
+            <li><button class="justify-between nav-view"
+                    data-view="profit">Profit <span
+                        class="chip chip-yellow">3</span></button></li>
+            <li><button class="justify-between nav-view"
+                    data-view="heatmap">Heatmap <span
+                        class="chip chip-neutral">4</span></button></li>
+        </ul>
+        <div class="divider"></div>
+        <div class="text-xs opacity-70 leading-relaxed">
+            Tips: Use keys 1–4 to switch views. N/P to cycle. Charts update
+            live.
         </div>
-    </div>
-</div>
+    </aside>
 
-<!-- Live Areas via HTMX SSE -->
-<div hx-ext="sse" sse-connect="/stream" class="mt-4">
-    <div id="metrics-panel" sse-swap="metrics_update" hx-swap="innerHTML">
-        <!-- server-rendered metrics partial will be swapped here -->
-    </div>
-</div>
-
-<!-- Log Table Container -->
-<div class="card bg-base-100 shadow mt-4">
-    <div class="card-body">
-        <h2 class="card-title">Event Log</h2>
-        <div class="overflow-x-auto">
-            <table class="table table-zebra">
-                <thead>
-                    <tr>
-                        <th>Time (UTC)</th>
-                        <th>Bot</th>
-                        <th>Latency (ms)</th>
-                        <th>Success %</th>
-                        <th>Status</th>
-                        <th>Tx Hash</th>
-                    </tr>
-                </thead>
-                <tbody id="logTableBody"></tbody>
-            </table>
+    <!-- Main Panel -->
+    <main class="lg:col-span-4 space-y-4 overflow-y-auto"
+        style="max-height: calc(100vh - 10rem);">
+        <!-- Live Areas via HTMX SSE -->
+        <div hx-ext="sse" sse-connect="/stream">
+            <div id="metrics-panel" sse-swap="metrics_update"
+                hx-swap="innerHTML">
+                <!-- server-rendered metrics partial will be swapped here -->
+            </div>
         </div>
-    </div>
+
+        <!-- Log Table Container -->
+        <div class="card bg-base-100 shadow glass-card">
+            <div class="card-body">
+                <h2 class="card-title">Event Log</h2>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Time (UTC)</th>
+                                <th>Bot</th>
+                                <th>Latency (ms)</th>
+                                <th>Success %</th>
+                                <th>Status</th>
+                                <th>Tx Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end">
+            <a class="btn btn-outline" href="/report" target="_blank">Open Daily
+                Report</a>
+        </div>
+    </main>
 </div>
 {% endblock %}
 
