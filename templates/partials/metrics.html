@@ -3,190 +3,132 @@
 
 <!-- KPI Cards -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div
-        class="stat bg-base-100 shadow rounded-box border border-primary/30 hover:border-primary transition">
-        <div class="stat-title">Avg Latency</div>
-        <div class="stat-value">{{ kpis.avg_latency_ms }}ms</div>
-        <div class="stat-desc">Last 60s</div>
-    </div>
-    <div
-        class="stat bg-base-100 shadow rounded-box border border-secondary/30 hover:border-secondary transition">
-        <div class="stat-title">Success Rate</div>
-        <div class="stat-value">{{ kpis.success_rate_pct }}%</div>
-        <div class="stat-desc">Last 60s</div>
-    </div>
-    <div
-        class="stat bg-base-100 shadow rounded-box border border-accent/30 hover:border-accent transition">
-        <div class="stat-title">Throughput</div>
-        <div class="stat-value">{{ kpis.throughput_1m }}/min</div>
-        <div class="stat-desc">Events</div>
-    </div>
+  <div
+    class="stat bg-base-100 shadow rounded-box border border-primary/30 hover:border-primary transition">
+    <div class="stat-title">Avg Latency</div>
+    <div class="stat-value">{{ kpis.avg_latency_ms }}ms</div>
+    <div class="stat-desc">Last 60s</div>
+  </div>
+  <div
+    class="stat bg-base-100 shadow rounded-box border border-secondary/30 hover:border-secondary transition">
+    <div class="stat-title">Success Rate</div>
+    <div class="stat-value">{{ kpis.success_rate_pct }}%</div>
+    <div class="stat-desc">Last 60s</div>
+  </div>
+  <div
+    class="stat bg-base-100 shadow rounded-box border border-accent/30 hover:border-accent transition">
+    <div class="stat-title">Throughput</div>
+    <div class="stat-value">{{ kpis.throughput_1m }}/min</div>
+    <div class="stat-desc">Events</div>
+  </div>
 </div>
 
 <!-- View Selector -->
 <div class="flex items-center justify-between mt-4">
-    <h2 class="text-lg font-semibold">Live Charts</h2>
-    <select id="viewSelector"
-        class="select select-bordered bg-base-100 hover-glow">
-        <option value="latency">Latency</option>
-        <option value="throughput">Throughput</option>
-        <option value="profit">Cumulative Profit</option>
-        <option value="heatmap">Latency Heatmap</option>
-    </select>
+  <h2 class="text-lg font-semibold">Live Charts</h2>
+  <select id="viewSelector"
+    class="select select-bordered bg-base-100 hover-glow">
+    <option value="latency">Latency</option>
+    <option value="throughput">Throughput</option>
+    <option value="profit">Cumulative Profit</option>
+    <option value="heatmap">Latency Heatmap</option>
+    <option value="sensors">Sensors (Temp/Humidity)</option>
+  </select>
 </div>
 
 <!-- Chart Containers -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
-    <div class="card bg-base-100 shadow glass-card p-2"
-        data-latency-labels='{{ labels | tojson }}'
-        data-latency-values='{{ values | tojson }}'
-        data-throughput-labels='{{ throughput_series | map(attribute=0) | list | tojson }}'
-        data-throughput-values='{{ throughput_series | map(attribute=1) | list | tojson }}'
-        data-profit-labels='{{ profit_series | map(attribute=0) | list | tojson }}'
-        data-profit-values='{{ profit_series | map(attribute=1) | list | tojson }}'
-        data-heat-cells='{{ heatmap.cells | tojson }}'
-        data-heat-cols='{{ heatmap.cols }}'>
-        <div class="card-body">
-            <div class="h-64">
-                <canvas id="chartPrimary"></canvas>
-            </div>
-        </div>
+  <div class="card bg-base-100 shadow glass-card p-2"
+    data-latency-labels='{{ labels | tojson }}'
+    data-latency-values='{{ values | tojson }}'
+    data-throughput-labels='{{ throughput_series | map(attribute=0) | list | tojson }}'
+    data-throughput-values='{{ throughput_series | map(attribute=1) | list | tojson }}'
+    data-profit-labels='{{ profit_series | map(attribute=0) | list | tojson }}'
+    data-profit-values='{{ profit_series | map(attribute=1) | list | tojson }}'
+    data-heat-cells='{{ heatmap.cells | tojson }}'
+    data-heat-cols='{{ heatmap.cols }}'
+    data-sensor-labels='{{ (sensor_labels or []) | tojson }}'
+    data-sensor-temp-values='{{ (sensor_temp_values or []) | tojson }}'
+    data-sensor-humidity-values='{{ (sensor_humidity_values or []) | tojson }}'>
+    <div class="card-body">
+      <!-- Chart toolbar -->
+      <div class="flex flex-wrap items-center gap-2 mb-2">
+        <button class="btn btn-xs" id="btnResetZoom"
+          title="Reset zoom (Z)">Reset Zoom</button>
+        <label class="label cursor-pointer gap-2">
+          <span class="label-text">Moving Avg</span>
+          <input type="checkbox" id="toggleMA"
+            class="toggle toggle-primary toggle-xs" />
+        </label>
+        <div class="divider divider-horizontal"></div>
+        <label class="label cursor-pointer gap-2">
+          <span class="label-text">Alert if latency ≥</span>
+          <input id="alertLatency" type="number"
+            class="input input-xs input-bordered w-24" placeholder="ms"
+            min="1" />
+        </label>
+        <button class="btn btn-xs" id="btnSavePrefs">Save</button>
+      </div>
+      <div class="h-64">
+        <canvas id="chartPrimary"></canvas>
+      </div>
     </div>
-    <div class="card bg-base-100 shadow glass-card p-2">
-        <div class="card-body">
-            <div class="h-64">
-                <canvas id="chartSecondary"></canvas>
-            </div>
-        </div>
+  </div>
+  <div class="card bg-base-100 shadow glass-card p-2">
+    <div class="card-body">
+      <div class="h-64">
+        <canvas id="chartSecondary"></canvas>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Recent Events Table -->
 <div class="card bg-base-100 shadow mt-4">
-    <div class="card-body">
-        <h2 class="card-title">Recent Events</h2>
-        <div class="overflow-x-auto">
-            <table class="table table-compact">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Bot</th>
-                        <th>Block</th>
-                        <th>Latency</th>
-                        <th>Status</th>
-                        <th>Tx</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for e in last_events %}
-                    <tr>
-                        <td>{{ e.timestamp.strftime('%H:%M:%S') }}</td>
-                        <td>{{ e.bot_name }}</td>
-                        <td>-</td>
-                        <td>{{ e.latency_ms }}ms</td>
-                        <td>
-                            {% if e.error %}
-                            <span class="badge"
-                                style="background-color:hsl(var(--er)); color:hsl(var(--erc));"
-                                title="{{ e.error }}">Error</span>
-                            {% else %}
-                            <span class="badge badge-success">OK</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if e.tx_hash %}
-                            <a class="link link-primary" target="_blank"
-                                rel="noopener"
-                                href="https://etherscan.io/tx/{{ e.tx_hash }}">{{
-                                e.tx_hash }}</a>
-                            {% else %}-{% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <div class="card-body">
+    <h2 class="card-title">Recent Events</h2>
+    <div class="overflow-x-auto">
+      <table class="table table-compact">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Bot</th>
+            <th>Block</th>
+            <th>Latency</th>
+            <th>Status</th>
+            <th>Tx</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in last_events %}
+          <tr>
+            <td>{{ e.timestamp.strftime('%H:%M:%S') }}</td>
+            <td>{{ e.bot_name }}</td>
+            <td>-</td>
+            <td>{{ e.latency_ms }}ms</td>
+            <td>
+              {% if e.error %}
+              <span class="badge"
+                style="background-color:hsl(var(--er)); color:hsl(var(--erc));"
+                title="{{ e.error }}">Error</span>
+              {% else %}
+              <span class="badge badge-success">OK</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if e.tx_hash %}
+              <a class="link link-primary" target="_blank"
+                rel="noopener"
+                href="https://etherscan.io/tx/{{ e.tx_hash }}">{{
+                e.tx_hash }}</a>
+              {% else %}-{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
-<script>
-(function(){
-  const card = document.currentScript.closest('.grid').previousElementSibling.nextElementSibling;
-  const latencyLabels = JSON.parse(card.dataset.latencyLabels || '[]');
-  const latencyValues = JSON.parse(card.dataset.latencyValues || '[]');
-  const tpLabels = JSON.parse(card.dataset.throughputLabels || '[]');
-  const tpValues = JSON.parse(card.dataset.throughputValues || '[]');
-  const pfLabels = JSON.parse(card.dataset.profitLabels || '[]');
-  const pfValues = JSON.parse(card.dataset.profitValues || '[]');
-  const heatCells = JSON.parse(card.dataset.heatCells || '[]');
-  const heatCols = parseInt(card.dataset.heatCols || '12', 10);
-
-  const colors = {
-    cyan: 'hsl(191 100% 46%)',
-    magenta: 'hsl(320 90% 70%)',
-    yellow: 'hsl(45 100% 60%)'
-  };
-
-  const ctx1 = document.getElementById('chartPrimary');
-  const ctx2 = document.getElementById('chartSecondary');
-
-  function ensureLineChart(instanceRef, ctx, labels, data, label, color){
-    if (!instanceRef.value){
-      instanceRef.value = new Chart(ctx, {
-        type: 'line',
-        data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color.replace('hsl', 'hsla').replace(')', '/.2)'), borderWidth: 2, tension: 0.25, pointRadius: 2 }] },
-        options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-      });
-    } else {
-      const c = instanceRef.value;
-      c.data.labels = labels; c.data.datasets[0].data = data; c.update('none');
-    }
-  }
-
-  function ensureHeatmap(instanceRef, ctx, cells, cols){
-    const data = cells.map(c => ({x: c.x, y: c.y, v: c.v}));
-    const maxV = data.reduce((m, c) => Math.max(m, c.v), 1);
-    if (!instanceRef.value){
-      instanceRef.value = new Chart(ctx, {
-        type: 'matrix',
-        data: { datasets: [{
-          label: 'Latency Heatmap',
-          data,
-          backgroundColor(ctx){ const v = ctx.raw.v||0; const alpha = v/maxV; return `hsla(191 100% 46% / ${alpha})`; },
-          borderWidth: 1,
-          width: ({chart}) => (chart.chartArea.right - chart.chartArea.left)/cols - 2,
-          height: ({chart}) => (chart.chartArea.bottom - chart.chartArea.top)/4 - 2,
-          xAxisID: 'x', yAxisID: 'y'
-        }] },
-        options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { display:false, offset:true }, y: { display:false, offset:true, reverse:true } } }
-      });
-    } else {
-      const c = instanceRef.value; c.data.datasets[0].data = data; c.update('none');
-    }
-  }
-
-  // Initialize with latency + throughput
-  window.__chartPrimary = window.__chartPrimary || { value: null };
-  window.__chartSecondary = window.__chartSecondary || { value: null };
-  ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
-  ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
-
-  // View selector behavior
-  const selector = document.getElementById('viewSelector');
-  selector && selector.addEventListener('change', () => {
-    if (selector.value === 'latency'){
-      ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
-      ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
-    } else if (selector.value === 'throughput'){
-      ensureLineChart(window.__chartPrimary, ctx1, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
-      ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
-    } else if (selector.value === 'profit'){
-      ensureLineChart(window.__chartPrimary, ctx1, pfLabels, pfValues, 'Cumulative Profit', colors.yellow);
-      ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
-    } else if (selector.value === 'heatmap'){
-      ensureHeatmap(window.__chartPrimary, ctx1, heatCells, heatCols);
-      ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
-    }
-  });
-})();
-</script>
+<!-- charts are initialized in static/js/main.js after HTMX swaps -->

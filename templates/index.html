@@ -18,10 +18,13 @@
             <li><button class="justify-between nav-view"
                     data-view="heatmap">Heatmap <span
                         class="chip chip-neutral">4</span></button></li>
+            <li><button class="justify-between nav-view"
+                    data-view="sensors">Sensors <span
+                        class="chip chip-cyan">5</span></button></li>
         </ul>
         <div class="divider"></div>
         <div class="text-xs opacity-70 leading-relaxed">
-            Tips: Use keys 1–4 to switch views. N/P to cycle. Charts update
+            Tips: Use keys 1–5 to switch views. N/P to cycle. Charts update
             live.
         </div>
     </aside>
@@ -33,7 +36,7 @@
         <div hx-ext="sse" sse-connect="/stream">
             <div id="metrics-panel" sse-swap="metrics_update"
                 hx-swap="innerHTML">
-                <!-- server-rendered metrics partial will be swapped here -->
+                {{ initial_metrics_html | safe }}
             </div>
         </div>
 

@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+import socket
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -97,7 +98,34 @@ def main() -> None:
     ensure_python_version()
     load_dotenv(PROJECT_DIR / ".env")
 
-    port = os.environ.get("PORT", "8000")
+    # Auto-pick an available port, preferring PORT or 8000
+    def is_free(p: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s.bind(("127.0.0.1", p))
+            except OSError:
+                return False
+            return True
+
+    def choose_port() -> str:
+        env_port = os.environ.get("PORT", "8000")
+        try:
+            base = int(env_port)
+        except ValueError:
+            base = 8000
+        for offset in range(0, 50):
+            cand = base + offset
+            if is_free(cand):
+                return str(cand)
+        # Fallback to a random high port chosen by OS by opening a socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", 0))
+            return str(s.getsockname()[1])
+
+    port = choose_port()
+    os.environ["PORT"] = port
+    print(f"[start] Selected free port: {port}")
 
     uv_path = shutil.which("uv")
     if uv_path:

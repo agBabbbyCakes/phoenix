@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Quick Demo - BotScope{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="hero bg-base-100 shadow glass-card">
+        <div class="hero-content text-center">
+            <div class="max-w-xl">
+                <h1 class="text-3xl font-bold">BotScope Live Demo</h1>
+                <p class="py-2 opacity-80">Real-time dashboard showcasing
+                    latency, throughput, and alerts. This demo runs in sample
+                    mode for instant playback.</p>
+                {% if sample_mode %}
+                <div class="badge badge-success">Sample Mode</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4">
+        <div class="card bg-base-100 shadow glass-card">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <h2 class="card-title">Live Metrics</h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm opacity-70">SSE</span>
+                        <span id="conn-status"
+                            class="badge badge-error">Disconnected</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <div class="text-sm opacity-70">Success Rate</div>
+                        <div id="successRateValue"
+                            class="text-2xl font-semibold">0%</div>
+                    </div>
+                    <div>
+                        <div class="text-sm opacity-70">Throughput (1m)</div>
+                        <div id="throughputValue"
+                            class="text-2xl font-semibold">0</div>
+                    </div>
+                    <div>
+                        <div class="text-sm opacity-70">Latest Bot</div>
+                        <div id="botName" class="text-2xl font-semibold">-</div>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="h-48"><canvas id="latencyChart"></canvas></div>
+                    <div class="h-48"><canvas
+                            id="throughputChart"></canvas></div>
+                </div>
+
+                <div class="mt-4">
+                    <div hx-ext="sse" sse-connect="/stream">
+                        <div id="metrics-panel" sse-swap="metrics_update"
+                            hx-swap="innerHTML">{{ initial_metrics_html | safe
+                            }}</div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-right">
+                    <a href="/" class="btn btn-outline">Open Full Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/main.js"></script>
+{% endblock %}

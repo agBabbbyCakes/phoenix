@@ -10,6 +10,7 @@
   let throughputChart;
   const maxPoints = 30;
   const eventTimes = [];
+  let userPrefs = { enableMA: false, enableTrend: false, alertLatencyMs: null };
 
   function initCharts() {
     const ctx = document.getElementById("latencyChart");
@@ -27,6 +28,16 @@
             tension: 0.25,
             pointRadius: 2,
           },
+          {
+            label: "MA(5)",
+            data: [],
+            borderColor: "#f59e0b",
+            backgroundColor: "rgba(245,158,11,0.15)",
+            borderWidth: 1,
+            tension: 0.25,
+            pointRadius: 0,
+            hidden: true,
+          }
         ],
       },
       options: {
@@ -36,7 +47,30 @@
           x: { title: { display: false } },
           y: { beginAtZero: true },
         },
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          zoom: {
+            pan: { enabled: true, mode: 'x' },
+            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const val = ctx.parsed.y;
+                const ds = ctx.datasetIndex === 0 ? ctx.dataset.data : [];
+                let delta = '';
+                if (ctx.datasetIndex === 0 && ctx.dataIndex > 0) {
+                  const prev = ds[ctx.dataIndex - 1];
+                  if (typeof prev === 'number') {
+                    const diff = val - prev;
+                    delta = ` (${diff >= 0 ? '+' : ''}${diff.toFixed(1)})`;
+                  }
+                }
+                return `${ctx.dataset.label}: ${val}${delta}`;
+              }
+            }
+          }
+        },
       },
     });
 
@@ -64,7 +98,7 @@
           x: { title: { display: false } },
           y: { beginAtZero: true },
         },
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false }, zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } },
       },
     });
   }
@@ -78,6 +112,20 @@
     if (labels.length > maxPoints) {
       labels.shift();
       data.shift();
+    }
+    // moving average (5)
+    if (Array.isArray(latencyChart.data.datasets[1].data)){
+      const src = latencyChart.data.datasets[0].data;
+      const ma = [];
+      const window = 5;
+      for (let i = 0; i < src.length; i++){
+        const start = Math.max(0, i - window + 1);
+        const slice = src.slice(start, i + 1);
+        const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+        ma.push(Number.isFinite(mean) ? Number(mean.toFixed(1)) : null);
+      }
+      latencyChart.data.datasets[1].data = ma;
+      latencyChart.data.datasets[1].hidden = !userPrefs.enableMA;
     }
     latencyChart.update();
   }
@@ -171,6 +219,15 @@
     if (body && body.dataset && body.dataset.sampleMode === "true" && sampleModeBadge()) {
       sampleModeBadge().classList.remove("hidden");
     }
+    // load prefs
+    try {
+      const raw = localStorage.getItem('phoenix:prefs');
+      if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
+    } catch {}
+    const toggle = document.getElementById('toggleMA');
+    const alertI = document.getElementById('alertLatency');
+    if (toggle) toggle.checked = !!userPrefs.enableMA;
+    if (alertI && userPrefs.alertLatencyMs != null) alertI.value = String(userPrefs.alertLatencyMs);
   });
 
   // HTMX SSE lifecycle events
@@ -187,6 +244,19 @@
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('#viewNav .nav-view');
     if (btn){ setView(btn.dataset.view); }
+    if (e.target && e.target.id === 'btnResetZoom'){
+      if (latencyChart && latencyChart.resetZoom) latencyChart.resetZoom();
+      if (throughputChart && throughputChart.resetZoom) throughputChart.resetZoom();
+    }
+    if (e.target && e.target.id === 'btnSavePrefs'){
+      const toggle = document.getElementById('toggleMA');
+      const alertI = document.getElementById('alertLatency');
+      userPrefs.enableMA = !!(toggle && toggle.checked);
+      const v = alertI && alertI.value ? parseInt(alertI.value, 10) : null;
+      userPrefs.alertLatencyMs = Number.isFinite(v) ? v : null;
+      try { localStorage.setItem('phoenix:prefs', JSON.stringify(userPrefs)); } catch {}
+      if (latencyChart){ latencyChart.data.datasets[1].hidden = !userPrefs.enableMA; latencyChart.update('none'); }
+    }
   });
   document.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
@@ -194,13 +264,14 @@
     else if (e.key === '2') setView('throughput');
     else if (e.key === '3') setView('profit');
     else if (e.key === '4') setView('heatmap');
+    else if (e.key === '5') setView('sensors');
     else if (e.key.toLowerCase() === 'n'){
-      const order = ['latency','throughput','profit','heatmap'];
+      const order = ['latency','throughput','profit','heatmap','sensors'];
       const selector = document.getElementById('viewSelector');
       const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
       setView(order[(idx+1)%order.length]);
     } else if (e.key.toLowerCase() === 'p'){
-      const order = ['latency','throughput','profit','heatmap'];
+      const order = ['latency','throughput','profit','heatmap','sensors'];
       const selector = document.getElementById('viewSelector');
       const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
       setView(order[(idx-1+order.length)%order.length]);
@@ -209,7 +280,126 @@
 
   // Metrics events from htmx sse extension
   document.body.addEventListener("sse:metrics", function(e) {
+    // Alerting check
+    try {
+      const evt = typeof e.detail === 'string' ? JSON.parse(e.detail) : e.detail;
+      if (userPrefs.alertLatencyMs && typeof evt.latency_ms === 'number' && evt.latency_ms >= userPrefs.alertLatencyMs){
+        const div = document.createElement('div');
+        div.className = 'toast toast-top toast-end';
+        div.innerHTML = `<div class="alert alert-warning">High latency ${evt.latency_ms}ms at ${new Date(evt.timestamp).toLocaleTimeString()}</div>`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+      }
+    } catch {}
     window.handleMetrics(e.detail);
+  });
+
+  // Charts initialization for server-rendered metrics partial (executed after HTMX swap)
+  function buildOrUpdateChartsFromPartial(container){
+    try {
+      const card = container.querySelector('.card[data-latency-labels]');
+      if (!card) return;
+      const latencyLabels = JSON.parse(card.dataset.latencyLabels || '[]');
+      const latencyValues = JSON.parse(card.dataset.latencyValues || '[]');
+      const tpLabels = JSON.parse(card.dataset.throughputLabels || '[]');
+      const tpValues = JSON.parse(card.dataset.throughputValues || '[]');
+      const pfLabels = JSON.parse(card.dataset.profitLabels || '[]');
+      const pfValues = JSON.parse(card.dataset.profitValues || '[]');
+      const heatCells = JSON.parse(card.dataset.heatCells || '[]');
+      const heatCols = parseInt(card.dataset.heatCols || '12', 10);
+      const sensorLabels = JSON.parse(card.dataset.sensorLabels || '[]');
+      const sensorTempValues = JSON.parse(card.dataset.sensorTempValues || '[]');
+      const sensorHumValues = JSON.parse(card.dataset.sensorHumidityValues || '[]');
+
+      const colors = {
+        cyan: 'hsl(191 100% 46%)',
+        magenta: 'hsl(320 90% 70%)',
+        yellow: 'hsl(45 100% 60%)'
+      };
+
+      const ctx1 = container.querySelector('#chartPrimary');
+      const ctx2 = container.querySelector('#chartSecondary');
+      if (!ctx1 || !ctx2) return;
+
+      function ensureLineChart(instanceRef, ctx, labels, data, label, color){
+        if (!instanceRef.value){
+          instanceRef.value = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color.replace('hsl', 'hsla').replace(')', '/.2)'), borderWidth: 2, tension: 0.25, pointRadius: 2 }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+          });
+        } else {
+          const c = instanceRef.value;
+          c.data.labels = labels; c.data.datasets[0].data = data; c.update('none');
+        }
+      }
+
+      function ensureHeatmap(instanceRef, ctx, cells, cols){
+        const data = cells.map(c => ({x: c.x, y: c.y, v: c.v}));
+        const maxV = data.reduce((m, c) => Math.max(m, c.v), 1);
+        if (!instanceRef.value){
+          instanceRef.value = new Chart(ctx, {
+            type: 'matrix',
+            data: { datasets: [{
+              label: 'Latency Heatmap',
+              data,
+              backgroundColor(ctx){ const v = ctx.raw.v||0; const alpha = v/maxV; return `hsla(191 100% 46% / ${alpha})`; },
+              borderWidth: 1,
+              width: ({chart}) => (chart.chartArea.right - chart.chartArea.left)/cols - 2,
+              height: ({chart}) => (chart.chartArea.bottom - chart.chartArea.top)/4 - 2,
+              xAxisID: 'x', yAxisID: 'y'
+            }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { display:false, offset:true }, y: { display:false, offset:true, reverse:true } } }
+          });
+        } else {
+          const c = instanceRef.value; c.data.datasets[0].data = data; c.update('none');
+        }
+      }
+
+      window.__chartPrimary = window.__chartPrimary || { value: null };
+      window.__chartSecondary = window.__chartSecondary || { value: null };
+
+      // Initialize defaults when partial first arrives
+      const selector = container.querySelector('#viewSelector');
+      const current = selector ? selector.value : 'latency';
+      if (current === 'latency'){
+        ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+      } else if (current === 'throughput'){
+        ensureLineChart(window.__chartPrimary, ctx1, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+      } else if (current === 'profit'){
+        ensureLineChart(window.__chartPrimary, ctx1, pfLabels, pfValues, 'Cumulative Profit', colors.yellow);
+        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+      } else if (current === 'heatmap'){
+        ensureHeatmap(window.__chartPrimary, ctx1, heatCells, heatCols);
+        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+      } else if (current === 'sensors'){
+        ensureLineChart(window.__chartPrimary, ctx1, sensorLabels, sensorTempValues, 'Temperature (°C)', colors.cyan);
+        ensureLineChart(window.__chartSecondary, ctx2, sensorLabels, sensorHumValues, 'Humidity (%)', colors.magenta);
+      }
+    } catch (err) {
+      console.error('Failed to init charts from partial', err);
+    }
+  }
+
+  document.body.addEventListener('htmx:afterSwap', function(e){
+    if (e && e.target && e.target.id === 'metrics-panel'){
+      buildOrUpdateChartsFromPartial(e.target);
+      // Re-bind toolbar states on new partial
+      const toggle = document.getElementById('toggleMA');
+      const alertI = document.getElementById('alertLatency');
+      if (toggle) toggle.checked = !!userPrefs.enableMA;
+      if (alertI && userPrefs.alertLatencyMs != null) alertI.value = String(userPrefs.alertLatencyMs);
+    }
+  });
+
+  // Keyboard shortcut to reset zoom
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'z' || e.key === 'Z') && !e.metaKey && !e.ctrlKey && !e.altKey){
+      if (latencyChart && latencyChart.resetZoom) latencyChart.resetZoom();
+      if (throughputChart && throughputChart.resetZoom) throughputChart.resetZoom();
+    }
   });
 })();
 

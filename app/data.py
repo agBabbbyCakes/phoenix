@@ -84,6 +84,55 @@ class DataStore:
             "avg_profit": avg_profit,
         }
 
+
+class SensorData:
+    """Simple fake sensor for temperature/humidity readings."""
+
+    def __init__(self) -> None:
+        self.min_temp = 18.0
+        self.max_temp = 26.0
+        self.min_humidity = 30.0
+        self.max_humidity = 65.0
+
+    def generate_reading(self) -> dict:
+        now = datetime.now(timezone.utc)
+        return {
+            "timestamp": now.isoformat(),
+            "temperature": round(random.uniform(self.min_temp, self.max_temp), 1),
+            "humidity": round(random.uniform(self.min_humidity, self.max_humidity), 1),
+            "status": random.choice(["normal", "warning", "critical"]),
+        }
+
+
+class SensorStore:
+    """In-memory fixed-size buffer of recent sensor readings."""
+
+    def __init__(self, maxlen: int = 20) -> None:
+        self.readings: Deque[dict] = deque(maxlen=maxlen)
+
+    def add(self, reading: dict) -> None:
+        self.readings.append(reading)
+
+    def ensure_min_samples(self, sensor: "SensorData", count: int = 20) -> None:
+        while len(self.readings) < count:
+            self.add(sensor.generate_reading())
+
+    def series(self) -> tuple[list[str], list[float], list[float]]:
+        """Return (labels, temps, humidities). Labels are HH:MM:SS."""
+        items = list(self.readings)
+        labels: list[str] = []
+        temps: list[float] = []
+        hums: list[float] = []
+        for r in items:
+            try:
+                ts = datetime.fromisoformat(str(r.get("timestamp")).replace("Z", "+00:00"))
+            except Exception:
+                ts = datetime.now(timezone.utc)
+            labels.append(ts.strftime("%H:%M:%S"))
+            temps.append(float(r.get("temperature", 0.0)))
+            hums.append(float(r.get("humidity", 0.0)))
+        return labels, temps, hums
+
     def latency_series(self, n: int = 50) -> tuple[list[str], list[int]]:
         items = list(self.events)[-n:]
         labels = [e.timestamp.strftime("%H:%M:%S") for e in items]
@@ -201,6 +250,9 @@ async def mock_metrics_publisher(broker: SSEBroker, store: DataStore, render_htm
     Throughput target: ~5–20 events per minute with jitter.
     """
     # Determine a base interval with jitter to hit 5–20 events/minute (~3–12s)
+    # Initialize fake sensors for the optional 5th view
+    sensor = SensorData()
+    sensor_store = SensorStore(maxlen=20)
     while True:
         now_dt = datetime.now(timezone.utc)
         latency = int(random.uniform(40, 450))
@@ -227,6 +279,11 @@ async def mock_metrics_publisher(broker: SSEBroker, store: DataStore, render_htm
             profit=profit,
         )
         store.add(evt)
+        # Update sensor stream alongside metrics
+        reading = sensor.generate_reading()
+        sensor_store.add(reading)
+        sensor_store.ensure_min_samples(sensor, 20)
+        s_labels, s_temp, s_hum = sensor_store.series()
         kpis = store.kpis()
         labels, values = store.latency_series()
         thr_labels, thr_values = store.throughput_series()
@@ -241,6 +298,11 @@ async def mock_metrics_publisher(broker: SSEBroker, store: DataStore, render_htm
                 "profit_series": list(zip(prof_labels, prof_values)),
                 "heatmap": heat,
                 "last_events": store.last_events(25),
+                # Sensors view data
+                "sensor_labels": s_labels,
+                "sensor_temp_values": s_temp,
+                "sensor_humidity_values": s_hum,
+                "sensor_latest": reading,
             },
         )
         await broker.publish(html)
@@ -308,6 +370,7 @@ def parse_silverback_json(obj: dict) -> MetricsEvent:
 
 async def tail_jsonl_and_broadcast(path: Path, broker: SSEBroker, store: DataStore, render_html, from_start: bool = False) -> None:
     """Tail a JSONL file and broadcast rendered HTML using the same partial as mock mode."""
+    last_publish = 0.0
     while True:
         try:
             if not path.exists():
@@ -319,7 +382,22 @@ async def tail_jsonl_and_broadcast(path: Path, broker: SSEBroker, store: DataSto
                 while True:
                     line = f.readline()
                     if line == "":
+                        # No new line; periodically publish a keepalive update with latest aggregates
                         await asyncio.sleep(0.5)
+                        now = asyncio.get_event_loop().time()
+                        if now - last_publish > 5.0:
+                            kpis = store.kpis()
+                            labels, values = store.latency_series()
+                            html = render_html(
+                                "partials/metrics.html",
+                                {
+                                    "kpis": kpis,
+                                    "latency_series": list(zip(labels, values)),
+                                    "last_events": store.last_events(25),
+                                },
+                            )
+                            await broker.publish(html)
+                            last_publish = now
                         try:
                             if f.tell() > path.stat().st_size:
                                 break

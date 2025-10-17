@@ -76,6 +76,37 @@ uvicorn app.main:app --reload --port 8000
 - Lint: `uv run ruff check .`
 - Format: `uv run black .`
 
+## Demo/Sample Mode
+
+To force demo data (no external dependencies), set `FORCE_SAMPLE=1`.
+
+```bash
+FORCE_SAMPLE=1 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+The dashboard will continuously stream mock metrics and sensor readings.
+
+Health endpoint: `/health` returns `{ "status": "ok" }`.
+
+## Container Image
+
+Build a production image:
+
+```bash
+docker build -t botscope:latest .
+docker run -p 8000:8000 -e FORCE_SAMPLE=1 botscope:latest
+```
+
+## Deploy to Render
+
+Create `render.yaml` and deploy from Git. The service will expose port 8000, run uvicorn, and can be configured with `FORCE_SAMPLE=1` for a live demo.
+
+Environment variables:
+
+- `FORCE_SAMPLE`: `1` to always run demo stream.
+- `SILVERBACK_LOG_PATH`: absolute path of JSONL to tail (optional).
+
+
 Expected JSONL fields (flexible names are handled):
 
 - timestamp: `timestamp` | `time` | `ts`

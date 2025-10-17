@@ -4,6 +4,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}BotScope{% endblock %}</title>
+        <meta name="description"
+            content="Realtime Ethereum bot monitoring dashboard with SSE, HTMX, and Chart.js." />
+        <meta property="og:title"
+            content="BotScope - Realtime Bot Monitoring" />
+        <meta property="og:description"
+            content="Live charts, alerts, and reports for Ethereum bots. Demo-ready in sample mode." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/static/og-image.png" />
+        <meta property="og:url"
+            content="{{ request.url if request else '' }}" />
         <!-- Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +28,9 @@
         <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
         <script
             src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <!-- Chart.js zoom/pan plugin -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
         <!-- Chart.js matrix plugin for heatmaps -->
         <script
             src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
