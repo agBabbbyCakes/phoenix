@@ -1,32 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>BotScope Live Demo</title>
-        <meta name="description"
-            content="Live Ethereum bot monitoring dashboard - real-time charts, alerts, and metrics." />
-
-        <!-- Tailwind CSS -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link
-            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
-            rel="stylesheet" />
-
-        <!-- HTMX + SSE -->
-        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-        <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-
-        <!-- Chart.js -->
-        <script
-            src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
-
-        <!-- Custom theme -->
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotScope 3D Glass Demo</title>
+    <meta name="description" content="Live Ethereum bot monitoring dashboard with 3D glass morphism - real-time charts, alerts, and metrics." />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    
+    <!-- HTMX + SSE -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
+    
+    <!-- Custom theme -->
+    <style>
         :root[data-theme='cmykTheme']{
           --b1: 40 33% 96%;
           --bc: 222 14% 20%;
@@ -42,51 +36,244 @@
         html{ font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
         .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .glass-nav { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        
+        /* 3D Glass Viewer Styles */
+        .glass-viewer {
+          perspective: 1000px;
+          transform-style: preserve-3d;
+        }
+        
+        .glass-frame {
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.05) 50%, 
+            rgba(255, 255, 255, 0.1) 100%);
+          backdrop-filter: blur(20px);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 20px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          transform-style: preserve-3d;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-frame:hover {
+          transform: translateZ(10px) rotateX(2deg) rotateY(2deg);
+          box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 3D Dial Controls */
+        .dial-container {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          margin: 10px;
+        }
+        
+        .dial {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.05) 100%);
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 
+            0 8px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          transform-style: preserve-3d;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .dial:hover {
+          transform: translateZ(5px) scale(1.05);
+          box-shadow: 
+            0 12px 24px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .dial:active {
+          transform: translateZ(2px) scale(0.98);
+        }
+        
+        .dial-knob {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #60a5fa, #3b82f6);
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          transition: all 0.2s ease;
+        }
+        
+        .dial-label {
+          position: absolute;
+          bottom: -25px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 10px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.8);
+          text-align: center;
+          white-space: nowrap;
+        }
+        
+        .dial-value {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 12px;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 3D Chart Container */
+        .chart-3d {
+          transform-style: preserve-3d;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-3d.view-1 { transform: rotateX(0deg) rotateY(0deg) translateZ(0px); }
+        .chart-3d.view-2 { transform: rotateX(15deg) rotateY(-15deg) translateZ(20px); }
+        .chart-3d.view-3 { transform: rotateX(-10deg) rotateY(20deg) translateZ(30px); }
+        .chart-3d.view-4 { transform: rotateX(25deg) rotateY(10deg) translateZ(15px); }
+        .chart-3d.view-5 { transform: rotateX(-5deg) rotateY(-25deg) translateZ(25px); }
+        
+        /* Control Panel */
+        .control-panel {
+          background: linear-gradient(135deg, 
+            rgba(0, 0, 0, 0.2) 0%, 
+            rgba(0, 0, 0, 0.1) 100%);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 15px;
+          padding: 20px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Etch-a-Sketch style grid */
+        .etch-grid {
+          background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+          background-size: 20px 20px;
+          border-radius: 10px;
+        }
+        
+        /* Glow effects */
+        .glow-cyan { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
+        .glow-magenta { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+        .glow-yellow { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        
+        /* Animation keyframes */
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        
+        .float-animation {
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(96, 165, 250, 0.6); }
+        }
+        
+        .pulse-glow {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
     </style>
-    </head>
-    <body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
-        <div class="container mx-auto p-4 space-y-4">
-            <!-- Header -->
-            <div
-                class="navbar glass-nav text-primary-content rounded-box shadow hover:brightness-105 transition">
-                <div class="flex-1">
-                    <span class="text-xl font-bold">BotScope Live Demo</span>
-                    <span
-                        class="ml-3 badge badge-outline border-accent/50 text-accent">Sample
-                        Mode</span>
+</head>
+<body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
+    <div class="glass-viewer">
+        <!-- 3D Control Panel -->
+        <div class="control-panel mb-6">
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <div class="dial-container">
+                    <div class="dial" id="viewpoint-dial" data-viewpoint="1">
+                        <div class="dial-knob"></div>
+                        <div class="dial-value">1</div>
+                        <div class="dial-label">Viewpoint</div>
+                    </div>
                 </div>
-                <div class="flex-none">
+                <div class="dial-container">
+                    <div class="dial" id="chart-dial" data-chart="latency">
+                        <div class="dial-knob"></div>
+                        <div class="dial-value">L</div>
+                        <div class="dial-label">Chart Type</div>
+                    </div>
+                </div>
+                <div class="dial-container">
+                    <div class="dial" id="zoom-dial" data-zoom="1">
+                        <div class="dial-knob"></div>
+                        <div class="dial-value">1x</div>
+                        <div class="dial-label">Zoom</div>
+                    </div>
+                </div>
+                <div class="dial-container">
+                    <div class="dial" id="glow-dial" data-glow="cyan">
+                        <div class="dial-knob"></div>
+                        <div class="dial-value">C</div>
+                        <div class="dial-label">Glow</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto p-4 space-y-4">
+            <!-- 3D Glass Header -->
+            <div class="glass-frame etch-grid p-6 mb-6 float-animation">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">🔮 BotScope 3D Glass Demo</h1>
+                        <p class="opacity-80">Real-time dashboard with 3D glass morphism and dial controls</p>
+                    </div>
                     <div class="flex items-center gap-2">
                         <span class="text-sm opacity-70">SSE</span>
-                        <span id="conn-status"
-                            class="badge badge-error">Disconnected</span>
+                        <span id="conn-status" class="badge badge-error">Disconnected</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Live Metrics Widget -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h2 class="card-title mb-4">Live Bot Metrics</h2>
-
+            <!-- 3D Glass Metrics Widget -->
+            <div class="glass-frame etch-grid p-6">
+                <div class="chart-3d view-1" id="metrics-container">
+                    <h2 class="text-2xl font-bold mb-4 text-center">📊 Live 3D Metrics</h2>
+                    
                     <!-- KPI Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div class="stat bg-primary/10 rounded-lg p-4">
+                        <div class="stat bg-primary/10 rounded-lg p-4 glow-cyan">
                             <div class="stat-title">Avg Latency</div>
-                            <div class="stat-value text-primary"
-                                id="avg-latency">0ms</div>
+                            <div class="stat-value text-primary" id="avg-latency">0ms</div>
                             <div class="stat-desc">Last 60s</div>
                         </div>
-                        <div class="stat bg-secondary/10 rounded-lg p-4">
+                        <div class="stat bg-secondary/10 rounded-lg p-4 glow-magenta">
                             <div class="stat-title">Success Rate</div>
-                            <div class="stat-value text-secondary"
-                                id="success-rate">0%</div>
+                            <div class="stat-value text-secondary" id="success-rate">0%</div>
                             <div class="stat-desc">Last 60s</div>
                         </div>
-                        <div class="stat bg-accent/10 rounded-lg p-4">
+                        <div class="stat bg-accent/10 rounded-lg p-4 glow-yellow">
                             <div class="stat-title">Throughput</div>
-                            <div class="stat-value text-accent"
-                                id="throughput">0/min</div>
+                            <div class="stat-value text-accent" id="throughput">0/min</div>
                             <div class="stat-desc">Events</div>
                         </div>
                     </div>
@@ -95,29 +282,21 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div class="card bg-base-100 shadow glass-card p-2">
                             <div class="card-body">
-                                <div
-                                    class="flex items-center justify-between mb-2">
-                                    <h3 class="text-lg font-semibold">Latency
-                                        Trend</h3>
-                                    <button class="btn btn-xs"
-                                        id="btnResetZoom1"
-                                        title="Reset zoom (Z)">Reset</button>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-lg font-semibold">Latency Trend</h3>
+                                    <button class="btn btn-xs" id="btnResetZoom1" title="Reset zoom (Z)">Reset</button>
                                 </div>
                                 <div class="h-64">
                                     <canvas id="chart1"></canvas>
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="card bg-base-100 shadow glass-card p-2">
                             <div class="card-body">
-                                <div
-                                    class="flex items-center justify-between mb-2">
-                                    <h3 class="text-lg font-semibold">Throughput
-                                        Trend</h3>
-                                    <button class="btn btn-xs"
-                                        id="btnResetZoom2"
-                                        title="Reset zoom (Z)">Reset</button>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-lg font-semibold">Throughput Trend</h3>
+                                    <button class="btn btn-xs" id="btnResetZoom2" title="Reset zoom (Z)">Reset</button>
                                 </div>
                                 <div class="h-64">
                                     <canvas id="chart2"></canvas>
@@ -128,8 +307,7 @@
 
                     <!-- Recent Events -->
                     <div class="mt-6">
-                        <h3 class="text-lg font-semibold mb-2">Recent
-                            Events</h3>
+                        <h3 class="text-lg font-semibold mb-2">Recent Events</h3>
                         <div class="overflow-x-auto">
                             <table class="table table-zebra table-compact">
                                 <thead>
@@ -142,8 +320,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="events-table">
-                                    <tr><td colspan="5"
-                                            class="text-center opacity-50">Loading...</td></tr>
+                                    <tr><td colspan="5" class="text-center opacity-50">Loading...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -153,19 +330,46 @@
 
             <!-- Connection Info -->
             <div class="text-center text-sm opacity-70">
-                <p>Connecting to live data stream...</p>
-                <p class="mt-1">Server: <span
-                        id="server-url">your-server.com</span></p>
+                <p>🎛️ Click dials to control 3D view • Server: <span id="server-url">your-server.com</span></p>
             </div>
         </div>
+    </div>
 
-        <script>
+    <script>
         // Configuration - Update this URL to point to your server
         const SERVER_URL = 'https://your-app.onrender.com'; // Change this!
         
         let chart1, chart2;
         let eventTimes = [];
         const maxEvents = 20;
+
+        // 3D Dial Controls
+        let currentViewpoint = 1;
+        let currentChart = 'latency';
+        let currentZoom = 1;
+        let currentGlow = 'cyan';
+
+        function update3DView() {
+            const container = document.getElementById('metrics-container');
+            if (container) {
+                container.className = `chart-3d view-${currentViewpoint}`;
+                container.style.transform = `scale(${currentZoom})`;
+            }
+            
+            // Update glow effects
+            document.querySelectorAll('.glow-cyan, .glow-magenta, .glow-yellow').forEach(el => {
+                el.classList.remove('glow-cyan', 'glow-magenta', 'glow-yellow');
+                el.classList.add(`glow-${currentGlow}`);
+            });
+        }
+
+        function rotateDial(dial, steps) {
+            const knob = dial.querySelector('.dial-knob');
+            const currentRotation = parseInt(dial.dataset.rotation || '0');
+            const newRotation = (currentRotation + steps * 45) % 360;
+            dial.dataset.rotation = newRotation;
+            knob.style.transform = `translate(-50%, -50%) rotate(${newRotation}deg)`;
+        }
 
         // Initialize charts
         function initCharts() {
@@ -340,6 +544,46 @@
                 }
             });
         });
+
+        // Dial event listeners
+        document.addEventListener('click', (e) => {
+            const dial = e.target.closest('.dial');
+            if (!dial) return;
+
+            if (dial.id === 'viewpoint-dial') {
+                currentViewpoint = currentViewpoint >= 5 ? 1 : currentViewpoint + 1;
+                dial.dataset.viewpoint = currentViewpoint;
+                dial.querySelector('.dial-value').textContent = currentViewpoint;
+                rotateDial(dial, 1);
+                update3DView();
+            }
+            else if (dial.id === 'chart-dial') {
+                const charts = ['latency', 'throughput', 'profit', 'heatmap', 'sensors'];
+                const currentIndex = charts.indexOf(currentChart);
+                const nextIndex = (currentIndex + 1) % charts.length;
+                currentChart = charts[nextIndex];
+                dial.dataset.chart = currentChart;
+                dial.querySelector('.dial-value').textContent = currentChart.charAt(0).toUpperCase();
+                rotateDial(dial, 1);
+            }
+            else if (dial.id === 'zoom-dial') {
+                currentZoom = currentZoom >= 2 ? 0.5 : currentZoom + 0.25;
+                dial.dataset.zoom = currentZoom;
+                dial.querySelector('.dial-value').textContent = currentZoom + 'x';
+                rotateDial(dial, 1);
+                update3DView();
+            }
+            else if (dial.id === 'glow-dial') {
+                const glows = ['cyan', 'magenta', 'yellow'];
+                const currentIndex = glows.indexOf(currentGlow);
+                const nextIndex = (currentIndex + 1) % glows.length;
+                currentGlow = glows[nextIndex];
+                dial.dataset.glow = currentGlow;
+                dial.querySelector('.dial-value').textContent = currentGlow.charAt(0).toUpperCase();
+                rotateDial(dial, 1);
+                update3DView();
+            }
+        });
     </script>
-    </body>
+</body>
 </html>
