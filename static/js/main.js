@@ -429,22 +429,14 @@
     currentView = view;
     setView(view);
     
-    // Add TV static effect briefly
+    // Brief static effect when switching
     const staticOverlay = document.querySelector('.tv-static');
     if (staticOverlay) {
-      staticOverlay.style.opacity = '0.6';
+      staticOverlay.style.opacity = '0.4';
       setTimeout(() => {
-        staticOverlay.style.opacity = '0.3';
-      }, 200);
+        staticOverlay.style.opacity = '0.2';
+      }, 150);
     }
-  }
-
-  function rotateChannelKnob(dial) {
-    const knob = dial.querySelector('.channel-knob');
-    const currentRotation = parseInt(dial.dataset.rotation || '0');
-    const newRotation = (currentRotation + 45) % 360;
-    dial.dataset.rotation = newRotation;
-    knob.style.transform = `translate(-50%, -50%) rotate(${newRotation}deg)`;
   }
 
   // TV Channel event listeners
@@ -456,7 +448,6 @@
     const view = dial.dataset.view;
     
     switchChannel(channelNumber, view);
-    rotateChannelKnob(dial);
   });
 })();
 
