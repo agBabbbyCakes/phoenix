@@ -1,67 +1,62 @@
 {% extends 'base.html' %}
 
-{% block title %}Quick Demo - BotScope{% endblock %}
+{% block title %}TV Demo - BotScope{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="hero bg-base-100 shadow glass-card">
-        <div class="hero-content text-center">
-            <div class="max-w-xl">
-                <h1 class="text-3xl font-bold">BotScope Live Demo</h1>
-                <p class="py-2 opacity-80">Real-time dashboard showcasing
-                    latency, throughput, and alerts. This demo runs in sample
-                    mode for instant playback.</p>
-                {% if sample_mode %}
-                <div class="badge badge-success">Sample Mode</div>
-                {% endif %}
+<div class="flex justify-center items-center min-h-screen">
+    <div class="tv-frame">
+        <!-- TV Screen -->
+        <div class="tv-screen">
+            <!-- TV Static Overlay -->
+            <div class="tv-static"></div>
+            
+            <!-- Power Indicator -->
+            <div class="tv-power"></div>
+            
+            <!-- Channel Indicator -->
+            <div class="tv-indicator">
+                CH <span id="current-channel">1</span>
             </div>
-        </div>
-    </div>
-
-    <div class="mt-4 grid grid-cols-1 gap-4">
-        <div class="card bg-base-100 shadow glass-card">
-            <div class="card-body">
-                <div class="flex items-center justify-between">
-                    <h2 class="card-title">Live Metrics</h2>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm opacity-70">SSE</span>
-                        <span id="conn-status"
-                            class="badge badge-error">Disconnected</span>
+            
+            <!-- Main Content -->
+            <div class="h-full w-full p-6 flex flex-col">
+                <div class="text-center mb-4">
+                    <h1 class="text-2xl font-bold mb-2">📺 BotScope TV Demo</h1>
+                    <p class="text-sm opacity-80">Real-time dashboard in 16:9 TV format</p>
+                    {% if sample_mode %}
+                    <div class="badge badge-success mt-2">Sample Mode Active</div>
+                    {% endif %}
+                </div>
+                
+                <div hx-ext="sse" sse-connect="/stream">
+                    <div id="metrics-panel" sse-swap="metrics_update"
+                        hx-swap="innerHTML" class="h-full">
+                        {{ initial_metrics_html | safe }}
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <div class="text-sm opacity-70">Success Rate</div>
-                        <div id="successRateValue"
-                            class="text-2xl font-semibold">0%</div>
-                    </div>
-                    <div>
-                        <div class="text-sm opacity-70">Throughput (1m)</div>
-                        <div id="throughputValue"
-                            class="text-2xl font-semibold">0</div>
-                    </div>
-                    <div>
-                        <div class="text-sm opacity-70">Latest Bot</div>
-                        <div id="botName" class="text-2xl font-semibold">-</div>
-                    </div>
+            </div>
+            
+            <!-- TV Channel Controls -->
+            <div class="tv-controls">
+                <div class="channel-dial active" id="channel-1" data-channel="1" data-view="latency">
+                    <div class="channel-number">1</div>
+                    <div class="channel-label">LAT</div>
                 </div>
-
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="h-48"><canvas id="latencyChart"></canvas></div>
-                    <div class="h-48"><canvas
-                            id="throughputChart"></canvas></div>
+                <div class="channel-dial" id="channel-2" data-channel="2" data-view="throughput">
+                    <div class="channel-number">2</div>
+                    <div class="channel-label">THR</div>
                 </div>
-
-                <div class="mt-4">
-                    <div hx-ext="sse" sse-connect="/stream">
-                        <div id="metrics-panel" sse-swap="metrics_update"
-                            hx-swap="innerHTML">{{ initial_metrics_html | safe
-                            }}</div>
-                    </div>
+                <div class="channel-dial" id="channel-3" data-channel="3" data-view="profit">
+                    <div class="channel-number">3</div>
+                    <div class="channel-label">PRF</div>
                 </div>
-
-                <div class="mt-4 text-right">
-                    <a href="/" class="btn btn-outline">Open Full Dashboard</a>
+                <div class="channel-dial" id="channel-4" data-channel="4" data-view="heatmap">
+                    <div class="channel-number">4</div>
+                    <div class="channel-label">HMP</div>
+                </div>
+                <div class="channel-dial" id="channel-5" data-channel="5" data-view="sensors">
+                    <div class="channel-number">5</div>
+                    <div class="channel-label">SNS</div>
                 </div>
             </div>
         </div>
