@@ -54,6 +54,183 @@
           --erc: 45 100% 60%;
         }
         html{ font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
+        
+        /* 3D Glass Viewer Styles */
+        .glass-viewer {
+          perspective: 1000px;
+          transform-style: preserve-3d;
+        }
+        
+        .glass-frame {
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.05) 50%, 
+            rgba(255, 255, 255, 0.1) 100%);
+          backdrop-filter: blur(20px);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 20px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          transform-style: preserve-3d;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-frame:hover {
+          transform: translateZ(10px) rotateX(2deg) rotateY(2deg);
+          box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-panel {
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.08) 0%, 
+            rgba(255, 255, 255, 0.02) 100%);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 15px;
+          box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 3D Dial Controls */
+        .dial-container {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          margin: 10px;
+        }
+        
+        .dial {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.05) 100%);
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 
+            0 8px 16px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          transform-style: preserve-3d;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .dial:hover {
+          transform: translateZ(5px) scale(1.05);
+          box-shadow: 
+            0 12px 24px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .dial:active {
+          transform: translateZ(2px) scale(0.98);
+        }
+        
+        .dial-knob {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #60a5fa, #3b82f6);
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          transition: all 0.2s ease;
+        }
+        
+        .dial-label {
+          position: absolute;
+          bottom: -25px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 10px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.8);
+          text-align: center;
+          white-space: nowrap;
+        }
+        
+        .dial-value {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 12px;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.9);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 3D Chart Container */
+        .chart-3d {
+          transform-style: preserve-3d;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-3d.view-1 { transform: rotateX(0deg) rotateY(0deg) translateZ(0px); }
+        .chart-3d.view-2 { transform: rotateX(15deg) rotateY(-15deg) translateZ(20px); }
+        .chart-3d.view-3 { transform: rotateX(-10deg) rotateY(20deg) translateZ(30px); }
+        .chart-3d.view-4 { transform: rotateX(25deg) rotateY(10deg) translateZ(15px); }
+        .chart-3d.view-5 { transform: rotateX(-5deg) rotateY(-25deg) translateZ(25px); }
+        
+        /* Control Panel */
+        .control-panel {
+          background: linear-gradient(135deg, 
+            rgba(0, 0, 0, 0.2) 0%, 
+            rgba(0, 0, 0, 0.1) 100%);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 15px;
+          padding: 20px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Etch-a-Sketch style grid */
+        .etch-grid {
+          background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+          background-size: 20px 20px;
+          border-radius: 10px;
+        }
+        
+        /* Glow effects */
+        .glow-cyan { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
+        .glow-magenta { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+        .glow-yellow { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        
+        /* Animation keyframes */
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        
+        .float-animation {
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(96, 165, 250, 0.6); }
+        }
+        
+        .pulse-glow {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
         </style>
         <link rel="stylesheet" href="/static/css/theme.css" />
         {% block head %}{% endblock %}

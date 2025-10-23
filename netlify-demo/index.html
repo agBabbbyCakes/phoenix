@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BotScope Live Demo</title>
-    <meta name="description" content="Live Ethereum bot monitoring dashboard - real-time charts, alerts, and metrics." />
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
-    
-    <!-- HTMX + SSE -->
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
-    
-    <!-- Custom theme -->
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BotScope Live Demo</title>
+        <meta name="description"
+            content="Live Ethereum bot monitoring dashboard - real-time charts, alerts, and metrics." />
+
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+            rel="stylesheet" />
+
+        <!-- HTMX + SSE -->
+        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+
+        <!-- Chart.js -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
+
+        <!-- Custom theme -->
+        <style>
         :root[data-theme='cmykTheme']{
           --b1: 40 33% 96%;
           --bc: 222 14% 20%;
@@ -37,105 +43,123 @@
         .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .glass-nav { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
     </style>
-</head>
-<body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
-    <div class="container mx-auto p-4 space-y-4">
-        <!-- Header -->
-        <div class="navbar glass-nav text-primary-content rounded-box shadow hover:brightness-105 transition">
-            <div class="flex-1">
-                <span class="text-xl font-bold">BotScope Live Demo</span>
-                <span class="ml-3 badge badge-outline border-accent/50 text-accent">Sample Mode</span>
-            </div>
-            <div class="flex-none">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm opacity-70">SSE</span>
-                    <span id="conn-status" class="badge badge-error">Disconnected</span>
+    </head>
+    <body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
+        <div class="container mx-auto p-4 space-y-4">
+            <!-- Header -->
+            <div
+                class="navbar glass-nav text-primary-content rounded-box shadow hover:brightness-105 transition">
+                <div class="flex-1">
+                    <span class="text-xl font-bold">BotScope Live Demo</span>
+                    <span
+                        class="ml-3 badge badge-outline border-accent/50 text-accent">Sample
+                        Mode</span>
+                </div>
+                <div class="flex-none">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm opacity-70">SSE</span>
+                        <span id="conn-status"
+                            class="badge badge-error">Disconnected</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Live Metrics Widget -->
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title mb-4">Live Bot Metrics</h2>
-                
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="stat bg-primary/10 rounded-lg p-4">
-                        <div class="stat-title">Avg Latency</div>
-                        <div class="stat-value text-primary" id="avg-latency">0ms</div>
-                        <div class="stat-desc">Last 60s</div>
-                    </div>
-                    <div class="stat bg-secondary/10 rounded-lg p-4">
-                        <div class="stat-title">Success Rate</div>
-                        <div class="stat-value text-secondary" id="success-rate">0%</div>
-                        <div class="stat-desc">Last 60s</div>
-                    </div>
-                    <div class="stat bg-accent/10 rounded-lg p-4">
-                        <div class="stat-title">Throughput</div>
-                        <div class="stat-value text-accent" id="throughput">0/min</div>
-                        <div class="stat-desc">Events</div>
-                    </div>
-                </div>
+            <!-- Live Metrics Widget -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Live Bot Metrics</h2>
 
-                <!-- Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="card bg-base-100 shadow glass-card p-2">
-                        <div class="card-body">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-lg font-semibold">Latency Trend</h3>
-                                <button class="btn btn-xs" id="btnResetZoom1" title="Reset zoom (Z)">Reset</button>
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="stat bg-primary/10 rounded-lg p-4">
+                            <div class="stat-title">Avg Latency</div>
+                            <div class="stat-value text-primary"
+                                id="avg-latency">0ms</div>
+                            <div class="stat-desc">Last 60s</div>
+                        </div>
+                        <div class="stat bg-secondary/10 rounded-lg p-4">
+                            <div class="stat-title">Success Rate</div>
+                            <div class="stat-value text-secondary"
+                                id="success-rate">0%</div>
+                            <div class="stat-desc">Last 60s</div>
+                        </div>
+                        <div class="stat bg-accent/10 rounded-lg p-4">
+                            <div class="stat-title">Throughput</div>
+                            <div class="stat-value text-accent"
+                                id="throughput">0/min</div>
+                            <div class="stat-desc">Events</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="card bg-base-100 shadow glass-card p-2">
+                            <div class="card-body">
+                                <div
+                                    class="flex items-center justify-between mb-2">
+                                    <h3 class="text-lg font-semibold">Latency
+                                        Trend</h3>
+                                    <button class="btn btn-xs"
+                                        id="btnResetZoom1"
+                                        title="Reset zoom (Z)">Reset</button>
+                                </div>
+                                <div class="h-64">
+                                    <canvas id="chart1"></canvas>
+                                </div>
                             </div>
-                            <div class="h-64">
-                                <canvas id="chart1"></canvas>
+                        </div>
+
+                        <div class="card bg-base-100 shadow glass-card p-2">
+                            <div class="card-body">
+                                <div
+                                    class="flex items-center justify-between mb-2">
+                                    <h3 class="text-lg font-semibold">Throughput
+                                        Trend</h3>
+                                    <button class="btn btn-xs"
+                                        id="btnResetZoom2"
+                                        title="Reset zoom (Z)">Reset</button>
+                                </div>
+                                <div class="h-64">
+                                    <canvas id="chart2"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="card bg-base-100 shadow glass-card p-2">
-                        <div class="card-body">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-lg font-semibold">Throughput Trend</h3>
-                                <button class="btn btn-xs" id="btnResetZoom2" title="Reset zoom (Z)">Reset</button>
-                            </div>
-                            <div class="h-64">
-                                <canvas id="chart2"></canvas>
-                            </div>
+
+                    <!-- Recent Events -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-2">Recent
+                            Events</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table table-zebra table-compact">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Bot</th>
+                                        <th>Latency</th>
+                                        <th>Status</th>
+                                        <th>Tx Hash</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="events-table">
+                                    <tr><td colspan="5"
+                                            class="text-center opacity-50">Loading...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Recent Events -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold mb-2">Recent Events</h3>
-                    <div class="overflow-x-auto">
-                        <table class="table table-zebra table-compact">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Bot</th>
-                                    <th>Latency</th>
-                                    <th>Status</th>
-                                    <th>Tx Hash</th>
-                                </tr>
-                            </thead>
-                            <tbody id="events-table">
-                                <tr><td colspan="5" class="text-center opacity-50">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Connection Info -->
+            <div class="text-center text-sm opacity-70">
+                <p>Connecting to live data stream...</p>
+                <p class="mt-1">Server: <span
+                        id="server-url">your-server.com</span></p>
             </div>
         </div>
 
-        <!-- Connection Info -->
-        <div class="text-center text-sm opacity-70">
-            <p>Connecting to live data stream...</p>
-            <p class="mt-1">Server: <span id="server-url">your-server.com</span></p>
-        </div>
-    </div>
-
-    <script>
+        <script>
         // Configuration - Update this URL to point to your server
         const SERVER_URL = 'https://your-app.onrender.com'; // Change this!
         
@@ -317,5 +341,5 @@
             });
         });
     </script>
-</body>
+    </body>
 </html>

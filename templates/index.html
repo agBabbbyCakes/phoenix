@@ -1,71 +1,114 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-    <!-- Sidebar -->
-    <aside class="lg:col-span-1 glass-card p-3 h-full sticky top-4">
-        <h3 class="text-sm opacity-70 mb-2">Views</h3>
-        <ul id="viewNav" class="menu bg-transparent rounded-box">
-            <li><button class="justify-between nav-view active"
-                    data-view="latency">Latency <span
-                        class="chip chip-cyan">1</span></button></li>
-            <li><button class="justify-between nav-view"
-                    data-view="throughput">Throughput <span
-                        class="chip chip-magenta">2</span></button></li>
-            <li><button class="justify-between nav-view"
-                    data-view="profit">Profit <span
-                        class="chip chip-yellow">3</span></button></li>
-            <li><button class="justify-between nav-view"
-                    data-view="heatmap">Heatmap <span
-                        class="chip chip-neutral">4</span></button></li>
-            <li><button class="justify-between nav-view"
-                    data-view="sensors">Sensors <span
-                        class="chip chip-cyan">5</span></button></li>
-        </ul>
-        <div class="divider"></div>
-        <div class="text-xs opacity-70 leading-relaxed">
-            Tips: Use keys 1–5 to switch views. N/P to cycle. Charts update
-            live.
-        </div>
-    </aside>
-
-    <!-- Main Panel -->
-    <main class="lg:col-span-4 space-y-4 overflow-y-auto"
-        style="max-height: calc(100vh - 10rem);">
-        <!-- Live Areas via HTMX SSE -->
-        <div hx-ext="sse" sse-connect="/stream">
-            <div id="metrics-panel" sse-swap="metrics_update"
-                hx-swap="innerHTML">
-                {{ initial_metrics_html | safe }}
+<div class="glass-viewer">
+    <!-- 3D Control Panel -->
+    <div class="control-panel mb-6">
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <div class="dial-container">
+                <div class="dial" id="viewpoint-dial" data-viewpoint="1">
+                    <div class="dial-knob"></div>
+                    <div class="dial-value">1</div>
+                    <div class="dial-label">Viewpoint</div>
+                </div>
             </div>
-        </div>
-
-        <!-- Log Table Container -->
-        <div class="card bg-base-100 shadow glass-card">
-            <div class="card-body">
-                <h2 class="card-title">Event Log</h2>
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra">
-                        <thead>
-                            <tr>
-                                <th>Time (UTC)</th>
-                                <th>Bot</th>
-                                <th>Latency (ms)</th>
-                                <th>Success %</th>
-                                <th>Status</th>
-                                <th>Tx Hash</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logTableBody"></tbody>
-                    </table>
+            <div class="dial-container">
+                <div class="dial" id="chart-dial" data-chart="latency">
+                    <div class="dial-knob"></div>
+                    <div class="dial-value">L</div>
+                    <div class="dial-label">Chart Type</div>
+                </div>
+            </div>
+            <div class="dial-container">
+                <div class="dial" id="zoom-dial" data-zoom="1">
+                    <div class="dial-knob"></div>
+                    <div class="dial-value">1x</div>
+                    <div class="dial-label">Zoom</div>
+                </div>
+            </div>
+            <div class="dial-container">
+                <div class="dial" id="glow-dial" data-glow="cyan">
+                    <div class="dial-knob"></div>
+                    <div class="dial-value">C</div>
+                    <div class="dial-label">Glow</div>
                 </div>
             </div>
         </div>
-        <div class="flex justify-end">
-            <a class="btn btn-outline" href="/report" target="_blank">Open Daily
-                Report</a>
-        </div>
-    </main>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <!-- 3D Glass Sidebar -->
+        <aside
+            class="lg:col-span-1 glass-frame p-4 h-full sticky top-4 float-animation">
+            <h3 class="text-sm opacity-70 mb-4 text-center">3D Controls</h3>
+            <ul id="viewNav" class="menu bg-transparent rounded-box">
+                <li><button class="justify-between nav-view active glow-cyan"
+                        data-view="latency">Latency <span
+                            class="chip chip-cyan">1</span></button></li>
+                <li><button class="justify-between nav-view"
+                        data-view="throughput">Throughput <span
+                            class="chip chip-magenta">2</span></button></li>
+                <li><button class="justify-between nav-view"
+                        data-view="profit">Profit <span
+                            class="chip chip-yellow">3</span></button></li>
+                <li><button class="justify-between nav-view"
+                        data-view="heatmap">Heatmap <span
+                            class="chip chip-neutral">4</span></button></li>
+                <li><button class="justify-between nav-view"
+                        data-view="sensors">Sensors <span
+                            class="chip chip-cyan">5</span></button></li>
+            </ul>
+            <div class="divider"></div>
+            <div class="text-xs opacity-70 leading-relaxed text-center">
+                <p>🎛️ Use dials to control 3D view</p>
+                <p>⌨️ Keys 1–5 for quick switch</p>
+                <p>🔄 N/P to cycle views</p>
+            </div>
+        </aside>
+
+        <!-- 3D Glass Main Panel -->
+        <main class="lg:col-span-4 space-y-4 overflow-y-auto"
+            style="max-height: calc(100vh - 10rem);">
+            <!-- 3D Glass Frame for Metrics -->
+            <div class="glass-frame etch-grid p-6">
+                <div hx-ext="sse" sse-connect="/stream">
+                    <div id="metrics-panel" sse-swap="metrics_update"
+                        hx-swap="innerHTML" class="chart-3d view-1">
+                        {{ initial_metrics_html | safe }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Glass Event Log -->
+            <div class="glass-frame p-6">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">📊 Event Log</h2>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>Time (UTC)</th>
+                                    <th>Bot</th>
+                                    <th>Latency (ms)</th>
+                                    <th>Success %</th>
+                                    <th>Status</th>
+                                    <th>Tx Hash</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <a class="btn btn-outline glow-cyan" href="/report"
+                    target="_blank">
+                    📈 Open Daily Report
+                </a>
+            </div>
+        </main>
+    </div>
 </div>
 {% endblock %}
 

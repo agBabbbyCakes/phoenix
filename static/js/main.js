@@ -401,6 +401,75 @@
       if (throughputChart && throughputChart.resetZoom) throughputChart.resetZoom();
     }
   });
+
+  // 3D Dial Controls
+  let currentViewpoint = 1;
+  let currentChart = 'latency';
+  let currentZoom = 1;
+  let currentGlow = 'cyan';
+
+  function update3DView() {
+    const panel = document.getElementById('metrics-panel');
+    if (panel) {
+      panel.className = `chart-3d view-${currentViewpoint}`;
+      panel.style.transform = `scale(${currentZoom})`;
+    }
+    
+    // Update glow effects
+    document.querySelectorAll('.glow-cyan, .glow-magenta, .glow-yellow').forEach(el => {
+      el.classList.remove('glow-cyan', 'glow-magenta', 'glow-yellow');
+      el.classList.add(`glow-${currentGlow}`);
+    });
+  }
+
+  function rotateDial(dial, steps) {
+    const knob = dial.querySelector('.dial-knob');
+    const currentRotation = parseInt(dial.dataset.rotation || '0');
+    const newRotation = (currentRotation + steps * 45) % 360;
+    dial.dataset.rotation = newRotation;
+    knob.style.transform = `translate(-50%, -50%) rotate(${newRotation}deg)`;
+  }
+
+  // Dial event listeners
+  document.addEventListener('click', (e) => {
+    const dial = e.target.closest('.dial');
+    if (!dial) return;
+
+    if (dial.id === 'viewpoint-dial') {
+      currentViewpoint = currentViewpoint >= 5 ? 1 : currentViewpoint + 1;
+      dial.dataset.viewpoint = currentViewpoint;
+      dial.querySelector('.dial-value').textContent = currentViewpoint;
+      rotateDial(dial, 1);
+      update3DView();
+    }
+    else if (dial.id === 'chart-dial') {
+      const charts = ['latency', 'throughput', 'profit', 'heatmap', 'sensors'];
+      const currentIndex = charts.indexOf(currentChart);
+      const nextIndex = (currentIndex + 1) % charts.length;
+      currentChart = charts[nextIndex];
+      dial.dataset.chart = currentChart;
+      dial.querySelector('.dial-value').textContent = currentChart.charAt(0).toUpperCase();
+      rotateDial(dial, 1);
+      setView(currentChart);
+    }
+    else if (dial.id === 'zoom-dial') {
+      currentZoom = currentZoom >= 2 ? 0.5 : currentZoom + 0.25;
+      dial.dataset.zoom = currentZoom;
+      dial.querySelector('.dial-value').textContent = currentZoom + 'x';
+      rotateDial(dial, 1);
+      update3DView();
+    }
+    else if (dial.id === 'glow-dial') {
+      const glows = ['cyan', 'magenta', 'yellow'];
+      const currentIndex = glows.indexOf(currentGlow);
+      const nextIndex = (currentIndex + 1) % glows.length;
+      currentGlow = glows[nextIndex];
+      dial.dataset.glow = currentGlow;
+      dial.querySelector('.dial-value').textContent = currentGlow.charAt(0).toUpperCase();
+      rotateDial(dial, 1);
+      update3DView();
+    }
+  });
 })();
 
 
