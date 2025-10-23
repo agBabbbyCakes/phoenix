@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BotScope TV Demo</title>
-    <meta name="description" content="Live Ethereum bot monitoring dashboard with 16:9 TV format - real-time charts, alerts, and metrics." />
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
-    
-    <!-- HTMX + SSE -->
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
-    
-    <!-- Custom theme -->
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BotScope TV Demo</title>
+        <meta name="description"
+            content="Live Ethereum bot monitoring dashboard with 16:9 TV format - real-time charts, alerts, and metrics." />
+
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+            rel="stylesheet" />
+
+        <!-- HTMX + SSE -->
+        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+
+        <!-- Chart.js -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
+
+        <!-- Custom theme -->
+        <style>
         :root[data-theme='cmykTheme']{
           --b1: 40 33% 96%;
           --bc: 222 14% 20%;
@@ -205,127 +211,171 @@
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }
+        
+        /* Ensure charts fit within TV frame */
+        .tv-screen .card {
+          max-height: calc(100vh - 200px);
+          overflow: hidden;
+        }
+        
+        .tv-screen .card-body {
+          padding: 0.5rem;
+          max-height: calc(100vh - 250px);
+          overflow: hidden;
+        }
+        
+        .tv-screen canvas {
+          max-height: 200px;
+        }
     </style>
-</head>
-<body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
-    <div class="flex justify-center items-center min-h-screen">
-        <div class="tv-frame">
-            <!-- TV Screen -->
-            <div class="tv-screen">
-                <!-- TV Static Overlay -->
-                <div class="tv-static"></div>
-                
-                <!-- Power Indicator -->
-                <div class="tv-power"></div>
-                
-                <!-- Channel Indicator -->
-                <div class="tv-indicator">
-                    CH <span id="current-channel">1</span>
-                </div>
-                
-                <!-- Main Content -->
-                <div class="h-full w-full p-6 flex flex-col">
-                    <div class="text-center mb-4">
-                        <h1 class="text-2xl font-bold mb-2">📺 BotScope TV Demo</h1>
-                        <p class="text-sm opacity-80">Real-time dashboard in 16:9 TV format</p>
-                        <div class="badge badge-success mt-2">Sample Mode Active</div>
+    </head>
+    <body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
+        <div class="flex justify-center items-center min-h-screen">
+            <div class="tv-frame">
+                <!-- TV Screen -->
+                <div class="tv-screen">
+                    <!-- TV Static Overlay -->
+                    <div class="tv-static"></div>
+
+                    <!-- Power Indicator -->
+                    <div class="tv-power"></div>
+
+                    <!-- Channel Indicator -->
+                    <div class="tv-indicator">
+                        CH <span id="current-channel">1</span>
                     </div>
-                    
-                    <div class="h-full">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="stat bg-primary/10 rounded-lg p-4">
-                                <div class="stat-title">Avg Latency</div>
-                                <div class="stat-value text-primary" id="avg-latency">0ms</div>
-                                <div class="stat-desc">Last 60s</div>
-                            </div>
-                            <div class="stat bg-secondary/10 rounded-lg p-4">
-                                <div class="stat-title">Success Rate</div>
-                                <div class="stat-value text-secondary" id="success-rate">0%</div>
-                                <div class="stat-desc">Last 60s</div>
-                            </div>
-                            <div class="stat bg-accent/10 rounded-lg p-4">
-                                <div class="stat-title">Throughput</div>
-                                <div class="stat-value text-accent" id="throughput">0/min</div>
-                                <div class="stat-desc">Events</div>
-                            </div>
+
+                    <!-- Main Content -->
+                    <div class="h-full w-full p-6 flex flex-col">
+                        <div class="text-center mb-4">
+                            <h1 class="text-2xl font-bold mb-2">BotScope TV
+                                Demo</h1>
+                            <p class="text-sm opacity-80">Real-time dashboard in
+                                16:9 TV format</p>
+                            <div class="badge badge-success mt-2">Sample Mode
+                                Active</div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div class="card bg-base-100 shadow glass-card p-2">
-                                <div class="card-body">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-lg font-semibold">Latency Trend</h3>
-                                        <button class="btn btn-xs" id="btnResetZoom1" title="Reset zoom (Z)">Reset</button>
+                        <div class="h-full">
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="stat bg-primary/10 rounded-lg p-4">
+                                    <div class="stat-title">Avg Latency</div>
+                                    <div class="stat-value text-primary"
+                                        id="avg-latency">0ms</div>
+                                    <div class="stat-desc">Last 60s</div>
+                                </div>
+                                <div
+                                    class="stat bg-secondary/10 rounded-lg p-4">
+                                    <div class="stat-title">Success Rate</div>
+                                    <div class="stat-value text-secondary"
+                                        id="success-rate">0%</div>
+                                    <div class="stat-desc">Last 60s</div>
+                                </div>
+                                <div class="stat bg-accent/10 rounded-lg p-4">
+                                    <div class="stat-title">Throughput</div>
+                                    <div class="stat-value text-accent"
+                                        id="throughput">0/min</div>
+                                    <div class="stat-desc">Events</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div
+                                    class="card bg-base-100 shadow glass-card p-2">
+                                    <div class="card-body">
+                                        <div
+                                            class="flex items-center justify-between mb-2">
+                                            <h3
+                                                class="text-lg font-semibold">Latency
+                                                Trend</h3>
+                                            <button class="btn btn-xs"
+                                                id="btnResetZoom1"
+                                                title="Reset zoom (Z)">Reset</button>
+                                        </div>
+                                        <div class="h-40 min-h-32">
+                                            <canvas id="chart1"></canvas>
+                                        </div>
                                     </div>
-                                    <div class="h-48">
-                                        <canvas id="chart1"></canvas>
+                                </div>
+
+                                <div
+                                    class="card bg-base-100 shadow glass-card p-2">
+                                    <div class="card-body">
+                                        <div
+                                            class="flex items-center justify-between mb-2">
+                                            <h3
+                                                class="text-lg font-semibold">Throughput
+                                                Trend</h3>
+                                            <button class="btn btn-xs"
+                                                id="btnResetZoom2"
+                                                title="Reset zoom (Z)">Reset</button>
+                                        </div>
+                                        <div class="h-40 min-h-32">
+                                            <canvas id="chart2"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="card bg-base-100 shadow glass-card p-2">
-                                <div class="card-body">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-lg font-semibold">Throughput Trend</h3>
-                                        <button class="btn btn-xs" id="btnResetZoom2" title="Reset zoom (Z)">Reset</button>
-                                    </div>
-                                    <div class="h-48">
-                                        <canvas id="chart2"></canvas>
-                                    </div>
+
+                            <div class="mt-6">
+                                <h3 class="text-lg font-semibold mb-2">Recent
+                                    Events</h3>
+                                <div class="overflow-x-auto">
+                                    <table
+                                        class="table table-zebra table-compact">
+                                        <thead>
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>Bot</th>
+                                                <th>Latency</th>
+                                                <th>Status</th>
+                                                <th>Tx Hash</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="events-table">
+                                            <tr><td colspan="5"
+                                                    class="text-center opacity-50">Loading...</td></tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mt-6">
-                            <h3 class="text-lg font-semibold mb-2">Recent Events</h3>
-                            <div class="overflow-x-auto">
-                                <table class="table table-zebra table-compact">
-                                    <thead>
-                                        <tr>
-                                            <th>Time</th>
-                                            <th>Bot</th>
-                                            <th>Latency</th>
-                                            <th>Status</th>
-                                            <th>Tx Hash</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="events-table">
-                                        <tr><td colspan="5" class="text-center opacity-50">Loading...</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <!-- TV Channel Controls -->
+                    <div class="tv-controls">
+                        <div class="channel-dial active" id="channel-1"
+                            data-channel="1" data-view="latency">
+                            <div class="channel-number">1</div>
+                            <div class="channel-label">LAT</div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- TV Channel Controls -->
-                <div class="tv-controls">
-                    <div class="channel-dial active" id="channel-1" data-channel="1" data-view="latency">
-                        <div class="channel-number">1</div>
-                        <div class="channel-label">LAT</div>
-                    </div>
-                    <div class="channel-dial" id="channel-2" data-channel="2" data-view="throughput">
-                        <div class="channel-number">2</div>
-                        <div class="channel-label">THR</div>
-                    </div>
-                    <div class="channel-dial" id="channel-3" data-channel="3" data-view="profit">
-                        <div class="channel-number">3</div>
-                        <div class="channel-label">PRF</div>
-                    </div>
-                    <div class="channel-dial" id="channel-4" data-channel="4" data-view="heatmap">
-                        <div class="channel-number">4</div>
-                        <div class="channel-label">HMP</div>
-                    </div>
-                    <div class="channel-dial" id="channel-5" data-channel="5" data-view="sensors">
-                        <div class="channel-number">5</div>
-                        <div class="channel-label">SNS</div>
+                        <div class="channel-dial" id="channel-2"
+                            data-channel="2" data-view="throughput">
+                            <div class="channel-number">2</div>
+                            <div class="channel-label">THR</div>
+                        </div>
+                        <div class="channel-dial" id="channel-3"
+                            data-channel="3" data-view="profit">
+                            <div class="channel-number">3</div>
+                            <div class="channel-label">PRF</div>
+                        </div>
+                        <div class="channel-dial" id="channel-4"
+                            data-channel="4" data-view="heatmap">
+                            <div class="channel-number">4</div>
+                            <div class="channel-label">HMP</div>
+                        </div>
+                        <div class="channel-dial" id="channel-5"
+                            data-channel="5" data-view="sensors">
+                            <div class="channel-number">5</div>
+                            <div class="channel-label">SNS</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
+        <script>
         // Configuration - Update this URL to point to your server
         const SERVER_URL = 'https://your-app.onrender.com'; // Change this!
         
@@ -541,5 +591,5 @@
             switchChannel(channelNumber, view);
         });
     </script>
-</body>
+    </body>
 </html>
