@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotScope Live Demo</title>
+    <meta name="description" content="Live Ethereum bot monitoring dashboard - real-time charts, alerts, and metrics." />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+    
+    <!-- HTMX + SSE -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
+    
+    <!-- Custom theme -->
+    <style>
+        :root[data-theme='cmykTheme']{
+          --b1: 40 33% 96%;
+          --bc: 222 14% 20%;
+          --p: 191 100% 46%;
+          --pc: 0 0% 100%;
+          --s: 320 90% 70%;
+          --sc: 0 0% 100%;
+          --a: 45 100% 60%;
+          --ac: 0 0% 20%;
+          --er: 0 0% 12%;
+          --erc: 45 100% 60%;
+        }
+        html{ font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
+        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .glass-nav { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
+    <div class="container mx-auto p-4 space-y-4">
+        <!-- Header -->
+        <div class="navbar glass-nav text-primary-content rounded-box shadow hover:brightness-105 transition">
+            <div class="flex-1">
+                <span class="text-xl font-bold">BotScope Live Demo</span>
+                <span class="ml-3 badge badge-outline border-accent/50 text-accent">Sample Mode</span>
+            </div>
+            <div class="flex-none">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm opacity-70">SSE</span>
+                    <span id="conn-status" class="badge badge-error">Disconnected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Metrics Widget -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Live Bot Metrics</h2>
+                
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat bg-primary/10 rounded-lg p-4">
+                        <div class="stat-title">Avg Latency</div>
+                        <div class="stat-value text-primary" id="avg-latency">0ms</div>
+                        <div class="stat-desc">Last 60s</div>
+                    </div>
+                    <div class="stat bg-secondary/10 rounded-lg p-4">
+                        <div class="stat-title">Success Rate</div>
+                        <div class="stat-value text-secondary" id="success-rate">0%</div>
+                        <div class="stat-desc">Last 60s</div>
+                    </div>
+                    <div class="stat bg-accent/10 rounded-lg p-4">
+                        <div class="stat-title">Throughput</div>
+                        <div class="stat-value text-accent" id="throughput">0/min</div>
+                        <div class="stat-desc">Events</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card bg-base-100 shadow glass-card p-2">
+                        <div class="card-body">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-lg font-semibold">Latency Trend</h3>
+                                <button class="btn btn-xs" id="btnResetZoom1" title="Reset zoom (Z)">Reset</button>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="chart1"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card bg-base-100 shadow glass-card p-2">
+                        <div class="card-body">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-lg font-semibold">Throughput Trend</h3>
+                                <button class="btn btn-xs" id="btnResetZoom2" title="Reset zoom (Z)">Reset</button>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="chart2"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Events -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Recent Events</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra table-compact">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Bot</th>
+                                    <th>Latency</th>
+                                    <th>Status</th>
+                                    <th>Tx Hash</th>
+                                </tr>
+                            </thead>
+                            <tbody id="events-table">
+                                <tr><td colspan="5" class="text-center opacity-50">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Info -->
+        <div class="text-center text-sm opacity-70">
+            <p>Connecting to live data stream...</p>
+            <p class="mt-1">Server: <span id="server-url">your-server.com</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Update this URL to point to your server
+        const SERVER_URL = 'https://your-app.onrender.com'; // Change this!
+        
+        let chart1, chart2;
+        let eventTimes = [];
+        const maxEvents = 20;
+
+        // Initialize charts
+        function initCharts() {
+            const ctx1 = document.getElementById('chart1');
+            const ctx2 = document.getElementById('chart2');
+            
+            chart1 = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Latency (ms)',
+                        data: [],
+                        borderColor: 'hsl(191 100% 46%)',
+                        backgroundColor: 'hsla(191 100% 46% / 0.2)',
+                        borderWidth: 2,
+                        tension: 0.25,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            chart2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Throughput (/min)',
+                        data: [],
+                        borderColor: 'hsl(320 90% 70%)',
+                        backgroundColor: 'hsla(320 90% 70% / 0.2)',
+                        borderWidth: 2,
+                        tension: 0.25,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Update charts with new data
+        function updateCharts(latency, timestamp) {
+            const time = new Date(timestamp).toLocaleTimeString();
+            
+            // Update latency chart
+            chart1.data.labels.push(time);
+            chart1.data.datasets[0].data.push(latency);
+            if (chart1.data.labels.length > maxEvents) {
+                chart1.data.labels.shift();
+                chart1.data.datasets[0].data.shift();
+            }
+            chart1.update('none');
+            
+            // Update throughput chart
+            const now = Date.now();
+            eventTimes.push(now);
+            const oneMinAgo = now - 60000;
+            eventTimes = eventTimes.filter(t => t > oneMinAgo);
+            
+            chart2.data.labels.push(time);
+            chart2.data.datasets[0].data.push(eventTimes.length);
+            if (chart2.data.labels.length > maxEvents) {
+                chart2.data.labels.shift();
+                chart2.data.datasets[0].data.shift();
+            }
+            chart2.update('none');
+        }
+
+        // Update KPIs
+        function updateKPIs(data) {
+            document.getElementById('avg-latency').textContent = data.avg_latency_ms + 'ms';
+            document.getElementById('success-rate').textContent = data.success_rate_pct + '%';
+            document.getElementById('throughput').textContent = data.throughput_1m + '/min';
+        }
+
+        // Add event to table
+        function addEvent(event) {
+            const tbody = document.getElementById('events-table');
+            const row = document.createElement('tr');
+            
+            const statusBadge = event.error 
+                ? `<span class="badge badge-error">Error</span>`
+                : `<span class="badge badge-success">OK</span>`;
+            
+            row.innerHTML = `
+                <td>${new Date(event.timestamp).toLocaleTimeString()}</td>
+                <td>${event.bot_name}</td>
+                <td>${event.latency_ms}ms</td>
+                <td>${statusBadge}</td>
+                <td class="font-mono text-xs">${event.tx_hash}</td>
+            `;
+            
+            tbody.insertBefore(row, tbody.firstChild);
+            
+            // Keep only last 10 events
+            while (tbody.children.length > 10) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+
+        // Connection status
+        function setConnectionStatus(connected) {
+            const el = document.getElementById('conn-status');
+            if (connected) {
+                el.textContent = 'Connected';
+                el.className = 'badge badge-success';
+            } else {
+                el.textContent = 'Disconnected';
+                el.className = 'badge badge-error';
+            }
+        }
+
+        // Reset zoom
+        function resetZoom() {
+            if (chart1 && chart1.resetZoom) chart1.resetZoom();
+            if (chart2 && chart2.resetZoom) chart2.resetZoom();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            document.getElementById('server-url').textContent = SERVER_URL;
+            
+            // Connect to SSE stream
+            const eventSource = new EventSource(`${SERVER_URL}/stream`);
+            
+            eventSource.onopen = () => setConnectionStatus(true);
+            eventSource.onerror = () => setConnectionStatus(false);
+            
+            eventSource.addEventListener('metrics_update', (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    updateCharts(data.latency_ms, data.timestamp);
+                    updateKPIs(data);
+                    addEvent(data);
+                } catch (err) {
+                    console.error('Failed to parse metrics:', err);
+                }
+            });
+            
+            // Reset zoom buttons
+            document.getElementById('btnResetZoom1').onclick = resetZoom;
+            document.getElementById('btnResetZoom2').onclick = resetZoom;
+            
+            // Keyboard shortcut
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'z' || e.key === 'Z') {
+                    resetZoom();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
