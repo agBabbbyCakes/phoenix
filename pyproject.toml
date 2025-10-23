@@ -10,6 +10,8 @@ dependencies = [
   "jinja2",
   "sse-starlette",
   "python-multipart",
+  "web3",
+  "python-dotenv",
 ]
 
 [tool.uv]

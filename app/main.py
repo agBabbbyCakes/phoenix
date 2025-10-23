@@ -9,10 +9,16 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
+from dotenv import load_dotenv
+import json, os
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast
+from src.realtime.eth_feed import EthRealtime
+
+load_dotenv()
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +27,16 @@ STATIC_DIR = BASE_DIR / "static"
 
 
 app = FastAPI(title="Ethereum Bot Monitoring Dashboard")
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -31,6 +47,9 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 broker = SSEBroker()
 store = DataStore()
+
+# ETH realtime instance (will be created on first use)
+eth_rt = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -89,8 +108,33 @@ async def demo(request: Request) -> HTMLResponse:
 
 
 @app.get("/stream")
-async def stream(request: Request):
-    return EventSourceResponse(client_event_stream(request, broker))
+async def stream():
+    global eth_rt
+    if eth_rt is None:
+        try:
+            eth_rt = EthRealtime()
+        except Exception as e:
+            print(f"[stream] ETH connection failed: {e}, falling back to mock data")
+            # Fallback to mock data if ETH connection fails
+            from .data import mock_metrics_publisher, SSEBroker
+            mock_broker = SSEBroker()
+            return EventSourceResponse(client_event_stream(None, mock_broker))
+    
+    async def gen():
+        try:
+            async for evt in eth_rt.stream():
+                yield {
+                    "event": evt["event"],
+                    "data": json.dumps(evt["data"])
+                }
+        except Exception as e:
+            print(f"[stream] ETH stream error: {e}, falling back to mock data")
+            # If ETH stream fails, fall back to mock data
+            from .data import mock_metrics_publisher, SSEBroker
+            mock_broker = SSEBroker()
+            async for evt in client_event_stream(None, mock_broker):
+                yield evt
+    return EventSourceResponse(gen())
 
 
 @app.on_event("startup")
@@ -128,4 +172,12 @@ async def _on_shutdown() -> None:
 @app.get("/health")
 async def health() -> JSONResponse:
     return JSONResponse({"status": "ok"})
+
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
+
+@app.get("/version")
+def version():
+    return {"version": os.getenv("APP_VERSION", "0.1.0")}
 

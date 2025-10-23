@@ -146,3 +146,37 @@ Notes:
 - feat: SSE streams server-rendered HTML partials (`metrics_update`) for HTMX
 - feat: Sample Mode auto-enabled without `SILVERBACK_LOG_PATH`, with warning/critical statuses and profit
 - ui: CMYK-inspired theme + Inter font; header cyan; KPI styling; error badges black/yellow
+
+### Ethereum Realtime Overlay
+
+**Requirements**
+- Alchemy or Infura Mainnet WSS key.
+
+**Setup**
+1) Copy `.env.example` → `.env` and fill `ETH_WSS_URL` and `CHAINLINK_ETHUSD`.
+2) Install deps:
+   ```bash
+   uv sync
+   ```
+
+Run API:
+
+```bash
+make run-api
+```
+
+In another terminal, serve the dashboard:
+
+```bash
+make run-web
+```
+
+Open http://localhost:5173/index.html (ensure SERVER_URL is http://localhost:8000).
+
+Smoke Test
+
+```bash
+make smoke
+```
+
+You should see metrics_update SSE frames with price_eth_usd, throughput_1m, and avg_latency_ms.

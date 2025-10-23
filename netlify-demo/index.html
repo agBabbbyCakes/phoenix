@@ -252,8 +252,13 @@
                                 Demo</h1>
                             <p class="text-sm opacity-80">Real-time dashboard in
                                 16:9 TV format</p>
-                            <div class="badge badge-success mt-2">Sample Mode
-                                Active</div>
+                            <div class="flex justify-center items-center gap-4 mt-2">
+                                <div class="badge badge-success">Sample Mode
+                                    Active</div>
+                                <div id="price-badge" class="badge badge-primary font-semibold" style="display: none;">
+                                    ETH/USD: Loading...
+                                </div>
+                            </div>
                         </div>
 
                         <div class="h-full">
@@ -339,6 +344,18 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                <!-- Debug Information Footer -->
+                                <div class="mt-4 p-3 bg-base-200 rounded-lg">
+                                    <h4 class="text-sm font-semibold mb-2">Data Collection Status</h4>
+                                    <div class="text-xs space-y-1">
+                                        <div><strong>Connection:</strong> <span id="connection-status" class="badge badge-warning">Connecting...</span></div>
+                                        <div><strong>Data Source:</strong> <span id="data-source">SSE Stream from FastAPI</span></div>
+                                        <div><strong>Last Update:</strong> <span id="last-update">Never</span></div>
+                                        <div><strong>Error Count:</strong> <span id="error-count">0</span></div>
+                                        <div><strong>Success Count:</strong> <span id="success-count">0</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -377,11 +394,16 @@
 
         <script>
         // Configuration - Update this URL to point to your server
-        const SERVER_URL = 'https://your-app.onrender.com'; // Change this!
+        const SERVER_URL = 'http://localhost:8000'; // Change this for production!
         
         let chart1, chart2;
         let eventTimes = [];
         const maxEvents = 20;
+        
+        // Debug tracking
+        let errorCount = 0;
+        let successCount = 0;
+        let lastUpdate = 'Never';
 
         // TV Channel Controls
         let currentChannel = 1;
@@ -514,12 +536,34 @@
             document.getElementById('avg-latency').textContent = data.avg_latency_ms + 'ms';
             document.getElementById('success-rate').textContent = data.success_rate_pct + '%';
             document.getElementById('throughput').textContent = data.throughput_1m + '/min';
+            
+            // Update price badge
+            const priceBadge = document.getElementById('price-badge');
+            if (priceBadge) {
+                if (data.price_eth_usd != null) {
+                    priceBadge.textContent = `ETH/USD: $${data.price_eth_usd.toFixed(2)}`;
+                    priceBadge.style.display = 'block';
+                } else {
+                    priceBadge.style.display = 'none';
+                }
+            }
         }
 
         // Add event to table
         function addEvent(event) {
             const tbody = document.getElementById('events-table');
             const row = document.createElement('tr');
+            
+            // Track errors and successes
+            if (event.error) {
+                errorCount++;
+            } else {
+                successCount++;
+            }
+            lastUpdate = new Date().toLocaleTimeString();
+            
+            // Update debug info
+            updateDebugInfo();
             
             const statusBadge = event.error 
                 ? `<span class="badge badge-error">Error</span>`
@@ -530,7 +574,7 @@
                 <td>${event.bot_name}</td>
                 <td>${event.latency_ms}ms</td>
                 <td>${statusBadge}</td>
-                <td class="font-mono text-xs">${event.tx_hash}</td>
+                <td class="font-mono text-xs">${event.tx_hash || 'N/A'}</td>
             `;
             
             tbody.insertBefore(row, tbody.firstChild);
@@ -539,6 +583,13 @@
             while (tbody.children.length > 10) {
                 tbody.removeChild(tbody.lastChild);
             }
+        }
+        
+        // Update debug information
+        function updateDebugInfo() {
+            document.getElementById('error-count').textContent = errorCount;
+            document.getElementById('success-count').textContent = successCount;
+            document.getElementById('last-update').textContent = lastUpdate;
         }
 
         // Reset zoom
@@ -554,12 +605,22 @@
             // Connect to SSE stream
             const eventSource = new EventSource(`${SERVER_URL}/stream`);
             
-            eventSource.onopen = () => console.log('Connected to stream');
-            eventSource.onerror = () => console.log('Stream error');
+            eventSource.onopen = () => {
+                console.log('Connected to stream');
+                document.getElementById('connection-status').textContent = 'Connected';
+                document.getElementById('connection-status').className = 'badge badge-success';
+            };
+            
+            eventSource.onerror = () => {
+                console.log('Stream error');
+                document.getElementById('connection-status').textContent = 'Error';
+                document.getElementById('connection-status').className = 'badge badge-error';
+            };
             
             eventSource.addEventListener('metrics_update', (e) => {
                 try {
                     const data = JSON.parse(e.data);
+                    console.log('Received metrics data:', data);
                     updateCharts(data.latency_ms, data.timestamp);
                     updateKPIs(data);
                     addEvent(data);

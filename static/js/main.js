@@ -207,6 +207,20 @@
       if (evt.bot_name && botNameEl()) {
         botNameEl().textContent = String(evt.bot_name);
       }
+      
+      // Price badge handling
+      let priceEl = document.getElementById("price-badge");
+      if (!priceEl) {
+        const header = document.querySelector("header") || document.body;
+        priceEl = document.createElement("div");
+        priceEl.id = "price-badge";
+        priceEl.style.fontWeight = "600";
+        priceEl.style.marginLeft = "12px";
+        header.appendChild(priceEl);
+      }
+      if (evt.price_eth_usd != null) {
+        priceEl.textContent = `ETH/USD: ${evt.price_eth_usd.toFixed(2)}`;
+      }
     } catch (e) {
       console.error("Failed to parse metrics event", e);
     }
