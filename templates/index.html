@@ -2,60 +2,65 @@
 
 {% block content %}
 <div class="flex justify-center items-center min-h-screen">
-    <div class="tv-frame">
-        <!-- TV Screen -->
-        <div class="tv-screen">
-            <!-- TV Static Overlay -->
-            <div class="tv-static"></div>
+  <div class="tv-frame">
+    <!-- TV Screen -->
+    <div class="tv-screen">
+      <!-- TV Static Overlay -->
+      <div class="tv-static"></div>
 
-            <!-- Power Indicator -->
-            <div class="tv-power"></div>
+      <!-- Power Indicator -->
+      <div class="tv-power"></div>
 
-            <!-- Channel Indicator -->
-            <div class="tv-indicator">
-                CH <span id="current-channel">1</span>
-            </div>
+      <!-- Channel Indicator -->
+      <div class="tv-indicator">
+        CH <span id="current-channel">1</span>
+      </div>
 
-            <!-- Main Content -->
-            <div class="h-full w-full p-6 flex flex-col">
-                <div hx-ext="sse" sse-connect="/stream">
-                    <div id="metrics-panel" sse-swap="metrics_update"
-                        hx-swap="innerHTML" class="h-full">
-                        {{ initial_metrics_html | safe }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- TV Channel Controls -->
-            <div class="tv-controls">
-                <div class="channel-dial active" id="channel-1" data-channel="1"
-                    data-view="latency">
-                    <div class="channel-number">1</div>
-                    <div class="channel-label">LAT</div>
-                </div>
-                <div class="channel-dial" id="channel-2" data-channel="2"
-                    data-view="throughput">
-                    <div class="channel-number">2</div>
-                    <div class="channel-label">THR</div>
-                </div>
-                <div class="channel-dial" id="channel-3" data-channel="3"
-                    data-view="profit">
-                    <div class="channel-number">3</div>
-                    <div class="channel-label">PRF</div>
-                </div>
-                <div class="channel-dial" id="channel-4" data-channel="4"
-                    data-view="heatmap">
-                    <div class="channel-number">4</div>
-                    <div class="channel-label">HMP</div>
-                </div>
-                <div class="channel-dial" id="channel-5" data-channel="5"
-                    data-view="sensors">
-                    <div class="channel-number">5</div>
-                    <div class="channel-label">SNS</div>
-                </div>
-            </div>
+      <!-- Main Content -->
+      <div class="h-full w-full p-6 flex flex-col">
+        <div hx-ext="sse" sse-connect="/stream">
+          <div id="metrics-panel" sse-swap="metrics_update"
+            hx-swap="innerHTML" class="h-full">
+            {{ initial_metrics_html | safe }}
+          </div>
         </div>
+      </div>
+
+      <!-- TV Channel Controls -->
+      <div class="tv-controls">
+        <div class="channel-dial active" id="channel-1" data-channel="1"
+          data-view="latency">
+          <div class="channel-number">1</div>
+          <div class="channel-label">LAT</div>
+        </div>
+        <div class="channel-dial" id="channel-2" data-channel="2"
+          data-view="throughput">
+          <div class="channel-number">2</div>
+          <div class="channel-label">THR</div>
+        </div>
+        <div class="channel-dial" id="channel-3" data-channel="3"
+          data-view="profit">
+          <div class="channel-number">3</div>
+          <div class="channel-label">PRF</div>
+        </div>
+        <div class="channel-dial" id="channel-4" data-channel="4"
+          data-view="heatmap">
+          <div class="channel-number">4</div>
+          <div class="channel-label">HMP</div>
+        </div>
+        <div class="channel-dial" id="channel-5" data-channel="5"
+          data-view="graph3d">
+          <div class="channel-number">5</div>
+          <div class="channel-label">3D</div>
+        </div>
+        <div class="channel-dial" id="channel-6" data-channel="6"
+          data-view="sensors">
+          <div class="channel-number">6</div>
+          <div class="channel-label">SNS</div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
@@ -69,82 +74,6 @@
     var el = document.getElementById('sample-mode-ind');
     if (el) el.classList.remove('hidden');
   }
-
-  // Dummy data simulation for testing
-  let basePrice = 2500; // Starting ETH price
-  let eventCount = 0;
-  
-  function simulateDummyData() {
-    eventCount++;
-    
-    // Simulate price movement (random walk with slight upward bias)
-    const priceChange = (Math.random() - 0.4) * 50; // -20 to +30 range
-    basePrice = Math.max(1000, basePrice + priceChange);
-    
-    // Generate realistic transaction hash
-    const txHash = "0x" + Array.from({length: 8}, () => 
-      Math.floor(Math.random() * 16).toString(16)
-    ).join('') + "..." + Array.from({length: 4}, () => 
-      Math.floor(Math.random() * 16).toString(16)
-    ).join('');
-    
-    // Simulate different bot behaviors
-    const botNames = ["eth-heads", "arb-scout", "mev-bot", "liquidity-hunter"];
-    const botName = botNames[Math.floor(Math.random() * botNames.length)];
-    
-    // Simulate latency patterns (some bots are faster)
-    const baseLatency = botName === "mev-bot" ? 20 : 80;
-    const latencyMs = Math.floor(Math.random() * 100) + baseLatency;
-    
-    // Simulate success rates (some bots are more reliable)
-    const baseSuccessRate = botName === "arb-scout" ? 95 : 85;
-    const successRatePct = Math.max(60, baseSuccessRate + (Math.random() - 0.5) * 20);
-    
-    const dummyData = {
-      timestamp: Date.now(),
-      bot_name: botName,
-      latency_ms: latencyMs,
-      avg_latency_ms: Math.floor(latencyMs * (0.8 + Math.random() * 0.4)),
-      success_rate_pct: successRatePct.toFixed(1),
-      throughput_1m: Math.floor(Math.random() * 20) + 3, // 3-23 events/min
-      tx_hash: txHash,
-      price_eth_usd: basePrice.toFixed(2),
-      error: Math.random() < 0.15, // 15% chance of error
-      status: Math.random() < 0.1 ? "critical" : (Math.random() < 0.2 ? "warning" : "ok")
-    };
-    
-    // Update the metrics if the handler exists
-    if (window.handleMetrics) {
-      window.handleMetrics(JSON.stringify(dummyData));
-    }
-    
-    // Log to console for debugging
-    console.log(`[Dummy Data ${eventCount}]`, dummyData);
-    
-    // Schedule next update (more frequent during "busy" periods)
-    const interval = Math.random() < 0.3 ? 
-      (1000 + Math.random() * 2000) : // 1-3 seconds (busy)
-      (3000 + Math.random() * 4000);  // 3-7 seconds (normal)
-    
-    setTimeout(simulateDummyData, interval);
-  }
-
-  // Start simulation after page loads
-  document.addEventListener('DOMContentLoaded', () => {
-    // Only start simulation if we're in sample mode or no real data is coming
-    if (document.body.dataset.sampleMode === 'true') {
-      console.log('Starting dummy data simulation...');
-      setTimeout(simulateDummyData, 1000); // Start after 1 second
-    }
-    
-    // Add manual trigger for testing (press 'D' key)
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'd' || e.key === 'D') {
-        console.log('Manually triggering dummy data simulation...');
-        simulateDummyData();
-      }
-    });
-  });
 </script>
 <script src="/static/js/main.js"></script>
 {% endblock %}

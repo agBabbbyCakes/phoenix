@@ -84,6 +84,116 @@ class DataStore:
             "avg_profit": avg_profit,
         }
 
+    def latency_series(self, n: int = 50) -> tuple[list[str], list[int]]:
+        items = list(self.events)[-n:]
+        labels = [e.timestamp.strftime("%H:%M:%S") for e in items]
+        values = [e.latency_ms for e in items]
+        return labels, values
+
+    def throughput_series(self, minutes: int = 30) -> tuple[list[str], list[int]]:
+        # Count events per minute for recent minutes present in data (up to `minutes` samples)
+        counts: dict[str, int] = {}
+        for e in self.events:
+            key = e.timestamp.strftime("%H:%M")
+            counts[key] = counts.get(key, 0) + 1
+        # Sort by time using a reasonable reconstruction from keys
+        keys_sorted = sorted(counts.keys())
+        if len(keys_sorted) > minutes:
+            keys_sorted = keys_sorted[-minutes:]
+        values = [counts[k] for k in keys_sorted]
+        return keys_sorted, values
+
+    def profit_series(self, n: int = 50) -> tuple[list[str], list[float]]:
+        items = list(self.events)[-n:]
+        labels: list[str] = []
+        values: list[float] = []
+        cum = 0.0
+        for e in items:
+            labels.append(e.timestamp.strftime("%H:%M:%S"))
+            if isinstance(e.profit, (int, float)):
+                cum += float(e.profit)
+            values.append(round(cum, 4))
+        return labels, values
+
+    def heatmap_matrix(self, cols: int = 12) -> dict:
+        """Build a simple latency heatmap for recent time windows.
+
+        Rows are latency buckets (ms): [0-100, 100-200, 200-300, 300+]
+        Cols are 5-second windows for the last `cols`*5 seconds.
+        """
+        now = datetime.now(timezone.utc)
+        window = timedelta(seconds=5)
+        # Prepare buckets
+        bucket_edges = [0, 100, 200, 300, 10**9]
+        row_labels = ["0-100", "100-200", "200-300", "300+"]
+        # Precompute windows
+        col_starts = [now - window * (cols - i) for i in range(cols)]
+        col_ends = [start + window for start in col_starts]
+        # Initialize matrix
+        matrix = [[0 for _ in range(cols)] for _ in range(4)]
+        for e in self.events:
+            # find column
+            for j, (s, t) in enumerate(zip(col_starts, col_ends)):
+                if s <= e.timestamp <= t:
+                    # find row (bucket)
+                    lat = e.latency_ms
+                    for r in range(4):
+                        if bucket_edges[r] <= lat < bucket_edges[r+1]:
+                            matrix[r][j] += 1
+                            break
+                    break
+        # Flatten for chart.js matrix
+        cells = []
+        for r in range(4):
+            for c in range(cols):
+                cells.append({"x": c, "y": r, "v": matrix[r][c]})
+        return {"cells": cells, "rows": row_labels, "cols": cols}
+
+    def _is_same_utc_day(self, a: datetime, b: datetime) -> bool:
+        a_d = a.astimezone(timezone.utc).date()
+        b_d = b.astimezone(timezone.utc).date()
+        return a_d == b_d
+
+    def daily_events(self, day: datetime | None = None) -> list[MetricsEvent]:
+        ref = day or datetime.now(timezone.utc)
+        return [e for e in self.events if self._is_same_utc_day(e.timestamp, ref)]
+
+    def daily_summary(self) -> dict:
+        items = self.daily_events()
+        total = len(items)
+        if total == 0:
+            return {
+                "total_events": 0,
+                "avg_latency_ms": 0,
+                "success_rate_pct": 0.0,
+                "profit_total": 0.0,
+                "status_counts": {"ok": 0, "warning": 0, "critical": 0},
+                "top_bots": [],
+            }
+        avg_latency = sum(e.latency_ms for e in items) / total
+        successes = sum(1 for e in items if not e.error and (e.status in (None, "ok")))
+        success_rate = round(successes * 100.0 / total, 2)
+        profit_total = round(sum(float(e.profit) for e in items if isinstance(e.profit, (int, float))), 4)
+        status_counts = {"ok": 0, "warning": 0, "critical": 0}
+        for e in items:
+            st = e.status or ("ok" if not e.error else "critical")
+            if st not in status_counts:
+                status_counts[st] = 0
+            status_counts[st] += 1
+        bot_profit: dict[str, float] = {}
+        for e in items:
+            if isinstance(e.profit, (int, float)):
+                bot_profit[e.bot_name] = bot_profit.get(e.bot_name, 0.0) + float(e.profit)
+        top_bots = sorted(bot_profit.items(), key=lambda kv: kv[1], reverse=True)[:5]
+        return {
+            "total_events": total,
+            "avg_latency_ms": int(avg_latency),
+            "success_rate_pct": success_rate,
+            "profit_total": profit_total,
+            "status_counts": status_counts,
+            "top_bots": top_bots,
+        }
+
 
 class SensorData:
     """Simple fake sensor for temperature/humidity readings."""

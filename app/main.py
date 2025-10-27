@@ -108,33 +108,9 @@ async def demo(request: Request) -> HTMLResponse:
 
 
 @app.get("/stream")
-async def stream():
-    global eth_rt
-    if eth_rt is None:
-        try:
-            eth_rt = EthRealtime()
-        except Exception as e:
-            print(f"[stream] ETH connection failed: {e}, falling back to mock data")
-            # Fallback to mock data if ETH connection fails
-            from .data import mock_metrics_publisher, SSEBroker
-            mock_broker = SSEBroker()
-            return EventSourceResponse(client_event_stream(None, mock_broker))
-    
-    async def gen():
-        try:
-            async for evt in eth_rt.stream():
-                yield {
-                    "event": evt["event"],
-                    "data": json.dumps(evt["data"])
-                }
-        except Exception as e:
-            print(f"[stream] ETH stream error: {e}, falling back to mock data")
-            # If ETH stream fails, fall back to mock data
-            from .data import mock_metrics_publisher, SSEBroker
-            mock_broker = SSEBroker()
-            async for evt in client_event_stream(None, mock_broker):
-                yield evt
-    return EventSourceResponse(gen())
+async def stream(request: Request):
+    # Use the global broker that's already publishing data
+    return EventSourceResponse(client_event_stream(request, broker))
 
 
 @app.on_event("startup")

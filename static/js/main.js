@@ -278,14 +278,15 @@
     else if (e.key === '2') setView('throughput');
     else if (e.key === '3') setView('profit');
     else if (e.key === '4') setView('heatmap');
-    else if (e.key === '5') setView('sensors');
+    else if (e.key === '5') setView('graph3d');
+    else if (e.key === '6') setView('sensors');
     else if (e.key.toLowerCase() === 'n'){
-      const order = ['latency','throughput','profit','heatmap','sensors'];
+      const order = ['latency','throughput','profit','heatmap','graph3d','sensors'];
       const selector = document.getElementById('viewSelector');
       const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
       setView(order[(idx+1)%order.length]);
     } else if (e.key.toLowerCase() === 'p'){
-      const order = ['latency','throughput','profit','heatmap','sensors'];
+      const order = ['latency','throughput','profit','heatmap','graph3d','sensors'];
       const selector = document.getElementById('viewSelector');
       const idx = Math.max(0, order.indexOf(selector?.value || 'latency'));
       setView(order[(idx-1+order.length)%order.length]);
@@ -308,11 +309,45 @@
     window.handleMetrics(e.detail);
   });
 
-  // Charts initialization for server-rendered metrics partial (executed after HTMX swap)
+    // Charts initialization for server-rendered metrics partial (executed after HTMX swap)
   function buildOrUpdateChartsFromPartial(container){
     try {
       const card = container.querySelector('.card[data-latency-labels]');
       if (!card) return;
+      
+      // Check if 3D graph view is selected
+      const viewSelector = document.getElementById('viewSelector');
+      const currentView = viewSelector ? viewSelector.value : 'latency';
+      
+      if (currentView === 'graph3d') {
+        // Hide chart canvas, show 3D graph canvas
+        const chartPrimary = container.querySelector('#chartPrimary');
+        const chartSecondary = container.querySelector('#chartSecondary');
+        const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const toolbar = container.querySelector('#chartToolbar');
+        
+        if (chartPrimary) chartPrimary.style.display = 'none';
+        if (chartSecondary) chartSecondary.style.display = 'none';
+        if (toolbar) toolbar.style.display = 'none';
+        if (graph3dCanvas) {
+          graph3dCanvas.style.display = 'block';
+          window.init3DGraph(container);
+          setTimeout(() => window.start3DAnimation(), 100);
+        }
+        return;
+      } else {
+        // Show normal charts
+        const chartPrimary = container.querySelector('#chartPrimary');
+        const chartSecondary = container.querySelector('#chartSecondary');
+        const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const toolbar = container.querySelector('#chartToolbar');
+        
+        if (chartPrimary) chartPrimary.style.display = 'block';
+        if (chartSecondary) chartSecondary.style.display = 'block';
+        if (toolbar) toolbar.style.display = 'flex';
+        if (graph3dCanvas) graph3dCanvas.style.display = 'none';
+      }
+      
       const latencyLabels = JSON.parse(card.dataset.latencyLabels || '[]');
       const latencyValues = JSON.parse(card.dataset.latencyValues || '[]');
       const tpLabels = JSON.parse(card.dataset.throughputLabels || '[]');
@@ -388,6 +423,9 @@
       } else if (current === 'heatmap'){
         ensureHeatmap(window.__chartPrimary, ctx1, heatCells, heatCols);
         ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+      } else if (current === 'graph3d'){
+        // 3D graph is handled separately above
+        return;
       } else if (current === 'sensors'){
         ensureLineChart(window.__chartPrimary, ctx1, sensorLabels, sensorTempValues, 'Temperature (°C)', colors.cyan);
         ensureLineChart(window.__chartSecondary, ctx2, sensorLabels, sensorHumValues, 'Humidity (%)', colors.magenta);
@@ -405,6 +443,14 @@
       const alertI = document.getElementById('alertLatency');
       if (toggle) toggle.checked = !!userPrefs.enableMA;
       if (alertI && userPrefs.alertLatencyMs != null) alertI.value = String(userPrefs.alertLatencyMs);
+      
+      // Add view selector handler
+      const selector = e.target.querySelector('#viewSelector');
+      if (selector) {
+        selector.addEventListener('change', function() {
+          buildOrUpdateChartsFromPartial(e.target);
+        });
+      }
     }
   });
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import AsyncIterator, Dict, Any, Optional
 
 from web3 import Web3
-from web3.providers.websocket import WebsocketProvider
+from web3.providers import HTTPProvider
 
 AGG_ABI = [{
     "inputs": [],
@@ -27,15 +27,19 @@ class Metrics:
 
 class EthRealtime:
     def __init__(self):
-        wss = os.getenv("ETH_WSS_URL")
-        if not wss:
-            raise RuntimeError("ETH_WSS_URL missing")
-        self.w3 = Web3(WebsocketProvider(wss))
-
+        http_url = os.getenv("ETH_HTTP_URL") or os.getenv("ETH_WSS_URL")
+        if not http_url:
+            raise RuntimeError("ETH_HTTP_URL or ETH_WSS_URL missing")
+        
+        # Use HTTP provider for compatibility
+        self.w3 = Web3(HTTPProvider(http_url))
+        
         feed_addr = os.getenv("CHAINLINK_ETHUSD")
         if not feed_addr:
             raise RuntimeError("CHAINLINK_ETHUSD missing")
-        self.cl = self.w3.eth.contract(address=Web3.toChecksumAddress(feed_addr), abi=AGG_ABI)
+        # Use to_checksum_address from eth_utils in newer web3 versions
+        from eth_utils import to_checksum_address
+        self.cl = self.w3.eth.contract(address=to_checksum_address(feed_addr), abi=AGG_ABI)
 
         self._events_last_min = deque()
         self._lat_samples = deque(maxlen=120)

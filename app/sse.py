@@ -41,8 +41,13 @@ async def client_event_stream(request, broker: SSEBroker):
     try:
         yield {"event": "ping", "data": "ready"}
         while True:
-            if await request.is_disconnected():
-                break
+            if request is not None and hasattr(request, 'is_disconnected'):
+                try:
+                    if await request.is_disconnected():
+                        break
+                except Exception:
+                    # Handle any errors checking disconnection
+                    break
             try:
                 msg = await asyncio.wait_for(queue.get(), timeout=15.0)
                 yield {"event": "metrics_update", "data": msg}

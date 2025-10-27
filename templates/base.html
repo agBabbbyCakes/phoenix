@@ -34,70 +34,367 @@
     <!-- Chart.js matrix plugin for heatmaps -->
     <script
       src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.0/dist/chartjs-chart-matrix.min.js"></script>
-    <!-- DaisyUI custom theme (cmykTheme) -->
+    <!-- Three.js for 3D Graph Visualization -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/static/js/graph3d.js"></script>
     <style>
-        :root[data-theme='cmykTheme']{
-          /* Base (off-white paper tone) */
-          --b1: 40 33% 96%; /* base-100 */
-          --bc: 222 14% 20%; /* base-content */
-          /* Primary: vibrant cyan */
-          --p: 191 100% 46%;
-          --pc: 0 0% 100%;
-          /* Secondary: soft magenta */
-          --s: 320 90% 70%;
-          --sc: 0 0% 100%;
-          /* Accent: warm yellow */
-          --a: 45 100% 60%;
-          --ac: 0 0% 20%;
-          /* Error: rich black / dark gray with yellow content */
-          --er: 0 0% 12%;
-          --erc: 45 100% 60%;
-        }
-        html{ font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
-        
-        /* 3D Glass Viewer Styles */
-        .glass-viewer {
-          perspective: 1000px;
-          transform-style: preserve-3d;
+        /* Modern macOS Dashboard Theme */
+        :root {
+          --bg-primary: #f5f5f7;
+          --bg-secondary: #ffffff;
+          --text-primary: #1d1d1f;
+          --text-secondary: #6e6e73;
+          --border-color: #d2d2d7;
+          --accent-blue: #007aff;
+          --accent-green: #30d158;
+          --accent-red: #ff3b30;
+          --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+          --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
         }
         
-        .glass-frame {
-          background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.1) 0%, 
-            rgba(255, 255, 255, 0.05) 50%, 
-            rgba(255, 255, 255, 0.1) 100%);
-          backdrop-filter: blur(20px);
-          border: 2px solid rgba(255, 255, 255, 0.2);
+        * {
+          box-sizing: border-box;
+        }
+        
+        html {
+          font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', system-ui, sans-serif;
+        }
+        
+        body {
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          margin: 0;
+          padding: 0;
+        }
+        
+        /* Dashboard Container - Fixed Frame */
+        .dashboard-container {
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          background: linear-gradient(to bottom, #f5f5f7, #fafafa);
+        }
+        
+        /* Dashboard Header - Fixed Top */
+        .dashboard-header {
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: saturate(180%) blur(20px);
+          -webkit-backdrop-filter: saturate(180%) blur(20px);
+          border-bottom: 1px solid var(--border-color);
+          padding: 12px 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 100;
+          position: relative;
+          box-shadow: var(--shadow-sm);
+        }
+        
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .app-title {
+          font-size: 20px;
+          font-weight: 600;
+          margin: 0;
+          color: var(--text-primary);
+        }
+        
+        .status-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 12px;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          font-size: 12px;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        
+        .status-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--accent-red);
+          transition: background 0.3s;
+        }
+        
+        .status-dot.connected {
+          background: var(--accent-green);
+        }
+        
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .btn-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+          background: var(--bg-secondary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--text-primary);
+        }
+        
+        .btn-icon:hover {
+          background: var(--accent-blue);
+          border-color: var(--accent-blue);
+          color: white;
+          transform: scale(1.05);
+        }
+        
+        /* Dashboard Content - Scrollable */
+        .dashboard-content {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 20px;
+          margin-top: 50vh; /* Max height constraint for desktop */
+          max-width: 100%;
+        }
+        
+        @media (min-width: 1024px) {
+          .dashboard-content {
+            margin-top: 0;
+            max-height: 50vh;
+          }
+        }
+        
+        /* Bot Grid Cards */
+        .bot-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+          padding: 0;
+        }
+        
+        .bot-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 16px;
+          padding: 20px;
+          transition: all 0.2s;
+          box-shadow: var(--shadow-sm);
+        }
+        
+        .bot-card:hover {
+          box-shadow: var(--shadow-md);
+          transform: translateY(-2px);
+          border-color: var(--accent-blue);
+        }
+        
+        .bot-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+        }
+        
+        .bot-name {
+          font-size: 16px;
+          font-weight: 600;
+          margin: 0;
+        }
+        
+        .bot-type {
+          font-size: 11px;
+          padding: 4px 8px;
+          background: var(--bg-primary);
+          border-radius: 6px;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        
+        .bot-metrics {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin: 16px 0;
+        }
+        
+        .metric-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        
+        .metric-label {
+          font-size: 11px;
+          color: var(--text-secondary);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .metric-value {
+          font-size: 24px;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        
+        .modal-overlay.hidden {
+          display: none;
+        }
+        
+        .modal-container {
+          background: var(--bg-secondary);
           border-radius: 20px;
-          box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-          transform-style: preserve-3d;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          width: 90%;
+          max-width: 480px;
+          box-shadow: var(--shadow-lg);
         }
         
-        .glass-frame:hover {
-          transform: translateZ(10px) rotateX(2deg) rotateY(2deg);
-          box-shadow: 
-            0 20px 40px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid var(--border-color);
         }
         
-        .glass-panel {
-          background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.08) 0%, 
-            rgba(255, 255, 255, 0.02) 100%);
-          backdrop-filter: blur(15px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 15px;
-          box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        .modal-header h2 {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 600;
         }
         
-        /* 16:9 Fixed Frame - Always maintains aspect ratio, max 100vh */
+        .btn-close {
+          width: 32px;
+          height: 32px;
+          border: none;
+          background: transparent;
+          font-size: 24px;
+          cursor: pointer;
+          color: var(--text-secondary);
+          transition: color 0.2s;
+        }
+        
+        .btn-close:hover {
+          color: var(--text-primary);
+        }
+        
+        .modal-body {
+          padding: 24px;
+        }
+        
+        .form-group {
+          margin-bottom: 20px;
+        }
+        
+        .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-secondary);
+        }
+        
+        .form-input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          font-size: 14px;
+          background: var(--bg-secondary);
+          transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+          outline: none;
+          border-color: var(--accent-blue);
+        }
+        
+        .modal-footer {
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+          padding-top: 20px;
+          margin-top: 20px;
+          border-top: 1px solid var(--border-color);
+        }
+        
+        .btn-primary {
+          padding: 8px 20px;
+          background: var(--accent-blue);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        
+        .btn-primary:hover {
+          opacity: 0.8;
+        }
+        
+        .btn-secondary {
+          padding: 8px 20px;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+          border-color: var(--text-primary);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: var(--border-color);
+          border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: var(--text-secondary);
+        }
+        
+        /* TV Frame Styles */
         .tv-frame {
           aspect-ratio: 16 / 9;
           width: 100%;
@@ -105,58 +402,18 @@
           max-height: 100vh;
           height: 100vh;
           position: relative;
-          background: linear-gradient(135deg, 
-            rgba(0, 0, 0, 0.8) 0%, 
-            rgba(0, 0, 0, 0.9) 100%);
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
           border: 8px solid #2a2a2a;
           border-radius: 20px;
-          box-shadow: 
-            0 0 0 4px #1a1a1a,
-            inset 0 0 0 2px #444,
-            0 20px 40px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 0 0 4px #1a1a1a, inset 0 0 0 2px #444, 0 20px 40px rgba(0, 0, 0, 0.5);
           overflow: hidden;
           margin: 0 auto;
-        }
-        
-        /* Responsive scaling - maintain 16:9 but fit in viewport */
-        @media (max-width: 768px) {
-          .tv-frame {
-            width: 95vw;
-            height: calc(95vw * 9 / 16);
-            max-height: 100vh;
-          }
-        }
-        
-        @media (min-width: 1920px) {
-          .tv-frame {
-            width: 80vw;
-            height: calc(80vw * 9 / 16);
-            max-height: 100vh;
-          }
-        }
-        
-        /* Ensure charts fit within TV frame */
-        .tv-screen .card {
-          max-height: calc(100vh - 200px);
-          overflow: hidden;
-        }
-        
-        .tv-screen .card-body {
-          padding: 0.5rem;
-          max-height: calc(100vh - 250px);
-          overflow: hidden;
-        }
-        
-        .tv-screen canvas {
-          max-height: 200px;
         }
         
         .tv-screen {
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, 
-            rgba(0, 0, 0, 0.9) 0%, 
-            rgba(0, 0, 0, 0.95) 100%);
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
           position: relative;
           overflow: hidden;
         }
@@ -167,15 +424,45 @@
           left: 0;
           width: 100%;
           height: 100%;
-          background: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.05) 0%, transparent 50%);
+          background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.05) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.05) 0%, transparent 50%),
+                      radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.05) 0%, transparent 50%);
           pointer-events: none;
           opacity: 0.2;
         }
         
-        /* TV Channel Dials - Built into frame */
+        .tv-power {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          width: 20px;
+          height: 20px;
+          background: #ff4444;
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+          animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        .tv-indicator {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.8);
+          border: 2px solid #444;
+          border-radius: 8px;
+          padding: 8px 12px;
+          color: #60a5fa;
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          font-weight: 700;
+          z-index: 10;
+        }
+        
         .tv-controls {
           position: absolute;
           bottom: 15px;
@@ -191,15 +478,10 @@
           position: relative;
           width: 45px;
           height: 45px;
-          background: linear-gradient(135deg, 
-            #2a2a2a 0%, 
-            #1a1a1a 50%, 
-            #0a0a0a 100%);
+          background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%);
           border: 2px solid #444;
           border-radius: 6px;
-          box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.5),
-            0 4px 8px rgba(0, 0, 0, 0.3);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
           cursor: pointer;
           transition: all 0.2s ease;
           position: relative;
@@ -211,24 +493,13 @@
         
         .channel-dial:hover {
           transform: translateY(-2px);
-          box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.5),
-            0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-        
-        .channel-dial:active {
-          transform: translateY(0px);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.4);
         }
         
         .channel-dial.active {
-          background: linear-gradient(135deg, 
-            #3a3a3a 0%, 
-            #2a2a2a 50%, 
-            #1a1a1a 100%);
+          background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
           border-color: #60a5fa;
-          box-shadow: 
-            inset 0 2px 4px rgba(0, 0, 0, 0.5),
-            0 0 15px rgba(96, 165, 250, 0.4);
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 15px rgba(96, 165, 250, 0.4);
         }
         
         .channel-number {
@@ -252,124 +523,123 @@
           font-family: 'Courier New', monospace;
         }
         
-        .tv-indicator {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          background: rgba(0, 0, 0, 0.8);
-          border: 2px solid #444;
-          border-radius: 8px;
-          padding: 8px 12px;
-          color: #60a5fa;
-          font-family: 'Courier New', monospace;
-          font-size: 12px;
-          font-weight: 700;
-          z-index: 10;
-        }
-        
-        .tv-power {
-          position: absolute;
-          top: 20px;
-          left: 20px;
-          width: 20px;
-          height: 20px;
-          background: #ff4444;
-          border-radius: 50%;
-          box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
-          animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        
-        /* 3D Chart Container */
-        .chart-3d {
-          transform-style: preserve-3d;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .chart-3d.view-1 { transform: rotateX(0deg) rotateY(0deg) translateZ(0px); }
-        .chart-3d.view-2 { transform: rotateX(15deg) rotateY(-15deg) translateZ(20px); }
-        .chart-3d.view-3 { transform: rotateX(-10deg) rotateY(20deg) translateZ(30px); }
-        .chart-3d.view-4 { transform: rotateX(25deg) rotateY(10deg) translateZ(15px); }
-        .chart-3d.view-5 { transform: rotateX(-5deg) rotateY(-25deg) translateZ(25px); }
-        
-        /* Control Panel */
-        .control-panel {
+        .glass-card {
           background: linear-gradient(135deg, 
-            rgba(0, 0, 0, 0.2) 0%, 
-            rgba(0, 0, 0, 0.1) 100%);
-          backdrop-filter: blur(15px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 15px;
-          padding: 20px;
+            rgba(15, 23, 42, 0.8) 0%, 
+            rgba(30, 41, 59, 0.8) 50%,
+            rgba(15, 23, 42, 0.9) 100%);
+          border: 1px solid rgba(96, 165, 250, 0.3);
+          backdrop-filter: blur(20px) saturate(180%);
           box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(96, 165, 250, 0.1),
+            0 0 40px rgba(96, 165, 250, 0.1);
+          position: relative;
+          overflow: hidden;
         }
         
-        /* Etch-a-Sketch style grid */
-        .etch-grid {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-          background-size: 20px 20px;
+        .glass-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, 
+            rgba(96, 165, 250, 0.1) 0%,
+            transparent 50%,
+            rgba(236, 72, 153, 0.1) 100%);
+          pointer-events: none;
+          opacity: 0.5;
+        }
+        
+        .glass-card:hover {
+          border-color: rgba(96, 165, 250, 0.5);
+          box-shadow: 
+            0 12px 48px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(96, 165, 250, 0.2),
+            0 0 60px rgba(96, 165, 250, 0.2);
+        }
+        
+        .glass-event-table {
+          background: linear-gradient(135deg, 
+            rgba(15, 23, 42, 0.85) 0%, 
+            rgba(30, 41, 59, 0.85) 100%);
+          border: 1px solid rgba(96, 165, 250, 0.2);
+          backdrop-filter: blur(16px) saturate(180%);
+        }
+        
+        .neon-scroll::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+        
+        .neon-scroll::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
           border-radius: 10px;
         }
         
-        /* Glow effects */
-        .glow-cyan { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
-        .glow-magenta { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
-        .glow-yellow { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
-        
-        /* Animation keyframes */
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(2deg); }
+        .neon-scroll::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, 
+            rgba(96, 165, 250, 0.8) 0%,
+            rgba(236, 72, 153, 0.8) 100%);
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+          box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
         }
         
-        .float-animation {
-          animation: float 6s ease-in-out infinite;
+        .neon-scroll::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, 
+            rgba(96, 165, 250, 1) 0%,
+            rgba(236, 72, 153, 1) 100%);
+          box-shadow: 0 0 20px rgba(96, 165, 250, 0.8);
         }
         
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }
-          50% { box-shadow: 0 0 30px rgba(96, 165, 250, 0.6); }
+        /* Chart container neon glow effect */
+        .glass-card .card-body {
+          position: relative;
+          z-index: 1;
         }
         
-        .pulse-glow {
-          animation: pulse-glow 2s ease-in-out infinite;
+        .glass-card canvas {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 8px;
+          padding: 8px;
         }
-        </style>
+        
+        /* TV frame specific adjustments */
+        .tv-screen .stat {
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid rgba(96, 165, 250, 0.2);
+          backdrop-filter: blur(10px);
+        }
+        
+        .tv-screen .stat:hover {
+          border-color: rgba(96, 165, 250, 0.5);
+          box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+          .tv-frame {
+            width: 95vw;
+            height: calc(95vw * 9 / 16);
+            max-height: 100vh;
+          }
+        }
+        
+        @media (min-width: 1920px) {
+          .tv-frame {
+            width: 80vw;
+            height: calc(80vw * 9 / 16);
+            max-height: 100vh;
+          }
+        }
+      </style>
     <link rel="stylesheet" href="/static/css/theme.css" />
     {% block head %}{% endblock %}
   </head>
-  <body class="min-h-screen bg-base-200" data-theme="cmykGlassDark">
-    <div class="container mx-auto p-4 space-y-4">
-      <!-- Top Bar -->
-      <div
-        class="navbar glass-nav text-primary-content rounded-box shadow hover:brightness-105 transition">
-        <div class="flex-1">
-          <span class="text-xl font-bold">BotScope</span>
-          <span
-            class="ml-3 badge badge-outline border-accent/50 text-accent hidden"
-            id="sample-mode-ind">
-            Sample Mode
-          </span>
-        </div>
-        <div class="flex-none">
-          <div class="flex items-center gap-2">
-            <span class="text-sm opacity-70">SSE</span>
-            <span id="conn-status" class="badge"
-              style="background-color:hsl(var(--er)); color:hsl(var(--erc));">Disconnected</span>
-          </div>
-        </div>
-      </div>
-
-      {% block content %}{% endblock %}
-    </div>
+  <body class="min-h-screen bg-base-200">
+    {% block content %}{% endblock %}
     {% block scripts %}{% endblock %}
   </body>
 </html>

@@ -32,6 +32,7 @@
     <option value="throughput">Throughput</option>
     <option value="profit">Cumulative Profit</option>
     <option value="heatmap">Latency Heatmap</option>
+    <option value="graph3d">3D Bot Network</option>
     <option value="sensors">Sensors (Temp/Humidity)</option>
   </select>
 </div>
@@ -47,12 +48,12 @@
     data-profit-values='{{ profit_series | map(attribute=1) | list | tojson }}'
     data-heat-cells='{{ heatmap.cells | tojson }}'
     data-heat-cols='{{ heatmap.cols }}'
-    data-sensor-labels='{{ (sensor_labels or []) | tojson }}'
-    data-sensor-temp-values='{{ (sensor_temp_values or []) | tojson }}'
-    data-sensor-humidity-values='{{ (sensor_humidity_values or []) | tojson }}'>
+    data-sensor-labels='[]'
+    data-sensor-temp-values='[]'
+    data-sensor-humidity-values='[]'>
     <div class="card-body">
       <!-- Chart toolbar -->
-      <div class="flex flex-wrap items-center gap-2 mb-2">
+      <div class="flex flex-wrap items-center gap-2 mb-2" id="chartToolbar">
         <button class="btn btn-xs" id="btnResetZoom"
           title="Reset zoom (Z)">Reset Zoom</button>
         <label class="label cursor-pointer gap-2">
@@ -78,16 +79,17 @@
     <div class="card-body">
       <div class="h-48 min-h-32">
         <canvas id="chartSecondary"></canvas>
+        <canvas id="graph3dCanvas" style="display: none;"></canvas>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Recent Events Table -->
-<div class="card bg-base-100 shadow mt-4">
+<div class="card bg-base-100 shadow mt-4 glass-event-table">
   <div class="card-body">
     <h2 class="card-title">Recent Events</h2>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto max-h-80 overflow-y-auto neon-scroll">
       <table class="table table-compact">
         <thead>
           <tr>
