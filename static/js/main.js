@@ -22,8 +22,8 @@
           {
             label: "Latency (ms)",
             data: [],
-            borderColor: "#60a5fa",
-            backgroundColor: "rgba(96,165,250,0.2)",
+            borderColor: "#00bfff",
+            backgroundColor: "rgba(0,191,255,0.15)",
             borderWidth: 2,
             tension: 0.25,
             pointRadius: 2,
@@ -31,8 +31,8 @@
           {
             label: "MA(5)",
             data: [],
-            borderColor: "#f59e0b",
-            backgroundColor: "rgba(245,158,11,0.15)",
+            borderColor: "#00ff88",
+            backgroundColor: "rgba(0,255,136,0.1)",
             borderWidth: 1,
             tension: 0.25,
             pointRadius: 0,
@@ -83,8 +83,8 @@
           {
             label: "Throughput (events/min)",
             data: [],
-            borderColor: "#34d399",
-            backgroundColor: "rgba(52,211,153,0.2)",
+            borderColor: "#00ff88",
+            backgroundColor: "rgba(0,255,136,0.15)",
             borderWidth: 2,
             tension: 0.25,
             pointRadius: 2,
@@ -226,6 +226,28 @@
     }
   }
 
+  // Load fallback sample data
+  async function loadFallbackData() {
+    try {
+      const response = await fetch('/static/data/sample_metrics.json');
+      const data = await response.json();
+      console.log('[Fallback] Loaded sample metrics data');
+      // Simulate the data stream
+      data.forEach((item, index) => {
+        setTimeout(() => {
+          if (window.handleMetrics) {
+            window.handleMetrics(JSON.stringify({
+              ...item,
+              timestamp: Date.now() - (data.length - index) * 6000
+            }));
+          }
+        }, index * 500);
+      });
+    } catch (err) {
+      console.error('[Fallback] Failed to load sample data:', err);
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initCharts();
     // Show Sample Mode indicator if present on body dataset
@@ -242,6 +264,15 @@
     const alertI = document.getElementById('alertLatency');
     if (toggle) toggle.checked = !!userPrefs.enableMA;
     if (alertI && userPrefs.alertLatencyMs != null) alertI.value = String(userPrefs.alertLatencyMs);
+    
+    // Set timeout to load fallback data if no SSE connection after 3 seconds
+    setTimeout(() => {
+      const statusEl = document.getElementById('conn-status');
+      if (statusEl && statusEl.textContent === 'Disconnected') {
+        console.log('[Fallback] No SSE connection, loading sample data');
+        loadFallbackData();
+      }
+    }, 3000);
   });
 
   // HTMX SSE lifecycle events
@@ -309,6 +340,33 @@
     window.handleMetrics(e.detail);
   });
 
+  // Generate chart markers for significant data points
+  function generateChartMarkers(labels, data) {
+    if (!data || data.length === 0) return {};
+    
+    const markers = {};
+    const threshold = Math.max(...data) * 0.8; // Mark values above 80% of max
+    const minThreshold = Math.min(...data) * 1.2; // Mark values below 20% above min
+    
+      data.forEach((value, index) => {
+        if (value >= threshold || value <= minThreshold) {
+          const markerId = `marker${index}`;
+          markers[markerId] = {
+            type: 'point',
+            xValue: index,
+            yValue: value,
+            backgroundColor: 'rgba(0, 191, 255, 0.8)',
+            borderColor: 'rgba(0, 191, 255, 1)',
+            borderWidth: 2,
+            radius: 6,
+            pointStyle: 'circle'
+          };
+        }
+      });
+    
+    return markers;
+  }
+
     // Charts initialization for server-rendered metrics partial (executed after HTMX swap)
   function buildOrUpdateChartsFromPartial(container){
     try {
@@ -361,9 +419,9 @@
       const sensorHumValues = JSON.parse(card.dataset.sensorHumidityValues || '[]');
 
       const colors = {
-        cyan: 'hsl(191 100% 46%)',
-        magenta: 'hsl(320 90% 70%)',
-        yellow: 'hsl(45 100% 60%)'
+        primary: 'rgba(0, 191, 255, 1)',
+        secondary: 'rgba(0, 255, 136, 1)',
+        accent: 'rgba(240, 240, 240, 1)'
       };
 
       const ctx1 = container.querySelector('#chartPrimary');
@@ -371,15 +429,67 @@
       if (!ctx1 || !ctx2) return;
 
       function ensureLineChart(instanceRef, ctx, labels, data, label, color){
+        // Generate markers based on data peaks/valleys
+        const annotations = generateChartMarkers(labels, data);
+        
+        // Convert color to RGBA with alpha for fill
+        const rgbaColor = color.replace('1)', '0.15)');
+        
         if (!instanceRef.value){
           instanceRef.value = new Chart(ctx, {
             type: 'line',
-            data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color.replace('hsl', 'hsla').replace(')', '/.2)'), borderWidth: 2, tension: 0.25, pointRadius: 2 }] },
-            options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            data: { 
+              labels, 
+              datasets: [{ 
+                label, 
+                data, 
+                borderColor: color, 
+                backgroundColor: rgbaColor, 
+                borderWidth: 3, 
+                tension: 0.25, 
+                pointRadius: 4, 
+                pointHoverRadius: 8,
+                fill: true
+              }] 
+            },
+            options: { 
+              responsive: true, 
+              maintainAspectRatio: false, 
+              animation: false, 
+              plugins: { 
+                legend: { display: false },
+                annotation: { annotations }
+              }, 
+              scales: { 
+                y: { 
+                  beginAtZero: true,
+                  grid: {
+                    color: 'rgba(128, 128, 128, 0.2)'
+                  },
+                  ticks: {
+                    color: 'rgba(240, 240, 240, 0.8)'
+                  }
+                },
+                x: {
+                  grid: {
+                    color: 'rgba(128, 128, 128, 0.2)'
+                  },
+                  ticks: {
+                    color: 'rgba(240, 240, 240, 0.8)'
+                  }
+                }
+              }
+            }
           });
         } else {
           const c = instanceRef.value;
-          c.data.labels = labels; c.data.datasets[0].data = data; c.update('none');
+          c.data.labels = labels; 
+          c.data.datasets[0].data = data; 
+          // Update annotations with new markers
+          if (c.options.plugins && c.options.plugins.annotation) {
+            c.options.plugins.annotation.annotations = annotations;
+          }
+          c.update('none');
         }
       }
 
@@ -412,23 +522,23 @@
       const selector = container.querySelector('#viewSelector');
       const current = selector ? selector.value : 'latency';
       if (current === 'latency'){
-        ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
-        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+        ensureLineChart(window.__chartPrimary, ctx1, latencyLabels, latencyValues, 'Latency (ms)', colors.primary);
+        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.secondary);
       } else if (current === 'throughput'){
-        ensureLineChart(window.__chartPrimary, ctx1, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
-        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+        ensureLineChart(window.__chartPrimary, ctx1, tpLabels, tpValues, 'Throughput (/min)', colors.primary);
+        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.secondary);
       } else if (current === 'profit'){
-        ensureLineChart(window.__chartPrimary, ctx1, pfLabels, pfValues, 'Cumulative Profit', colors.yellow);
-        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.magenta);
+        ensureLineChart(window.__chartPrimary, ctx1, pfLabels, pfValues, 'Cumulative Profit', colors.primary);
+        ensureLineChart(window.__chartSecondary, ctx2, tpLabels, tpValues, 'Throughput (/min)', colors.secondary);
       } else if (current === 'heatmap'){
         ensureHeatmap(window.__chartPrimary, ctx1, heatCells, heatCols);
-        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.cyan);
+        ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.primary);
       } else if (current === 'graph3d'){
         // 3D graph is handled separately above
         return;
       } else if (current === 'sensors'){
-        ensureLineChart(window.__chartPrimary, ctx1, sensorLabels, sensorTempValues, 'Temperature (°C)', colors.cyan);
-        ensureLineChart(window.__chartSecondary, ctx2, sensorLabels, sensorHumValues, 'Humidity (%)', colors.magenta);
+        ensureLineChart(window.__chartPrimary, ctx1, sensorLabels, sensorTempValues, 'Temperature (°C)', colors.primary);
+        ensureLineChart(window.__chartSecondary, ctx2, sensorLabels, sensorHumValues, 'Humidity (%)', colors.secondary);
       }
     } catch (err) {
       console.error('Failed to init charts from partial', err);

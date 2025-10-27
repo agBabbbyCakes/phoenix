@@ -1,0 +1,99 @@
+[
+  {
+    "timestamp": 1736563200000,
+    "bot_name": "eth-heads",
+    "latency_ms": 45,
+    "success_rate_pct": 98.5,
+    "throughput_1m": 15,
+    "tx_hash": "0x8a3f9c12...45d7e8",
+    "price_eth_usd": 2543.21,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0234
+  },
+  {
+    "timestamp": 1736563260000,
+    "bot_name": "arb-scout",
+    "latency_ms": 120,
+    "success_rate_pct": 95.2,
+    "throughput_1m": 12,
+    "tx_hash": "0x2f4b7a98...91e3c5",
+    "price_eth_usd": 2545.67,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0456
+  },
+  {
+    "timestamp": 1736563320000,
+    "bot_name": "mev-watch",
+    "latency_ms": 78,
+    "success_rate_pct": 96.8,
+    "throughput_1m": 18,
+    "tx_hash": "0x6c9d2f3a...74b9c1",
+    "price_eth_usd": 2544.89,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0123
+  },
+  {
+    "timestamp": 1736563380000,
+    "bot_name": "sandwich-guard",
+    "latency_ms": 234,
+    "success_rate_pct": 89.3,
+    "throughput_1m": 8,
+    "tx_hash": "0x4e8b9f3c...52a1d6",
+    "price_eth_usd": 2547.12,
+    "error": true,
+    "status": "warning",
+    "profit": -0.0089
+  },
+  {
+    "timestamp": 1736563440000,
+    "bot_name": "eth-heads",
+    "latency_ms": 52,
+    "success_rate_pct": 97.2,
+    "throughput_1m": 14,
+    "tx_hash": "0x9a2d4e7b...36c8f2",
+    "price_eth_usd": 2546.43,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0198
+  },
+  {
+    "timestamp": 1736563500000,
+    "bot_name": "arb-scout",
+    "latency_ms": 145,
+    "success_rate_pct": 93.7,
+    "throughput_1m": 10,
+    "tx_hash": "0x3c7d9e2f...85b9a4",
+    "price_eth_usd": 2548.56,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0345
+  },
+  {
+    "timestamp": 1736563560000,
+    "bot_name": "tx-relay",
+    "latency_ms": 89,
+    "success_rate_pct": 94.5,
+    "throughput_1m": 16,
+    "tx_hash": "0x5f3a8c9d...47e2b1",
+    "price_eth_usd": 2549.78,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0287
+  },
+  {
+    "timestamp": 1736563620000,
+    "bot_name": "mev-watch",
+    "latency_ms": 156,
+    "success_rate_pct": 91.8,
+    "throughput_1m": 11,
+    "tx_hash": "0x1d9f7a4e...63c8b2",
+    "price_eth_usd": 2547.91,
+    "error": false,
+    "status": "ok",
+    "profit": 0.0156
+  }
+]
+

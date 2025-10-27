@@ -38,20 +38,26 @@
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="/static/js/graph3d.js"></script>
+    <!-- Chart.js annotations plugin for markers -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
-        /* Modern macOS Dashboard Theme */
+        /* Monochromatic Theme - 3 Colors Only */
         :root {
-          --bg-primary: #f5f5f7;
-          --bg-secondary: #ffffff;
-          --text-primary: #1d1d1f;
-          --text-secondary: #6e6e73;
-          --border-color: #d2d2d7;
-          --accent-blue: #007aff;
-          --accent-green: #30d158;
-          --accent-red: #ff3b30;
-          --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-          --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+          --bg-primary: #0a0a0c;
+          --bg-secondary: #15151a;
+          --text-primary: #f0f0f0;
+          --text-secondary: #808080;
+          --border-color: #2a2a30;
+          --accent-blue: #00bfff;
+          --accent-green: #00ff88;
+          --accent-red: #ff4444;
+          --primary: #00bfff;
+          --secondary: #15151a;
+          --tertiary: #2a2a30;
+          --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+          --shadow-md: 0 4px 12px rgba(0,0,0,0.7);
+          --shadow-lg: 0 8px 24px rgba(0,0,0,0.9);
         }
         
         * {
@@ -67,6 +73,28 @@
           color: var(--text-primary);
           margin: 0;
           padding: 0;
+        }
+        
+        /* Override DaisyUI dark theme */
+        .stat-value,
+        .stat-title,
+        .stat-desc,
+        .card-title,
+        h2,
+        h3 {
+          color: var(--text-primary) !important;
+        }
+        
+        .table {
+          color: var(--text-primary);
+        }
+        
+        .table thead {
+          color: var(--text-secondary);
+        }
+        
+        .badge {
+          color: var(--text-primary);
         }
         
         /* Dashboard Container - Fixed Frame */
@@ -402,10 +430,10 @@
           max-height: 100vh;
           height: 100vh;
           position: relative;
-          background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
-          border: 8px solid #2a2a2a;
+          background: var(--bg-primary);
+          border: 8px solid var(--secondary);
           border-radius: 20px;
-          box-shadow: 0 0 0 4px #1a1a1a, inset 0 0 0 2px #444, 0 20px 40px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 0 0 4px var(--bg-primary), inset 0 0 0 2px var(--border-color), 0 20px 40px rgba(0, 0, 0, 0.9);
           overflow: hidden;
           margin: 0 auto;
         }
@@ -413,7 +441,7 @@
         .tv-screen {
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
+          background: var(--bg-primary);
           position: relative;
           overflow: hidden;
         }
@@ -524,16 +552,12 @@
         }
         
         .glass-card {
-          background: linear-gradient(135deg, 
-            rgba(15, 23, 42, 0.8) 0%, 
-            rgba(30, 41, 59, 0.8) 50%,
-            rgba(15, 23, 42, 0.9) 100%);
-          border: 1px solid rgba(96, 165, 250, 0.3);
-          backdrop-filter: blur(20px) saturate(180%);
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          backdrop-filter: blur(20px);
           box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(96, 165, 250, 0.1),
-            0 0 40px rgba(96, 165, 250, 0.1);
+            0 8px 32px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(0, 191, 255, 0.1);
           position: relative;
           overflow: hidden;
         }
@@ -546,27 +570,24 @@
           right: 0;
           bottom: 0;
           background: linear-gradient(135deg, 
-            rgba(96, 165, 250, 0.1) 0%,
-            transparent 50%,
-            rgba(236, 72, 153, 0.1) 100%);
+            rgba(0, 191, 255, 0.05) 0%,
+            transparent 100%);
           pointer-events: none;
           opacity: 0.5;
         }
         
         .glass-card:hover {
-          border-color: rgba(96, 165, 250, 0.5);
+          border-color: var(--primary);
           box-shadow: 
-            0 12px 48px rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(96, 165, 250, 0.2),
-            0 0 60px rgba(96, 165, 250, 0.2);
+            0 12px 48px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(0, 191, 255, 0.2),
+            0 0 60px rgba(0, 191, 255, 0.2);
         }
         
         .glass-event-table {
-          background: linear-gradient(135deg, 
-            rgba(15, 23, 42, 0.85) 0%, 
-            rgba(30, 41, 59, 0.85) 100%);
-          border: 1px solid rgba(96, 165, 250, 0.2);
-          backdrop-filter: blur(16px) saturate(180%);
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          backdrop-filter: blur(16px);
         }
         
         .neon-scroll::-webkit-scrollbar {
@@ -575,24 +596,20 @@
         }
         
         .neon-scroll::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
+          background: var(--bg-primary);
           border-radius: 10px;
         }
         
         .neon-scroll::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, 
-            rgba(96, 165, 250, 0.8) 0%,
-            rgba(236, 72, 153, 0.8) 100%);
+          background: var(--primary);
           border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
-          box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+          border: 2px solid var(--bg-primary);
+          box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
         }
         
         .neon-scroll::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, 
-            rgba(96, 165, 250, 1) 0%,
-            rgba(236, 72, 153, 1) 100%);
-          box-shadow: 0 0 20px rgba(96, 165, 250, 0.8);
+          background: var(--text-primary);
+          box-shadow: 0 0 20px rgba(0, 191, 255, 0.8);
         }
         
         /* Chart container neon glow effect */
@@ -609,14 +626,62 @@
         
         /* TV frame specific adjustments */
         .tv-screen .stat {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(96, 165, 250, 0.2);
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
           backdrop-filter: blur(10px);
+          color: var(--text-primary) !important;
         }
         
         .tv-screen .stat:hover {
-          border-color: rgba(96, 165, 250, 0.5);
-          box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+          border-color: var(--primary);
+          box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        }
+        
+        .tv-screen .stat-value {
+          color: var(--text-primary) !important;
+        }
+        
+        .tv-screen .stat-title,
+        .tv-screen .stat-desc {
+          color: var(--text-secondary) !important;
+        }
+        
+        /* Dark theme for table */
+        .table tbody tr {
+          color: var(--text-primary);
+          border-bottom: 1px solid var(--border-color);
+        }
+        
+        .table tbody tr:hover {
+          background-color: rgba(0, 191, 255, 0.05);
+        }
+        
+        /* Links */
+        .link {
+          color: var(--primary) !important;
+        }
+        
+        .link:hover {
+          color: var(--text-primary) !important;
+        }
+        
+        /* Better button contrast */
+        .btn {
+          color: var(--text-primary);
+          border-color: var(--border-color);
+        }
+        
+        /* Select dropdown */
+        .select,
+        .input {
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+          border-color: var(--border-color);
+        }
+        
+        .select:focus,
+        .input:focus {
+          border-color: var(--primary);
         }
         
         @media (max-width: 768px) {
