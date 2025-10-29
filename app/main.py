@@ -157,3 +157,9 @@ def healthz():
 def version():
     return {"version": os.getenv("APP_VERSION", "0.1.0")}
 
+
+@app.get("/logs", response_class=HTMLResponse)
+async def logs_viewer(request: Request) -> HTMLResponse:
+    """Logs viewer page for displaying JSON log entries."""
+    return templates.TemplateResponse("logs.html", {"request": request})
+

@@ -1,0 +1,608 @@
+{% extends 'base.html' %}
+
+{% block title %}Logs Viewer - BotScope{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-base-200 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">Logs Viewer</h1>
+                <p class="text-base-content/70">Paste or upload JSON log entries
+                    to view them in a structured format</p>
+            </div>
+            <div>
+                <a href="/" class="btn btn-outline">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="card bg-base-100 shadow-lg mb-6">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Import Logs</h2>
+                <div class="flex gap-4 flex-col md:flex-row">
+                    <div class="flex-1">
+                        <label class="label">
+                            <span class="label-text">Paste JSON Log
+                                Entries</span>
+                        </label>
+                        <textarea
+                            id="logInput"
+                            class="textarea textarea-bordered w-full h-48 font-mono text-sm"
+                            placeholder='Paste JSON log entries here, one per line or as a JSON array...&#10;&#10;Example:&#10;{"level":20,"timestamp":"2025-10-29T07:30:00Z","message":"price - Started"}&#10;{"level":30,"timestamp":"2025-10-29T07:30:00Z","message":"Request was rate-limited..."}'></textarea>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button id="parseBtn" class="btn btn-primary">Parse &
+                            Display</button>
+                        <button id="demoBtn" class="btn btn-accent">🎬 Load
+                            Demo</button>
+                        <button id="clearBtn"
+                            class="btn btn-secondary">Clear</button>
+                        <label class="btn btn-outline">
+                            📁 Upload File
+                            <input type="file" id="fileInput"
+                                accept=".json,.jsonl,.txt" class="hidden" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card bg-base-100 shadow-lg mb-6" id="filtersCard"
+            style="display: none;">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="card-title">Filters</h2>
+                    <div class="flex gap-2">
+                        <button id="saveQueryBtn"
+                            class="btn btn-sm btn-outline">💾 Save
+                            Query</button>
+                        <select id="savedQueries"
+                            class="select select-bordered select-sm">
+                            <option value>Saved Queries...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="label">
+                            <span class="label-text">Search</span>
+                        </label>
+                        <input type="text" id="searchInput"
+                            placeholder="Search in messages..."
+                            class="input input-bordered w-full" />
+                    </div>
+                    <div>
+                        <label class="label">
+                            <span class="label-text">Log Level</span>
+                        </label>
+                        <select id="levelFilter"
+                            class="select select-bordered w-full">
+                            <option value>All Levels</option>
+                            <option value="10">DEBUG (10)</option>
+                            <option value="20">INFO (20)</option>
+                            <option value="21">INFO+ (21)</option>
+                            <option value="30">WARNING (30)</option>
+                            <option value="40">ERROR (40)</option>
+                            <option value="50">CRITICAL (50)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label">
+                            <span class="label-text">Time Range</span>
+                        </label>
+                        <input type="datetime-local" id="startTime"
+                            class="input input-bordered w-full" />
+                    </div>
+                    <div>
+                        <label class="label">
+                            <span class="label-text">&nbsp;</span>
+                        </label>
+                        <input type="datetime-local" id="endTime"
+                            class="input input-bordered w-full" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats stats-horizontal shadow-lg mb-6 w-full" id="statsBar"
+            style="display: none;">
+            <div class="stat">
+                <div class="stat-title">Total Logs</div>
+                <div class="stat-value" id="totalLogs">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">INFO</div>
+                <div class="stat-value text-blue-400" id="infoCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">WARNING</div>
+                <div class="stat-value text-yellow-400"
+                    id="warningCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">ERROR</div>
+                <div class="stat-value text-red-400" id="errorCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Transactions</div>
+                <div class="stat-value text-green-400" id="txCount">0</div>
+            </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="card bg-base-100 shadow-lg" id="logsCard"
+            style="display: none;">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="card-title">Log Entries</h2>
+                    <div class="flex gap-2">
+                        <button id="exportBtn" class="btn btn-sm btn-outline">📥
+                            Export JSON</button>
+                        <button id="exportCsvBtn"
+                            class="btn btn-sm btn-outline">📥 Export
+                            CSV</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Level</th>
+                                <th>Message</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="card bg-base-100 shadow-lg">
+            <div class="card-body text-center">
+                <div class="text-6xl mb-4">📋</div>
+                <h2 class="text-2xl font-bold mb-2">No Logs Loaded</h2>
+                <p class="text-base-content/70">Paste or upload JSON log entries
+                    to get started</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  let allLogs = [];
+  let filteredLogs = [];
+
+  // Log level mapping
+  const levelMap = {
+    10: { name: 'DEBUG', class: 'badge-ghost', color: 'text-gray-400' },
+    20: { name: 'INFO', class: 'badge-info', color: 'text-blue-400' },
+    21: { name: 'INFO', class: 'badge-info', color: 'text-blue-400' },
+    30: { name: 'WARN', class: 'badge-warning', color: 'text-yellow-400' },
+    40: { name: 'ERROR', class: 'badge-error', color: 'text-red-400' },
+    50: { name: 'CRITICAL', class: 'badge-error', color: 'text-red-600' },
+  };
+
+  function getLevelInfo(level) {
+    return levelMap[level] || { name: `LEVEL-${level}`, class: 'badge-ghost', color: 'text-gray-500' };
+  }
+
+  // Extract transaction hash from message
+  function extractTxHash(message) {
+    // Look for patterns like "0x..." or URLs with transaction hashes
+    const txPattern = /0x[a-fA-F0-9]{64}/g;
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const matches = {
+      hashes: message.match(txPattern) || [],
+      urls: message.match(urlPattern) || []
+    };
+    return matches;
+  }
+
+  // Format timestamp
+  function formatTimestamp(ts) {
+    try {
+      const date = new Date(ts);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    } catch (e) {
+      return ts;
+    }
+  }
+
+  // Parse JSON logs
+  function parseLogs(input) {
+    const logs = [];
+    const trimmed = input.trim();
+    
+    // First, try to parse as a single JSON array
+    try {
+      const arr = JSON.parse(trimmed);
+      if (Array.isArray(arr)) {
+        return arr.filter(log => log && typeof log === 'object');
+      }
+    } catch (e) {
+      // Not a JSON array, continue with line-by-line parsing
+    }
+    
+    // Parse as newline-delimited JSON (JSONL)
+    const lines = trimmed.split('\n').filter(line => line.trim());
+    
+    for (const line of lines) {
+      try {
+        const obj = JSON.parse(line.trim());
+        if (obj && typeof obj === 'object') {
+          logs.push(obj);
+        }
+      } catch (e) {
+        console.warn('Failed to parse line:', line.substring(0, 100), e);
+      }
+    }
+    
+    return logs;
+  }
+
+  // Render logs table
+  function renderLogs() {
+    const tbody = document.getElementById('logsTableBody');
+    tbody.innerHTML = '';
+
+    if (filteredLogs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center text-base-content/70">No logs match the current filters</td></tr>';
+      return;
+    }
+
+    filteredLogs.forEach((log, idx) => {
+      const row = document.createElement('tr');
+      const levelInfo = getLevelInfo(log.level);
+      const timestamp = log.timestamp || log.time || '';
+      const message = log.message || '';
+      const txInfo = extractTxHash(message);
+      
+      // Extract structured data from message (e.g., [metric=price], [time=2025-10-29T07:30:00Z])
+      let structuredData = {};
+      const bracketMatch = message.match(/\[([^\]]+)\]/g);
+      if (bracketMatch) {
+        bracketMatch.forEach(m => {
+          const content = m.slice(1, -1);
+          // Handle cases like "metric=price" or "time=2025-10-29T07:30:00Z" or "value:ge=0"
+          const pairs = content.split(',').map(p => p.trim()).filter(p => p);
+          pairs.forEach(pair => {
+            // Handle both "key=value" and "key:ge=value" patterns
+            const colonIdx = pair.indexOf(':');
+            const eqIdx = pair.indexOf('=');
+            if (eqIdx > 0) {
+              let key, value;
+              if (colonIdx > 0 && colonIdx < eqIdx) {
+                // Pattern like "value:ge=0"
+                key = pair.substring(0, eqIdx).trim();
+                value = pair.substring(eqIdx + 1).trim();
+              } else {
+                // Pattern like "key=value"
+                key = pair.substring(0, eqIdx).trim();
+                value = pair.substring(eqIdx + 1).trim();
+              }
+              if (key && value) {
+                structuredData[key] = value;
+              }
+            }
+          });
+        });
+      }
+
+      // Build message with clickable transaction hashes
+      let formattedMessage = message;
+      txInfo.hashes.forEach(txHash => {
+        const shortHash = `${txHash.slice(0, 10)}...${txHash.slice(-6)}`;
+        const explorerUrl = `https://optimistic.etherscan.io/tx/${txHash}`;
+        formattedMessage = formattedMessage.replace(
+          txHash,
+          `<a href="${explorerUrl}" target="_blank" class="link link-primary font-mono">${shortHash}</a>`
+        );
+      });
+      
+      // Make URLs clickable (but avoid double-linking transaction hashes)
+      txInfo.urls.forEach(url => {
+        // Only make it clickable if it doesn't already contain a linked tx hash
+        if (!txInfo.hashes.some(hash => url.includes(hash))) {
+          formattedMessage = formattedMessage.replace(
+            url,
+            `<a href="${url}" target="_blank" class="link link-primary">${url}</a>`
+          );
+        }
+      });
+      
+      // Handle Etherscan URLs that might contain tx hashes
+      const etherscanPattern = /(https?:\/\/[^\s/]+\.etherscan\.io\/[^\s]+)/g;
+      const etherscanMatches = message.matchAll(etherscanPattern);
+      for (const match of etherscanMatches) {
+        const url = match[0];
+        if (!formattedMessage.includes(`href="${url}"`)) {
+          formattedMessage = formattedMessage.replace(
+            url,
+            `<a href="${url}" target="_blank" class="link link-primary font-mono">${url}</a>`
+          );
+        }
+      }
+
+      // Format JSON details
+      const details = { ...log };
+      delete details.message;
+      delete details.timestamp;
+      delete details.time;
+      const detailsJson = JSON.stringify(details, null, 2);
+
+      row.innerHTML = `
+        <td class="font-mono text-xs">${formatTimestamp(timestamp)}</td>
+        <td>
+          <span class="badge ${levelInfo.class}">${levelInfo.name}</span>
+        </td>
+        <td>
+          <div class="max-w-2xl">
+            <div class="whitespace-pre-wrap break-words">${formattedMessage}</div>
+            ${Object.keys(structuredData).length > 0 ? `
+              <div class="mt-2 flex flex-wrap gap-1">
+                ${Object.entries(structuredData).map(([k, v]) => 
+                  `<span class="badge badge-outline text-xs">${k}=${v}</span>`
+                ).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </td>
+        <td>
+          <div class="dropdown dropdown-left">
+            <label tabindex="0" class="btn btn-sm btn-ghost">Details</label>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-96 max-h-96 overflow-auto">
+              <li class="text-xs">
+                <pre class="whitespace-pre-wrap font-mono text-xs">${detailsJson}</pre>
+              </li>
+            </ul>
+          </div>
+        </td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+
+    updateStats();
+  }
+
+  // Update statistics
+  function updateStats() {
+    const stats = {
+      total: allLogs.length,
+      info: allLogs.filter(l => l.level === 20 || l.level === 21).length,
+      warning: allLogs.filter(l => l.level === 30).length,
+      error: allLogs.filter(l => l.level >= 40).length,
+      tx: allLogs.filter(l => {
+        const msg = (l.message || '').toLowerCase();
+        return msg.includes('tx/') || /0x[a-fA-F0-9]{64}/.test(msg);
+      }).length
+    };
+
+    document.getElementById('totalLogs').textContent = stats.total;
+    document.getElementById('infoCount').textContent = stats.info;
+    document.getElementById('warningCount').textContent = stats.warning;
+    document.getElementById('errorCount').textContent = stats.error;
+    document.getElementById('txCount').textContent = stats.tx;
+  }
+
+  // Apply filters
+  function applyFilters() {
+    filteredLogs = [...allLogs];
+
+    // Search filter
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    if (search) {
+      filteredLogs = filteredLogs.filter(log => 
+        (log.message || '').toLowerCase().includes(search) ||
+        JSON.stringify(log).toLowerCase().includes(search)
+      );
+    }
+
+    // Level filter
+    const level = document.getElementById('levelFilter').value;
+    if (level) {
+      filteredLogs = filteredLogs.filter(log => log.level === parseInt(level));
+    }
+
+    // Time range filter
+    const startTime = document.getElementById('startTime').value;
+    const endTime = document.getElementById('endTime').value;
+    if (startTime || endTime) {
+      filteredLogs = filteredLogs.filter(log => {
+        const logTime = log.timestamp || log.time;
+        if (!logTime) return true;
+        const logDate = new Date(logTime);
+        if (startTime && logDate < new Date(startTime)) return false;
+        if (endTime && logDate > new Date(endTime)) return false;
+        return true;
+      });
+    }
+
+    renderLogs();
+  }
+
+  // Load demo data
+  async function loadDemoLogs() {
+    try {
+      const response = await fetch('/static/data/sample_logs.json');
+      const demoLogs = await response.json();
+      const jsonString = demoLogs.map(log => JSON.stringify(log)).join('\n');
+      document.getElementById('logInput').value = jsonString;
+      document.getElementById('parseBtn').click();
+    } catch (e) {
+      console.error('Failed to load demo logs:', e);
+      alert('Failed to load demo data. Make sure sample_logs.json exists in /static/data/');
+    }
+  }
+
+  // Event listeners
+  document.getElementById('demoBtn').addEventListener('click', loadDemoLogs);
+  
+  document.getElementById('parseBtn').addEventListener('click', () => {
+    const input = document.getElementById('logInput').value;
+    if (!input.trim()) {
+      alert('Please paste or upload log entries');
+      return;
+    }
+
+    try {
+      allLogs = parseLogs(input);
+      allLogs.sort((a, b) => {
+        const tsA = new Date(a.timestamp || a.time || 0);
+        const tsB = new Date(b.timestamp || b.time || 0);
+        return tsB - tsA; // Newest first
+      });
+
+      filteredLogs = [...allLogs];
+      
+      // Show UI elements
+      document.getElementById('filtersCard').style.display = 'block';
+      document.getElementById('statsBar').style.display = 'flex';
+      document.getElementById('logsCard').style.display = 'block';
+      document.getElementById('emptyState').style.display = 'none';
+
+      renderLogs();
+    } catch (e) {
+      alert('Error parsing logs: ' + e.message);
+      console.error(e);
+    }
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('logInput').value = '';
+    allLogs = [];
+    filteredLogs = [];
+    document.getElementById('filtersCard').style.display = 'none';
+    document.getElementById('statsBar').style.display = 'none';
+    document.getElementById('logsCard').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('logsTableBody').innerHTML = '';
+  });
+
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      document.getElementById('logInput').value = event.target.result;
+      document.getElementById('parseBtn').click();
+    };
+    reader.readAsText(file);
+  });
+
+  // Filter event listeners
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+  document.getElementById('levelFilter').addEventListener('change', applyFilters);
+  document.getElementById('startTime').addEventListener('change', applyFilters);
+  document.getElementById('endTime').addEventListener('change', applyFilters);
+
+  // Saved queries functionality
+  function loadSavedQueries() {
+    const saved = localStorage.getItem('phoenix:savedQueries');
+    const queries = saved ? JSON.parse(saved) : [];
+    const select = document.getElementById('savedQueries');
+    select.innerHTML = '<option value="">Saved Queries...</option>';
+    queries.forEach((q, idx) => {
+      const option = document.createElement('option');
+      option.value = idx;
+      option.textContent = q.name;
+      select.appendChild(option);
+    });
+  }
+
+  function saveCurrentQuery() {
+    const name = prompt('Name for this query:');
+    if (!name) return;
+    
+    const query = {
+      name,
+      search: document.getElementById('searchInput').value,
+      level: document.getElementById('levelFilter').value,
+      startTime: document.getElementById('startTime').value,
+      endTime: document.getElementById('endTime').value,
+      timestamp: new Date().toISOString()
+    };
+
+    const saved = localStorage.getItem('phoenix:savedQueries');
+    const queries = saved ? JSON.parse(saved) : [];
+    queries.push(query);
+    localStorage.setItem('phoenix:savedQueries', JSON.stringify(queries));
+    loadSavedQueries();
+  }
+
+  function loadQuery(idx) {
+    const saved = localStorage.getItem('phoenix:savedQueries');
+    const queries = saved ? JSON.parse(saved) : [];
+    if (!queries[idx]) return;
+    
+    const q = queries[idx];
+    document.getElementById('searchInput').value = q.search || '';
+    document.getElementById('levelFilter').value = q.level || '';
+    document.getElementById('startTime').value = q.startTime || '';
+    document.getElementById('endTime').value = q.endTime || '';
+    applyFilters();
+  }
+
+  document.getElementById('saveQueryBtn').addEventListener('click', saveCurrentQuery);
+  document.getElementById('savedQueries').addEventListener('change', (e) => {
+    if (e.target.value) loadQuery(parseInt(e.target.value));
+  });
+  loadSavedQueries();
+
+  // Export functionality
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const dataStr = JSON.stringify(filteredLogs, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `logs_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('exportCsvBtn').addEventListener('click', () => {
+    const headers = ['Timestamp', 'Level', 'Message', 'Full JSON'];
+    const rows = filteredLogs.map(log => [
+      log.timestamp || log.time || '',
+      log.level || '',
+      (log.message || '').replace(/"/g, '""'),
+      JSON.stringify(log).replace(/"/g, '""')
+    ]);
+    
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => r.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `logs_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+{% endblock %}

@@ -2,8 +2,18 @@
 
 FastAPI + SSE + HTMX + Tailwind/DaisyUI + Chart.js dashboard for real-time Ethereum bot metrics.
 
-## Quickstart (uv)
+📖 **New to this?** Check out [SHARE_WITH_BOSS.md](SHARE_WITH_BOSS.md) for a quick demo guide!
 
+## Quickstart
+
+### Easiest Way (Recommended)
+```bash
+python start.py
+```
+
+**What this does:** Automatically sets up dependencies, finds a free port, and starts the server. See [STARTUP_GUIDE.md](STARTUP_GUIDE.md) for all startup options.
+
+### Alternative (Using uv)
 ```bash
 uv run uvicorn app.main:app --reload --port 8000
 ```
