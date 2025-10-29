@@ -66,6 +66,13 @@ store = DataStore()
 eth_rt = None
 
 
+@app.get("/home", response_class=HTMLResponse)
+async def home(request: Request) -> HTMLResponse:
+    """Home page with feature overview / start menu."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("home.html", {"request": request, "version": version})
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     sample_mode = getattr(request.app.state, "sample_mode", False)
