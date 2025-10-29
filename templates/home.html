@@ -3,238 +3,287 @@
 {% block title %}BotScope - Start Menu{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 p-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="text-center mb-12">
-      <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-        BotScope
-      </h1>
-      <p class="text-2xl text-base-content/70 mb-2">Ethereum Bot Monitoring Dashboard</p>
-      <p class="text-base-content/60">Real-time monitoring, analytics, and debugging for your trading bots</p>
-    </div>
-
-    <!-- Feature Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      
-      <!-- Main Dashboard -->
-      <a href="/" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="card-title text-2xl">📊 Live Dashboard</h2>
-            <div class="badge badge-primary badge-lg">Real-Time</div>
-          </div>
-          <p class="text-base-content/70 mb-4">
-            Monitor your bots in real-time with live metrics, charts, and event streams.
-          </p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span class="badge badge-outline">Latency</span>
-            <span class="badge badge-outline">Success Rate</span>
-            <span class="badge badge-outline">Throughput</span>
-            <span class="badge badge-outline">Profit</span>
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-primary group-hover:btn-accent">
-              Open Dashboard →
-            </button>
-          </div>
+<div
+    class="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1
+                class="text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                BotScope
+            </h1>
+            <p class="text-2xl text-base-content/70 mb-2">Ethereum Bot
+                Monitoring Dashboard</p>
+            <p class="text-base-content/60">Real-time monitoring, analytics, and
+                debugging for your trading bots</p>
         </div>
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
-      </a>
 
-      <!-- Logs Viewer -->
-      <a href="/logs" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="card-title text-2xl">🔍 Logs Viewer</h2>
-            <div class="badge badge-accent badge-lg">New</div>
-          </div>
-          <p class="text-base-content/70 mb-4">
-            Advanced log analysis with smart filtering, search, and export capabilities.
-          </p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span class="badge badge-outline">Filter</span>
-            <span class="badge badge-outline">Search</span>
-            <span class="badge badge-outline">Export</span>
-            <span class="badge badge-outline">Save Queries</span>
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-accent group-hover:btn-primary">
-              View Logs →
-            </button>
-          </div>
-        </div>
-        <div class="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/0 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
-      </a>
+        <!-- Feature Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 
-      <!-- Daily Report -->
-      <a href="/report" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="card-title text-2xl">📈 Daily Report</h2>
-            <div class="badge badge-secondary badge-lg">Analytics</div>
-          </div>
-          <p class="text-base-content/70 mb-4">
-            Comprehensive daily summary with performance metrics and top bot analytics.
-          </p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span class="badge badge-outline">Summary</span>
-            <span class="badge badge-outline">Top Bots</span>
-            <span class="badge badge-outline">Statistics</span>
-            <span class="badge badge-outline">Trends</span>
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-secondary group-hover:btn-primary">
-              View Report →
-            </button>
-          </div>
-        </div>
-        <div class="absolute inset-0 bg-gradient-to-br from-secondary/0 via-secondary/0 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
-      </a>
-
-      <!-- Demo Mode -->
-      <a href="/demo" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="card-title text-2xl">🎬 Demo Mode</h2>
-            <div class="badge badge-info badge-lg">Sample</div>
-          </div>
-          <p class="text-base-content/70 mb-4">
-            Explore all features with realistic demo data - perfect for presentations.
-          </p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span class="badge badge-outline">TV Format</span>
-            <span class="badge badge-outline">Channels</span>
-            <span class="badge badge-outline">3D View</span>
-            <span class="badge badge-outline">Heatmaps</span>
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-info group-hover:btn-primary">
-              Launch Demo →
-            </button>
-          </div>
-        </div>
-        <div class="absolute inset-0 bg-gradient-to-br from-info/0 via-info/0 to-info/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
-      </a>
-
-      <!-- Quick Stats -->
-      <div class="card bg-gradient-to-br from-primary/20 to-secondary/20 shadow-xl glass-card">
-        <div class="card-body">
-          <h2 class="card-title text-2xl mb-4">⚡ Quick Access</h2>
-          <div class="stats stats-vertical shadow bg-base-100/80">
-            <div class="stat">
-              <div class="stat-title">Features</div>
-              <div class="stat-value text-primary">6+</div>
-              <div class="stat-desc">Complete tools</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title">Updates</div>
-              <div class="stat-value text-secondary">2s</div>
-              <div class="stat-desc">Real-time</div>
-            </div>
-            <div class="stat">
-              <div class="stat-title">Views</div>
-              <div class="stat-value text-accent">6</div>
-              <div class="stat-desc">Chart types</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- API & Health -->
-      <div class="card bg-base-100 shadow-xl glass-card">
-        <div class="card-body">
-          <h2 class="card-title text-2xl mb-4">🔧 Developer Tools</h2>
-          <div class="space-y-3">
-            <a href="/health" class="btn btn-outline btn-block justify-start">
-              <span class="mr-2">❤️</span>
-              Health Check
+            <!-- Main Dashboard -->
+            <a href="/"
+                class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-2xl">📊 Live Dashboard</h2>
+                        <div
+                            class="badge badge-primary badge-lg">Real-Time</div>
+                    </div>
+                    <p class="text-base-content/70 mb-4">
+                        Monitor your bots in real-time with live metrics,
+                        charts, and event streams.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="badge badge-outline">Latency</span>
+                        <span class="badge badge-outline">Success Rate</span>
+                        <span class="badge badge-outline">Throughput</span>
+                        <span class="badge badge-outline">Profit</span>
+                    </div>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-primary group-hover:btn-accent">
+                            Open Dashboard →
+                        </button>
+                    </div>
+                </div>
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
             </a>
-            <a href="/version" class="btn btn-outline btn-block justify-start">
-              <span class="mr-2">🔖</span>
-              Version Info
+
+            <!-- Logs Viewer -->
+            <a href="/logs"
+                class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-2xl">🔍 Logs Viewer</h2>
+                        <div class="badge badge-accent badge-lg">New</div>
+                    </div>
+                    <p class="text-base-content/70 mb-4">
+                        Advanced log analysis with smart filtering, search, and
+                        export capabilities.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="badge badge-outline">Filter</span>
+                        <span class="badge badge-outline">Search</span>
+                        <span class="badge badge-outline">Export</span>
+                        <span class="badge badge-outline">Save Queries</span>
+                    </div>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-accent group-hover:btn-primary">
+                            View Logs →
+                        </button>
+                    </div>
+                </div>
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-accent/0 via-accent/0 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
             </a>
-            <a href="/stream" class="btn btn-outline btn-block justify-start" target="_blank">
-              <span class="mr-2">📡</span>
-              SSE Stream (JSON)
+
+            <!-- Daily Report -->
+            <a href="/report"
+                class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-2xl">📈 Daily Report</h2>
+                        <div
+                            class="badge badge-secondary badge-lg">Analytics</div>
+                    </div>
+                    <p class="text-base-content/70 mb-4">
+                        Comprehensive daily summary with performance metrics and
+                        top bot analytics.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="badge badge-outline">Summary</span>
+                        <span class="badge badge-outline">Top Bots</span>
+                        <span class="badge badge-outline">Statistics</span>
+                        <span class="badge badge-outline">Trends</span>
+                    </div>
+                    <div class="card-actions justify-end">
+                        <button
+                            class="btn btn-secondary group-hover:btn-primary">
+                            View Report →
+                        </button>
+                    </div>
+                </div>
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-secondary/0 via-secondary/0 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
             </a>
-          </div>
+
+            <!-- Demo Mode -->
+            <a href="/demo"
+                class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 glass-card group">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-2xl">🎬 Demo Mode</h2>
+                        <div class="badge badge-info badge-lg">Sample</div>
+                    </div>
+                    <p class="text-base-content/70 mb-4">
+                        Explore all features with realistic demo data - perfect
+                        for presentations.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="badge badge-outline">TV Format</span>
+                        <span class="badge badge-outline">Channels</span>
+                        <span class="badge badge-outline">3D View</span>
+                        <span class="badge badge-outline">Heatmaps</span>
+                    </div>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-info group-hover:btn-primary">
+                            Launch Demo →
+                        </button>
+                    </div>
+                </div>
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-info/0 via-info/0 to-info/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none"></div>
+            </a>
+
+            <!-- Quick Stats -->
+            <div
+                class="card bg-gradient-to-br from-primary/20 to-secondary/20 shadow-xl glass-card">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">⚡ Quick Access</h2>
+                    <div class="stats stats-vertical shadow bg-base-100/80">
+                        <div class="stat">
+                            <div class="stat-title">Features</div>
+                            <div class="stat-value text-primary">6+</div>
+                            <div class="stat-desc">Complete tools</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Updates</div>
+                            <div class="stat-value text-secondary">2s</div>
+                            <div class="stat-desc">Real-time</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Views</div>
+                            <div class="stat-value text-accent">6</div>
+                            <div class="stat-desc">Chart types</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API & Health -->
+            <div class="card bg-base-100 shadow-xl glass-card">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">🔧 Developer Tools</h2>
+                    <div class="space-y-3 mb-4">
+                        <a href="/health"
+                            class="btn btn-outline btn-block justify-start">
+                            <span class="mr-2">❤️</span>
+                            Health Check
+                        </a>
+                        <a href="/version"
+                            class="btn btn-outline btn-block justify-start">
+                            <span class="mr-2">🔖</span>
+                            Version Info
+                        </a>
+                        <a href="/stream"
+                            class="btn btn-outline btn-block justify-start"
+                            target="_blank">
+                            <span class="mr-2">📡</span>
+                            SSE Stream (JSON)
+                        </a>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="mt-4">
+                        <h3 class="font-semibold mb-2">📡 Live Log API</h3>
+                        <p class="text-sm text-base-content/70 mb-2">
+                            POST logs to <code class="text-xs bg-base-200 px-1 rounded">/api/logs</code>
+                        </p>
+                        <p class="text-xs text-base-content/60">
+                            Send JSONL from your bots to update dashboard in real-time
+                        </p>
+                    </div>
+                </div>
+            </div>
+
         </div>
-      </div>
 
-    </div>
+        <!-- Feature Highlights -->
+        <div class="card bg-base-100 shadow-xl mt-8 glass-card">
+            <div class="card-body">
+                <h2 class="card-title text-3xl mb-6">✨ Key Features</h2>
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-    <!-- Feature Highlights -->
-    <div class="card bg-base-100 shadow-xl mt-8 glass-card">
-      <div class="card-body">
-        <h2 class="card-title text-3xl mb-6">✨ Key Features</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">📊</div>
-            <div>
-              <h3 class="font-semibold text-lg">Real-Time Metrics</h3>
-              <p class="text-sm text-base-content/70">Live latency, success rate, and throughput tracking</p>
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">📊</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Real-Time
+                                Metrics</h3>
+                            <p class="text-sm text-base-content/70">Live
+                                latency, success rate, and throughput
+                                tracking</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">📈</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Interactive
+                                Charts</h3>
+                            <p class="text-sm text-base-content/70">6 different
+                                views with zoom, pan, and moving averages</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">🔍</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Smart Log
+                                Analysis</h3>
+                            <p class="text-sm text-base-content/70">Filter,
+                                search, and export logs with saved queries</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">🔗</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Transaction
+                                Links</h3>
+                            <p class="text-sm text-base-content/70">Click any tx
+                                hash to open Etherscan verification</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">⚡</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">SSE Streaming</h3>
+                            <p class="text-sm text-base-content/70">No
+                                WebSockets needed - efficient server-sent
+                                events</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">💾</div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Export &
+                                Share</h3>
+                            <p class="text-sm text-base-content/70">Export logs
+                                as JSON or CSV for team analysis</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">📈</div>
-            <div>
-              <h3 class="font-semibold text-lg">Interactive Charts</h3>
-              <p class="text-sm text-base-content/70">6 different views with zoom, pan, and moving averages</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">🔍</div>
-            <div>
-              <h3 class="font-semibold text-lg">Smart Log Analysis</h3>
-              <p class="text-sm text-base-content/70">Filter, search, and export logs with saved queries</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">🔗</div>
-            <div>
-              <h3 class="font-semibold text-lg">Transaction Links</h3>
-              <p class="text-sm text-base-content/70">Click any tx hash to open Etherscan verification</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">⚡</div>
-            <div>
-              <h3 class="font-semibold text-lg">SSE Streaming</h3>
-              <p class="text-sm text-base-content/70">No WebSockets needed - efficient server-sent events</p>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3">
-            <div class="text-3xl">💾</div>
-            <div>
-              <h3 class="font-semibold text-lg">Export & Share</h3>
-              <p class="text-sm text-base-content/70">Export logs as JSON or CSV for team analysis</p>
-            </div>
-          </div>
-
         </div>
-      </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="text-center mt-8 text-base-content/60">
-      <p>BotScope Dashboard v{{ version }}</p>
-      <p class="text-sm mt-2">Built with FastAPI, HTMX, SSE, and Chart.js</p>
-      <div class="mt-4">
-        <a href="/" class="link link-primary mr-4">Dashboard</a>
-        <a href="/logs" class="link link-primary mr-4">Logs</a>
-        <a href="/report" class="link link-primary mr-4">Report</a>
-        <a href="/demo" class="link link-primary">Demo</a>
-      </div>
-    </div>
+        <!-- Footer -->
+        <div class="text-center mt-8 text-base-content/60">
+            <p>BotScope Dashboard v{{ version }}</p>
+            <p class="text-sm mt-2">Built with FastAPI, HTMX, SSE, and
+                Chart.js</p>
+            <div class="mt-4">
+                <a href="/" class="link link-primary mr-4">Dashboard</a>
+                <a href="/logs" class="link link-primary mr-4">Logs</a>
+                <a href="/report" class="link link-primary mr-4">Report</a>
+                <a href="/demo" class="link link-primary">Demo</a>
+            </div>
+        </div>
 
-  </div>
+    </div>
 </div>
 
 <style>

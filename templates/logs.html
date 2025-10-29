@@ -4,177 +4,177 @@
 
 {% block content %}
 <div class="min-h-screen bg-base-200 p-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="mb-6 flex justify-between items-start">
-             <div>
-                 <h1 class="text-3xl font-bold mb-2">Logs Viewer</h1>
-                 <p class="text-base-content/70">Paste or upload JSON log entries
-                     to view them in a structured format</p>
-             </div>
-             <div class="flex gap-2">
-                 <a href="/home" class="btn btn-ghost">🏠 Home</a>
-                 <a href="/" class="btn btn-outline">← Dashboard</a>
-             </div>
-        </div>
-
-        <!-- Input Section -->
-        <div class="card bg-base-100 shadow-lg mb-6">
-            <div class="card-body">
-                <h2 class="card-title mb-4">Import Logs</h2>
-                <div class="flex gap-4 flex-col md:flex-row">
-                    <div class="flex-1">
-                        <label class="label">
-                            <span class="label-text">Paste JSON Log
-                                Entries</span>
-                        </label>
-                        <textarea
-                            id="logInput"
-                            class="textarea textarea-bordered w-full h-48 font-mono text-sm"
-                            placeholder='Paste JSON log entries here, one per line or as a JSON array...&#10;&#10;Example:&#10;{"level":20,"timestamp":"2025-10-29T07:30:00Z","message":"price - Started"}&#10;{"level":30,"timestamp":"2025-10-29T07:30:00Z","message":"Request was rate-limited..."}'></textarea>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <button id="parseBtn" class="btn btn-primary">Parse &
-                            Display</button>
-                        <button id="demoBtn" class="btn btn-accent">🎬 Load
-                            Demo</button>
-                        <button id="clearBtn"
-                            class="btn btn-secondary">Clear</button>
-                        <label class="btn btn-outline">
-                            📁 Upload File
-                            <input type="file" id="fileInput"
-                                accept=".json,.jsonl,.txt" class="hidden" />
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="card bg-base-100 shadow-lg mb-6" id="filtersCard"
-            style="display: none;">
-            <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="card-title">Filters</h2>
-                    <div class="flex gap-2">
-                        <button id="saveQueryBtn"
-                            class="btn btn-sm btn-outline">💾 Save
-                            Query</button>
-                        <select id="savedQueries"
-                            class="select select-bordered select-sm">
-                            <option value>Saved Queries...</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="label">
-                            <span class="label-text">Search</span>
-                        </label>
-                        <input type="text" id="searchInput"
-                            placeholder="Search in messages..."
-                            class="input input-bordered w-full" />
-                    </div>
-                    <div>
-                        <label class="label">
-                            <span class="label-text">Log Level</span>
-                        </label>
-                        <select id="levelFilter"
-                            class="select select-bordered w-full">
-                            <option value>All Levels</option>
-                            <option value="10">DEBUG (10)</option>
-                            <option value="20">INFO (20)</option>
-                            <option value="21">INFO+ (21)</option>
-                            <option value="30">WARNING (30)</option>
-                            <option value="40">ERROR (40)</option>
-                            <option value="50">CRITICAL (50)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="label">
-                            <span class="label-text">Time Range</span>
-                        </label>
-                        <input type="datetime-local" id="startTime"
-                            class="input input-bordered w-full" />
-                    </div>
-                    <div>
-                        <label class="label">
-                            <span class="label-text">&nbsp;</span>
-                        </label>
-                        <input type="datetime-local" id="endTime"
-                            class="input input-bordered w-full" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats stats-horizontal shadow-lg mb-6 w-full" id="statsBar"
-            style="display: none;">
-            <div class="stat">
-                <div class="stat-title">Total Logs</div>
-                <div class="stat-value" id="totalLogs">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-title">INFO</div>
-                <div class="stat-value text-blue-400" id="infoCount">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-title">WARNING</div>
-                <div class="stat-value text-yellow-400"
-                    id="warningCount">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-title">ERROR</div>
-                <div class="stat-value text-red-400" id="errorCount">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-title">Transactions</div>
-                <div class="stat-value text-green-400" id="txCount">0</div>
-            </div>
-        </div>
-
-        <!-- Logs Table -->
-        <div class="card bg-base-100 shadow-lg" id="logsCard"
-            style="display: none;">
-            <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="card-title">Log Entries</h2>
-                    <div class="flex gap-2">
-                        <button id="exportBtn" class="btn btn-sm btn-outline">📥
-                            Export JSON</button>
-                        <button id="exportCsvBtn"
-                            class="btn btn-sm btn-outline">📥 Export
-                            CSV</button>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Level</th>
-                                <th>Message</th>
-                                <th>Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logsTableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="card bg-base-100 shadow-lg">
-            <div class="card-body text-center">
-                <div class="text-6xl mb-4">📋</div>
-                <h2 class="text-2xl font-bold mb-2">No Logs Loaded</h2>
-                <p class="text-base-content/70">Paste or upload JSON log entries
-                    to get started</p>
-            </div>
-        </div>
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-start">
+      <div>
+        <h1 class="text-3xl font-bold mb-2">Logs Viewer</h1>
+        <p class="text-base-content/70">Paste or upload JSON log entries
+          to view them in a structured format</p>
+      </div>
+      <div class="flex gap-2">
+        <a href="/home" class="btn btn-ghost">🏠 Home</a>
+        <a href="/" class="btn btn-outline">← Dashboard</a>
+      </div>
     </div>
+
+    <!-- Input Section -->
+    <div class="card bg-base-100 shadow-lg mb-6">
+      <div class="card-body">
+        <h2 class="card-title mb-4">Import Logs</h2>
+        <div class="flex gap-4 flex-col md:flex-row">
+          <div class="flex-1">
+            <label class="label">
+              <span class="label-text">Paste JSON Log
+                Entries</span>
+            </label>
+            <textarea
+              id="logInput"
+              class="textarea textarea-bordered w-full h-48 font-mono text-sm"
+              placeholder='Paste JSON log entries here, one per line or as a JSON array...&#10;&#10;Example:&#10;{"level":20,"timestamp":"2025-10-29T07:30:00Z","message":"price - Started"}&#10;{"level":30,"timestamp":"2025-10-29T07:30:00Z","message":"Request was rate-limited..."}'></textarea>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button id="parseBtn" class="btn btn-primary">Parse &
+              Display</button>
+            <button id="demoBtn" class="btn btn-accent">🎬 Load
+              Demo</button>
+            <button id="clearBtn"
+              class="btn btn-secondary">Clear</button>
+            <label class="btn btn-outline">
+              📁 Upload File
+              <input type="file" id="fileInput"
+                accept=".json,.jsonl,.txt" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card bg-base-100 shadow-lg mb-6" id="filtersCard"
+      style="display: none;">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="card-title">Filters</h2>
+          <div class="flex gap-2">
+            <button id="saveQueryBtn"
+              class="btn btn-sm btn-outline">💾 Save
+              Query</button>
+            <select id="savedQueries"
+              class="select select-bordered select-sm">
+              <option value>Saved Queries...</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="label">
+              <span class="label-text">Search</span>
+            </label>
+            <input type="text" id="searchInput"
+              placeholder="Search in messages..."
+              class="input input-bordered w-full" />
+          </div>
+          <div>
+            <label class="label">
+              <span class="label-text">Log Level</span>
+            </label>
+            <select id="levelFilter"
+              class="select select-bordered w-full">
+              <option value>All Levels</option>
+              <option value="10">DEBUG (10)</option>
+              <option value="20">INFO (20)</option>
+              <option value="21">INFO+ (21)</option>
+              <option value="30">WARNING (30)</option>
+              <option value="40">ERROR (40)</option>
+              <option value="50">CRITICAL (50)</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">
+              <span class="label-text">Time Range</span>
+            </label>
+            <input type="datetime-local" id="startTime"
+              class="input input-bordered w-full" />
+          </div>
+          <div>
+            <label class="label">
+              <span class="label-text">&nbsp;</span>
+            </label>
+            <input type="datetime-local" id="endTime"
+              class="input input-bordered w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats stats-horizontal shadow-lg mb-6 w-full" id="statsBar"
+      style="display: none;">
+      <div class="stat">
+        <div class="stat-title">Total Logs</div>
+        <div class="stat-value" id="totalLogs">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">INFO</div>
+        <div class="stat-value text-blue-400" id="infoCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">WARNING</div>
+        <div class="stat-value text-yellow-400"
+          id="warningCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">ERROR</div>
+        <div class="stat-value text-red-400" id="errorCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Transactions</div>
+        <div class="stat-value text-green-400" id="txCount">0</div>
+      </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="card bg-base-100 shadow-lg" id="logsCard"
+      style="display: none;">
+      <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="card-title">Log Entries</h2>
+          <div class="flex gap-2">
+            <button id="exportBtn" class="btn btn-sm btn-outline">📥
+              Export JSON</button>
+            <button id="exportCsvBtn"
+              class="btn btn-sm btn-outline">📥 Export
+              CSV</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Level</th>
+                <th>Message</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="card bg-base-100 shadow-lg">
+      <div class="card-body text-center">
+        <div class="text-6xl mb-4">📋</div>
+        <h2 class="text-2xl font-bold mb-2">No Logs Loaded</h2>
+        <p class="text-base-content/70">Paste or upload JSON log entries
+          to get started</p>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

@@ -4,19 +4,19 @@
 <!-- KPI Cards -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
   <div
-    class="stat bg-base-100 shadow rounded-box border border-primary/30 hover:border-primary transition">
+    class="stat glass-card shadow-xl rounded-box border border-primary/30 hover:border-primary transition-all">
     <div class="stat-title">Avg Latency</div>
     <div class="stat-value">{{ kpis.avg_latency_ms }}ms</div>
     <div class="stat-desc">Last 60s</div>
   </div>
   <div
-    class="stat bg-base-100 shadow rounded-box border border-secondary/30 hover:border-secondary transition">
+    class="stat glass-card shadow-xl rounded-box border border-secondary/30 hover:border-secondary transition-all">
     <div class="stat-title">Success Rate</div>
     <div class="stat-value">{{ kpis.success_rate_pct }}%</div>
     <div class="stat-desc">Last 60s</div>
   </div>
   <div
-    class="stat bg-base-100 shadow rounded-box border border-accent/30 hover:border-accent transition">
+    class="stat glass-card shadow-xl rounded-box border border-accent/30 hover:border-accent transition-all">
     <div class="stat-title">Throughput</div>
     <div class="stat-value">{{ kpis.throughput_1m }}/min</div>
     <div class="stat-desc">Events</div>

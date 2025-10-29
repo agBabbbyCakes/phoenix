@@ -430,6 +430,95 @@ def _shorten_tx_hash(tx: str) -> str:
     return f"{tx[:10]}...{tx[-6:]}"
 
 
+def parse_bot_log_to_event(log_obj: dict) -> MetricsEvent | None:
+    """Parse bot log JSON and extract metrics to create a MetricsEvent.
+    
+    Extracts:
+    - Timestamp from log
+    - Transaction hashes from messages
+    - Latency from timing messages (e.g., "10.560s")
+    - Status from log level
+    - Bot name from message patterns
+    - Fees/profit info if available
+    """
+    import re
+    
+    # Parse timestamp
+    if isinstance(log_obj.get("timestamp"), str):
+        ts = datetime.fromisoformat(log_obj["timestamp"].replace("Z", "+00:00"))
+    elif isinstance(log_obj.get("time"), str):
+        ts = datetime.fromisoformat(log_obj["time"].replace("Z", "+00:00"))
+    else:
+        ts = datetime.now(timezone.utc)
+    
+    message = str(log_obj.get("message", ""))
+    level = log_obj.get("level", 20)
+    
+    # Extract transaction hash from message
+    tx_hash = ""
+    tx_pattern = r'0x[a-fA-F0-9]{64}'
+    tx_matches = re.findall(tx_pattern, message)
+    if tx_matches:
+        tx_hash = _shorten_tx_hash(tx_matches[-1])  # Use last match (most recent)
+    
+    # Extract latency from timing messages (e.g., "10.560s" or "28.330s")
+    latency_ms = 0
+    latency_pattern = r'(\d+\.?\d*)\s*s\s*\('
+    latency_match = re.search(latency_pattern, message)
+    if latency_match:
+        latency_seconds = float(latency_match.group(1))
+        latency_ms = int(latency_seconds * 1000)
+    
+    # Extract bot name from message patterns
+    bot_name = "bot"
+    if "price[" in message.lower():
+        bot_name = "price-bot"
+    elif "rsi[" in message.lower():
+        bot_name = "rsi-bot"
+    elif "trade" in message.lower() or "perform_trade" in message.lower():
+        bot_name = "trading-bot"
+    elif "amount_to_sell" in message.lower():
+        bot_name = "strategy-bot"
+    
+    # Determine status from level and message
+    status = "ok"
+    error = None
+    if level >= 40:
+        status = "critical"
+        error = message[:100]  # First 100 chars
+    elif level == 30:
+        status = "warning"
+        if "rate-limited" in message.lower():
+            error = "Rate limited"
+    elif level == 20:
+        status = "ok"
+    
+    # Extract fees/profit if mentioned
+    profit = None
+    fee_pattern = r'total fees paid\s*=\s*(\d+)'
+    fee_match = re.search(fee_pattern, message)
+    if fee_match:
+        # Convert fees to a small negative profit impact (for visualization)
+        fees = int(fee_match.group(1))
+        # Assume fees are in wei, convert to ETH and make negative
+        profit = -float(fees) / 1e18 if fees > 0 else None
+    
+    # Only create event if we have meaningful data
+    if tx_hash or latency_ms > 0 or "Confirmed" in message or "Submitted" in message:
+        return MetricsEvent(
+            timestamp=ts,
+            bot_name=bot_name,
+            latency_ms=latency_ms,
+            success_rate=100.0 if status == "ok" else 0.0,
+            tx_hash=tx_hash,
+            error=error,
+            status=status,
+            profit=profit,
+        )
+    
+    return None
+
+
 def parse_silverback_json(obj: dict) -> MetricsEvent:
     # Timestamp
     if isinstance(obj.get("timestamp"), str):

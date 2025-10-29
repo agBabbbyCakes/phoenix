@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 import json, os
 
 from .sse import SSEBroker, client_event_stream
-from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast
+from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
 
 # Optional import for Ethereum realtime feed (only if src directory exists)
 try:
@@ -183,4 +183,82 @@ def version():
 async def logs_viewer(request: Request) -> HTMLResponse:
     """Logs viewer page for displaying JSON log entries."""
     return templates.TemplateResponse("logs.html", {"request": request})
+
+
+@app.post("/api/logs")
+async def receive_bot_logs(request: Request) -> JSONResponse:
+    """API endpoint to receive live JSON log data from bots.
+    
+    Accepts JSONL (newline-delimited JSON) in request body.
+    Extracts metrics and updates dashboard in real-time.
+    """
+    try:
+        body = await request.body()
+        logs_text = body.decode('utf-8')
+        
+        # Parse JSONL (newline-delimited JSON) or JSON array
+        logs = []
+        try:
+            # Try as JSON array first
+            logs = json.loads(logs_text)
+            if not isinstance(logs, list):
+                logs = []
+        except json.JSONDecodeError:
+            # Parse as JSONL (one JSON per line)
+            for line in logs_text.strip().split('\n'):
+                if not line.strip():
+                    continue
+                try:
+                    log_obj = json.loads(line)
+                    logs.append(log_obj)
+                except json.JSONDecodeError:
+                    continue
+        
+        # Process each log and try to extract metrics
+        metrics_created = 0
+        for log_obj in logs:
+            if not isinstance(log_obj, dict):
+                continue
+            # Try to parse as a metrics event if it has the right structure
+            try:
+                event = parse_bot_log_to_event(log_obj)
+                if event:
+                    store.add(event)
+                    metrics_created += 1
+            except Exception:
+                # If parsing fails, just skip it, don't fail the request
+                pass
+        
+        # Trigger a metrics update broadcast if we created metrics
+        if metrics_created > 0:
+            kpis = store.kpis()
+            labels, values = store.latency_series()
+            thr_labels, thr_values = store.throughput_series()
+            prof_labels, prof_values = store.profit_series()
+            heat = store.heatmap_matrix()
+            
+            def render_html(name: str, context: dict) -> str:
+                template = templates.env.get_template(name)
+                return template.render(**context)
+            
+            html = render_html(
+                "partials/metrics.html",
+                {
+                    "kpis": kpis,
+                    "latency_series": list(zip(labels, values)),
+                    "throughput_series": list(zip(thr_labels, thr_values)),
+                    "profit_series": list(zip(prof_labels, prof_values)),
+                    "heatmap": heat,
+                    "last_events": store.last_events(25),
+                }
+            )
+            await broker.publish(html)
+        
+        return JSONResponse({
+            "status": "success",
+            "logs_received": len(logs),
+            "metrics_created": metrics_created
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
 

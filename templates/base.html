@@ -87,14 +87,49 @@
         
         .table {
           color: var(--text-primary);
+          background: rgba(26, 26, 30, 0.5) !important;
+          backdrop-filter: blur(10px);
         }
         
         .table thead {
           color: var(--text-secondary);
+          background: rgba(0, 0, 0, 0.3) !important;
         }
         
         .badge {
           color: var(--text-primary);
+          backdrop-filter: blur(10px);
+        }
+        
+        /* Glass buttons */
+        .btn {
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          background: rgba(26, 26, 30, 0.8) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn:hover {
+          background: rgba(0, 191, 255, 0.3) !important;
+          border-color: rgba(0, 191, 255, 0.5);
+          box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        }
+        
+        /* Glass inputs */
+        .input,
+        .select,
+        .textarea {
+          background: rgba(26, 26, 30, 0.6) !important;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input:focus,
+        .select:focus,
+        .textarea:focus {
+          border-color: rgba(0, 191, 255, 0.5);
+          box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
         }
         
         /* Dashboard Container - Fixed Frame */
@@ -551,10 +586,14 @@
           font-family: 'Courier New', monospace;
         }
         
-        .glass-card {
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          backdrop-filter: blur(20px);
+        /* Glass morphism effects - applied everywhere */
+        .glass-card,
+        .card,
+        .stat {
+          background: rgba(26, 26, 30, 0.7) !important;
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           box-shadow: 
             0 8px 32px rgba(0, 0, 0, 0.6),
             inset 0 1px 0 rgba(0, 191, 255, 0.1);
@@ -562,7 +601,9 @@
           overflow: hidden;
         }
         
-        .glass-card::before {
+        .glass-card::before,
+        .card::before,
+        .stat::before {
           content: '';
           position: absolute;
           top: 0;
@@ -574,20 +615,33 @@
             transparent 100%);
           pointer-events: none;
           opacity: 0.5;
+          z-index: 0;
         }
         
-        .glass-card:hover {
-          border-color: var(--primary);
+        .glass-card:hover,
+        .card:hover,
+        .stat:hover {
+          border-color: rgba(0, 191, 255, 0.5);
           box-shadow: 
             0 12px 48px rgba(0, 0, 0, 0.8),
             inset 0 1px 0 rgba(0, 191, 255, 0.2),
             0 0 60px rgba(0, 191, 255, 0.2);
+          transform: translateY(-2px);
+          transition: all 0.3s ease;
         }
         
+        .glass-card > *,
+        .card > * {
+          position: relative;
+          z-index: 1;
+        }
+        
+        /* Glass table */
         .glass-event-table {
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          backdrop-filter: blur(16px);
+          background: rgba(26, 26, 30, 0.7) !important;
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .neon-scroll::-webkit-scrollbar {
