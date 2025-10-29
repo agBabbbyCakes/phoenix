@@ -16,7 +16,21 @@ import json, os
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast
-from src.realtime.eth_feed import EthRealtime
+
+# Optional import for Ethereum realtime feed (only if src directory exists)
+try:
+    import sys
+    from pathlib import Path
+    # Add project root to path if src exists
+    project_root = Path(__file__).resolve().parent.parent
+    src_path = project_root / "src"
+    if src_path.exists() and str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from src.realtime.eth_feed import EthRealtime
+    ETH_REALTIME_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    EthRealtime = None
+    ETH_REALTIME_AVAILABLE = False
 
 load_dotenv()
 

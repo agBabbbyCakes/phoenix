@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY app /app/app
 COPY templates /app/templates
 COPY static /app/static
+# Copy src directory if it exists (optional for Ethereum realtime)
+# Note: This will fail silently if src doesn't exist, but the import is optional
+COPY src /app/src
 
 EXPOSE 8000
 
