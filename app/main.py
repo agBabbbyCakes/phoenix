@@ -22,9 +22,9 @@ try:
     import sys
     from pathlib import Path
     # Add project root to path if src exists
+    # This works both locally and in Render/Docker deployments
     project_root = Path(__file__).resolve().parent.parent
-    src_path = project_root / "src"
-    if src_path.exists() and str(project_root) not in sys.path:
+    if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
     from src.realtime.eth_feed import EthRealtime
     ETH_REALTIME_AVAILABLE = True
