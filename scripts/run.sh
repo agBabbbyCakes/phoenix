@@ -33,7 +33,13 @@ fi
 PORT="${PORT:-8000}"
 APP_MODULE="app.main:app"
 
-echo "Starting server at http://localhost:${PORT}"
-exec uvicorn "$APP_MODULE" --reload --port "$PORT"
+HOST="0.0.0.0"
+RELOAD_FLAG=""
+if [[ "${ENV:-}" == "development" || "${ENV:-}" == "dev" ]]; then
+  RELOAD_FLAG="--reload"
+fi
+
+echo "Starting server at http://${HOST}:${PORT}"
+exec uvicorn "$APP_MODULE" --host "$HOST" --port "$PORT" ${RELOAD_FLAG}
 
 
