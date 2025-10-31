@@ -1,0 +1,10 @@
+# Netlify configuration for Silverback marketing site
+
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

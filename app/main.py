@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -75,6 +76,9 @@ async def home(request: Request) -> HTMLResponse:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
+    # Optional clean UI: redirect to /home when CLEAN_UI is enabled
+    if os.getenv("CLEAN_UI", "").lower() in {"1", "true", "yes"}:
+        return RedirectResponse(url="/home", status_code=307)
     sample_mode = getattr(request.app.state, "sample_mode", False)
     # Build initial metrics HTML so charts render before first SSE update
     kpis = store.kpis()
@@ -144,6 +148,11 @@ async def _on_startup() -> None:
     # Decide between sample mode (mock) and real tailing
     import os
     force_sample = os.getenv("FORCE_SAMPLE", "").lower() in {"1", "true", "yes"}
+    clean_ui = os.getenv("CLEAN_UI", "").lower() in {"1", "true", "yes"}
+    if clean_ui:
+        # Do not start any publishers; present a clean UI by default
+        app.state.sample_mode = False
+        return
     log_path = os.getenv("SILVERBACK_LOG_PATH")
     if log_path and not force_sample:
         app.state.publisher_task = asyncio.create_task(

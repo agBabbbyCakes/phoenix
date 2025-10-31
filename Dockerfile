@@ -19,7 +19,8 @@ COPY src /app/src
 
 EXPOSE 8000
 
-ENV FORCE_SAMPLE=1
+ENV FORCE_SAMPLE=1 \
+    CLEAN_UI=1
 
 # Use shell-form to allow env var expansion for PORT (required by platforms like Railway)
 CMD sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}'

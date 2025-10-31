@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Silverback - Bot Recorder & Controller Client</title>
+        <meta name="description"
+            content="Record, monitor, and control your Ethereum bots with complete local control. Simple. Private. Powerful.">
+
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --gray-900: #111827;
+            --gray-800: #1f2937;
+            --gray-700: #374151;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .section-padding {
+            padding: 5rem 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .section-padding {
+                padding: 6rem 2rem;
+            }
+        }
+        
+        .feature-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .code-block {
+            background: var(--gray-900);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .download-button {
+            background: var(--primary);
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+        
+        .download-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .download-button:active {
+            transform: translateY(0);
+        }
+    </style>
+    </head>
+    <body class="bg-white">
+        <!-- Navigation -->
+        <nav
+            class="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-opacity-90">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl font-bold text-gray-900">🦍
+                            Silverback</span>
+                    </div>
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#features"
+                            class="text-gray-700 hover:text-gray-900 transition">Features</a>
+                        <a href="#how-it-works"
+                            class="text-gray-700 hover:text-gray-900 transition">How
+                            It Works</a>
+                        <a href="#download"
+                            class="text-gray-700 hover:text-gray-900 transition">Download</a>
+                        <a href="https://github.com/agBabbbyCakes/phoenix"
+                            target="_blank" rel="noopener"
+                            class="text-gray-700 hover:text-gray-900 transition">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white">
+            <div class="max-w-6xl mx-auto section-padding text-center">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Record. Monitor. Control.
+                </h1>
+                <p
+                    class="text-xl md:text-2xl mb-4 text-gray-100 max-w-3xl mx-auto">
+                    Silverback recorder and bot controller client
+                </p>
+                <p class="text-lg mb-10 text-gray-200 max-w-2xl mx-auto">
+                    Track your Ethereum bots with complete local control. Your
+                    data stays on your machine. No cloud. No tracking. Just
+                    control.
+                </p>
+                <div
+                    class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="#download"
+                        class="download-button text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg">
+                        Download Now
+                    </a>
+                    <a href="#how-it-works"
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-8 py-4 rounded-lg font-semibold text-lg transition">
+                        Learn More
+                    </a>
+                </div>
+                <p class="mt-6 text-sm text-gray-300">Available for macOS,
+                    Windows, and Linux</p>
+            </div>
+        </section>
+
+        <!-- Value Propositions -->
+        <section id="features" class="section-padding bg-gray-50">
+            <div class="max-w-6xl mx-auto">
+                <h2
+                    class="text-4xl font-bold text-center mb-4 text-gray-900">Why
+                    Silverback?</h2>
+                <p
+                    class="text-xl text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                    Built for developers who want control without complexity
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="feature-card bg-white p-8 rounded-lg shadow-md">
+                        <div class="text-4xl mb-4">🔒</div>
+                        <h3 class="text-2xl font-bold mb-3 text-gray-900">Local
+                            Control</h3>
+                        <p class="text-gray-700">
+                            Everything runs on your machine. Your bot data, your
+                            metrics, your logs—nothing leaves your computer.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card bg-white p-8 rounded-lg shadow-md">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3
+                            class="text-2xl font-bold mb-3 text-gray-900">Real-Time
+                            Monitoring</h3>
+                        <p class="text-gray-700">
+                            Watch your bots in real-time with live dashboards,
+                            latency tracking, and instant alerts.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card bg-white p-8 rounded-lg shadow-md">
+                        <div class="text-4xl mb-4">🛠️</div>
+                        <h3 class="text-2xl font-bold mb-3 text-gray-900">Simple
+                            & Powerful</h3>
+                        <p class="text-gray-700">
+                            Clean interface that doesn't get in your way. Record
+                            actions, replay sequences, analyze performance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works" class="section-padding bg-white">
+            <div class="max-w-6xl mx-auto">
+                <h2
+                    class="text-4xl font-bold text-center mb-4 text-gray-900">How
+                    It Works</h2>
+                <p
+                    class="text-xl text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                    Get up and running in minutes
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center mb-12">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">1.
+                            Download & Install</h3>
+                        <p class="text-gray-700 mb-4">
+                            Download the desktop app for your platform. No
+                            account needed. No signup. Just run it.
+                        </p>
+
+                        <h3
+                            class="text-2xl font-bold mb-4 text-gray-900 mt-8">2.
+                            Connect Your Bots</h3>
+                        <p class="text-gray-700 mb-4">
+                            Point Silverback to your bot logs or connect via
+                            API. It starts monitoring immediately.
+                        </p>
+
+                        <h3
+                            class="text-2xl font-bold mb-4 text-gray-900 mt-8">3.
+                            Monitor & Control</h3>
+                        <p class="text-gray-700">
+                            View real-time dashboards, analyze performance, and
+                            control your bot fleet—all from one interface.
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-100 rounded-lg p-6">
+                        <div class="code-block text-green-400">
+                            <div class="mb-2"># Example: Start monitoring</div>
+                            <div class="mb-2 text-gray-400">$ silverback
+                                start</div>
+                            <div class="mb-2 text-gray-400">✓ Server running on
+                                localhost:8000</div>
+                            <div class="mb-2 text-gray-400">✓ Dashboard
+                                available</div>
+                            <div class="text-green-400">→ Open
+                                http://127.0.0.1:8000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screenshot/Demo Section -->
+        <section class="section-padding bg-gray-900 text-white">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-4">See It In Action</h2>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                    Real-time dashboards, comprehensive metrics, and intuitive
+                    controls
+                </p>
+
+                <!-- Placeholder for screenshot/demo -->
+                <div class="bg-gray-800 rounded-lg p-12 border border-gray-700">
+                    <p class="text-gray-400 text-lg">📊 Dashboard Screenshot
+                        Coming Soon</p>
+                    <p class="text-gray-500 text-sm mt-2">GIF demo of the
+                        dashboard in action</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust & Transparency -->
+        <section class="section-padding bg-gray-50">
+            <div class="max-w-6xl mx-auto">
+                <h2
+                    class="text-4xl font-bold text-center mb-4 text-gray-900">Why
+                    Trust Silverback?</h2>
+
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">🔓
+                            Open Source</h3>
+                        <p class="text-gray-700 mb-4">
+                            View the source code on GitHub. Nothing hidden. Full
+                            transparency.
+                        </p>
+                        <a href="https://github.com/agBabbbyCakes/phoenix"
+                            target="_blank" rel="noopener"
+                            class="text-blue-600 hover:underline">
+                            View on GitHub →
+                        </a>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">🏠
+                            Local First</h3>
+                        <p class="text-gray-700 mb-4">
+                            Your data never leaves your machine. No cloud sync.
+                            No telemetry. No tracking.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">🔒
+                            Privacy Focused</h3>
+                        <p class="text-gray-700 mb-4">
+                            Built with privacy in mind. No analytics. No data
+                            collection. Just your bots and your control.
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">⚙️
+                            Developer Built</h3>
+                        <p class="text-gray-700 mb-4">
+                            Created by developers, for developers. Simple
+                            design. Powerful features. No fluff.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download Section -->
+        <section id="download" class="section-padding bg-white">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-4 text-gray-900">Download
+                    Silverback</h2>
+                <p class="text-xl text-gray-600 mb-12">
+                    Choose your platform. Install. Run. That's it.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div
+                        class="bg-gray-50 p-8 rounded-lg border-2 border-gray-200">
+                        <div class="text-4xl mb-4">🍎</div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900">macOS</h3>
+                        <p class="text-sm text-gray-600 mb-4">10.14 or later</p>
+                        <a href="#"
+                            class="download-button text-white px-6 py-3 rounded-lg font-semibold inline-block">
+                            Download .dmg
+                        </a>
+                    </div>
+
+                    <div
+                        class="bg-gray-50 p-8 rounded-lg border-2 border-gray-200">
+                        <div class="text-4xl mb-4">🪟</div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900">Windows</h3>
+                        <p class="text-sm text-gray-600 mb-4">Windows 10 or
+                            later</p>
+                        <a href="#"
+                            class="download-button text-white px-6 py-3 rounded-lg font-semibold inline-block">
+                            Download .msi
+                        </a>
+                    </div>
+
+                    <div
+                        class="bg-gray-50 p-8 rounded-lg border-2 border-gray-200">
+                        <div class="text-4xl mb-4">🐧</div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900">Linux</h3>
+                        <p class="text-sm text-gray-600 mb-4">AppImage
+                            (universal)</p>
+                        <a href="#"
+                            class="download-button text-white px-6 py-3 rounded-lg font-semibold inline-block">
+                            Download .AppImage
+                        </a>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500">
+                    Version 0.1.0 • <a
+                        href="https://github.com/agBabbbyCakes/phoenix/releases"
+                        target="_blank" rel="noopener"
+                        class="text-blue-600 hover:underline">Release Notes</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Email Capture (Optional) -->
+        <section class="section-padding bg-gray-900 text-white">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
+                <p class="text-gray-300 mb-8">
+                    Get notified when new versions are released. No spam. Just
+                    updates.
+                </p>
+
+                <!-- Netlify Forms -->
+                <form name="email-signup" method="POST" data-netlify="true"
+                    netlify-honeypot="bot-field" class="max-w-md mx-auto">
+                    <input type="hidden" name="form-name" value="email-signup">
+                    <p class="hidden">
+                        <label>Don't fill this out if you're human: <input
+                                name="bot-field" /></label>
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="your@email.com"
+                            required
+                            class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button
+                            type="submit"
+                            class="download-button text-white px-6 py-3 rounded-lg font-semibold">
+                            Subscribe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-gray-400 py-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-3 gap-8 mb-8">
+                    <div>
+                        <h4 class="text-white font-bold mb-4">Silverback</h4>
+                        <p class="text-sm">
+                            Bot recorder and controller client. Simple. Private.
+                            Powerful.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-white font-bold mb-4">Resources</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a
+                                    href="https://github.com/agBabbbyCakes/phoenix"
+                                    target="_blank" rel="noopener"
+                                    class="hover:text-white transition">GitHub</a></li>
+                            <li><a
+                                    href="https://github.com/agBabbbyCakes/phoenix/releases"
+                                    target="_blank" rel="noopener"
+                                    class="hover:text-white transition">Releases</a></li>
+                            <li><a
+                                    href="https://github.com/agBabbbyCakes/phoenix/issues"
+                                    target="_blank" rel="noopener"
+                                    class="hover:text-white transition">Issues</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="text-white font-bold mb-4">Legal</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="#"
+                                    class="hover:text-white transition">MIT
+                                    License</a></li>
+                            <li><a href="#"
+                                    class="hover:text-white transition">Privacy
+                                    Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-700 pt-8 text-center text-sm">
+                    <p>&copy; 2025 Silverback. Open source software.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Smooth scroll -->
+        <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+    </body>
+</html>
