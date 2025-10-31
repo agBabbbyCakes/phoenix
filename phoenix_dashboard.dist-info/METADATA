@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Briefcase-Version: 0.3.25
+Name: phoenix_dashboard
+Formal-Name: Phoenix Dashboard
+App-ID: com.agworkywork.phoenixdashboard.phoenix-dashboard
+Version: 0.1.0
+Home-page: https://github.com/agBabbbyCakes/phoenix
+Download-URL: https://github.com/agBabbbyCakes/phoenix
+Author: Alex Gonzalez
+Summary: Silverback recorder and bot controller client

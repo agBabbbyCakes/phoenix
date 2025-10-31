@@ -3,15 +3,15 @@ name = "phoenix_dashboard"
 version = "0.1.0"
 description = "Silverback recorder and bot controller client"
 readme = "README.md"
-requires-python = ">=3.11"
+# requires-python = ">=3.11"  # Temporarily commented for Briefcase
 dependencies = [
-  "fastapi>=0.115.0",
-  "uvicorn[standard]>=0.30.6",
-  "jinja2>=3.1.4",
-  "sse-starlette>=2.1.3",
+  "fastapi",
+  "uvicorn[standard]",
+  "jinja2",
+  "sse-starlette",
   "python-multipart",
-  "web3>=6.0.0",
-  "python-dotenv>=1.0.0",
+  "web3",
+  "python-dotenv",
 ]
 
 [tool.uv]
@@ -22,7 +22,7 @@ dev-dependencies = [
 
 [tool.briefcase]
 project_name = "Phoenix Dashboard"
-bundle = "com.agworkywork.phoenix_dashboard"
+bundle = "com.agworkywork.phoenixdashboard"
 version = "0.1.0"
 url = "https://github.com/agBabbbyCakes/phoenix"
 license = { text = "MIT" }
@@ -38,14 +38,15 @@ sources = [
   "phoenix_dashboard",
 ]
 requires = [
-  "fastapi>=0.115.0",
-  "uvicorn>=0.30.6",
-  "jinja2>=3.1.4",
-  "sse-starlette>=2.1.3",
+  "fastapi",
+  "uvicorn[standard]",
+  "jinja2",
+  "sse-starlette",
   "python-multipart",
-  "web3>=6.0.0",
-  "python-dotenv>=1.0.0",
+  "web3",
+  "python-dotenv",
 ]
+# Note: Removed tkinter dependency - using browser-based UI instead
 icon = "resources/phoenix"
 document_types = []
 resources = [
@@ -54,10 +55,10 @@ resources = [
 ]
 
 [tool.briefcase.app.phoenix_dashboard.macOS]
-requires = ">=10.14"
+minimum_version = "10.14"
 
 [tool.briefcase.app.phoenix_dashboard.windows]
-requires = ">=10"
+minimum_version = "10"
 
 [tool.briefcase.app.phoenix_dashboard.linux]
-requires = ">=18.04"
+minimum_version = "18.04"
