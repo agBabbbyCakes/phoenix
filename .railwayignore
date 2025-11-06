@@ -1,0 +1,12 @@
+# Railway: This project should not be deployed via Railway
+# The marketing site is deployed on Netlify only
+# The backend service can be deployed on Render.com if needed
+# 
+# To disconnect Railway:
+# 1. Go to https://railway.app
+# 2. Navigate to your project
+# 3. Go to Settings
+# 4. Click "Delete Project" or "Disconnect Repository"
+# 
+# Or simply remove the service from your Railway dashboard
+
