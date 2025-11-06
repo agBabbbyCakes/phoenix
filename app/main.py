@@ -194,6 +194,12 @@ async def logs_viewer(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("logs.html", {"request": request})
 
 
+@app.get("/pointcloud", response_class=HTMLResponse)
+async def pointcloud_viewer(request: Request) -> HTMLResponse:
+    """Standalone 3D point cloud visualization page."""
+    return templates.TemplateResponse("pointcloud.html", {"request": request})
+
+
 @app.get("/api/bots/status")
 async def get_bots_status() -> JSONResponse:
     """Get aggregated health status for all bots.

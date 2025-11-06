@@ -11,13 +11,29 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
             rel="stylesheet">
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
+        
+        <!-- Three.js for Point Cloud Visualization -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
         <style>
+        /* --- Silverback Cyber Theme --- */
+        
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-panel: #111827;
+            --text-main: #e5e5e5;
+            --accent-cyan: #00ffcc;
+            --accent-pink: #ff0066;
+            --gradient: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -25,17 +41,54 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            letter-spacing: 0.2px;
             overflow-x: hidden;
         }
         
-        /* Animated background gradient */
+        /* --- Subtle Background Glow --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -25%;
+            left: -25%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 30% 20%, rgba(0,255,204,0.08), transparent 70%),
+                        radial-gradient(circle at 70% 80%, rgba(255,0,102,0.08), transparent 70%);
+            z-index: -1;
+            animation: hueShift 20s infinite alternate linear;
+        }
+        
+        @keyframes hueShift {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(45deg); }
+        }
+        
+        /* --- Headings --- */
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(0,255,204,0.25);
+            margin-bottom: 0.5em;
+        }
+        
+        /* --- Hero Section --- */
         .hero-bg {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
             position: relative;
             overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(255,0,102,0.05), transparent 70%);
         }
         
         .hero-bg::before {
@@ -45,7 +98,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(0,255,204,0.15) 0%, transparent 70%);
             animation: pulse 20s ease-in-out infinite;
         }
         
@@ -54,37 +107,61 @@
             50% { transform: scale(1.1) rotate(180deg); opacity: 0.5; }
         }
         
+        .hero h1,
+        .hero-bg h1 {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulseGlow 6s infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 8px rgba(0,255,204,0.4); }
+            100% { text-shadow: 0 0 18px rgba(255,0,102,0.5); }
+        }
+        
         /* Glass morphism effect */
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0,255,204,0.2);
         }
         
         /* Button styles */
         .btn-primary {
-            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-            border: 1px solid rgba(168, 85, 247, 0.3);
+            background: var(--gradient);
+            border: 1px solid rgba(0,255,204,0.3);
             transition: all 0.3s ease;
+            color: #fff;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 30px rgba(0,255,204,0.4);
         }
         
         .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(0,255,204,0.3);
             transition: all 0.3s ease;
+            color: var(--text-main);
         }
         
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 0 25px rgba(0,255,204,0.4);
+            transform: translateY(-2px);
         }
         
         /* Section spacing */
+        section {
+            padding: 6rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background-color: rgba(17,24,39,0.3);
+        }
+        
         .section {
             padding: 6rem 1.5rem;
         }
@@ -102,18 +179,31 @@
         
         .card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0,255,204,0.2);
         }
         
         /* Code block */
+        pre, code {
+            background: var(--bg-panel);
+            color: var(--accent-cyan);
+            font-family: 'IBM Plex Mono', 'Monaco', 'Courier New', monospace;
+            padding: 1rem;
+            border-left: 3px solid var(--accent-pink);
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        
         .code-block {
-            background: #1a1a1a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0,255,204,0.2);
+            border-left: 3px solid var(--accent-pink);
             border-radius: 8px;
             padding: 1.5rem;
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: 'IBM Plex Mono', 'Monaco', 'Courier New', monospace;
             font-size: 0.875rem;
             overflow-x: auto;
+            color: var(--accent-cyan);
         }
         
         /* Smooth scroll */
@@ -151,7 +241,7 @@
             right: 0;
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0,255,204,0.2);
             padding: 1rem;
         }
         
@@ -168,7 +258,8 @@
         }
         
         .mobile-menu a:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0,255,204,0.1);
+            color: var(--accent-cyan);
         }
         
         @media (max-width: 768px) {
@@ -194,7 +285,7 @@
         
         .download-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0,255,204,0.3);
             padding: 1.5rem;
             border-radius: 12px;
             text-align: center;
@@ -204,14 +295,15 @@
         }
         
         .download-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(0,255,204,0.1);
+            border-color: var(--accent-cyan);
             transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,255,204,0.3);
         }
         
         .download-btn.recommended {
-            border-color: rgba(168, 85, 247, 0.5);
-            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--accent-cyan);
+            background: rgba(0,255,204,0.1);
         }
         
         .download-btn-title {
@@ -232,7 +324,7 @@
         
         .dropdown-header {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0,255,204,0.2);
             padding: 1rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
@@ -243,20 +335,20 @@
         }
         
         .dropdown-header:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(0,255,204,0.1);
+            border-color: var(--accent-cyan);
         }
         
         .dropdown-header.active {
-            border-color: rgba(168, 85, 247, 0.5);
-            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--accent-cyan);
+            background: rgba(0,255,204,0.15);
         }
         
         .dropdown-content {
             display: none;
             padding: 1.5rem;
             background: rgba(10, 10, 10, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0,255,204,0.2);
             border-top: none;
             border-radius: 0 0 8px 8px;
         }
@@ -271,6 +363,24 @@
         
         .dropdown-header.active .dropdown-arrow {
             transform: rotate(180deg);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            background-color: #080808;
+            color: #777;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            color: var(--accent-pink);
         }
     </style>
     </head>
@@ -290,6 +400,11 @@
                             class="text-gray-300 hover:text-white transition">Features</a>
                         <a href="#download"
                             class="text-gray-300 hover:text-white transition">Download</a>
+                        <a href="releases.html"
+                            class="text-gray-300 hover:text-white transition">Releases</a>
+                        <a href="#run-locally"
+                            class="text-gray-300 hover:text-white transition">Run
+                            Locally</a>
                         <a href="#web-app"
                             class="text-gray-300 hover:text-white transition">Web
                             App</a>
@@ -310,6 +425,8 @@
                 <div class="mobile-menu" id="mobileMenu">
                     <a href="#features">Features</a>
                     <a href="#download">Download</a>
+                    <a href="releases.html">Releases</a>
+                    <a href="#run-locally">Run Locally</a>
                     <a href="#web-app">Web App</a>
                     <a href="#examples">Examples</a>
                     <a href="https://github.com/agBabbbyCakes/phoenix"
@@ -324,7 +441,7 @@
             <div
                 class="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
                 <h1
-                    class="text-6xl md:text-8xl font-black mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-400 to-white">
+                    class="text-6xl md:text-8xl font-black mb-6 leading-tight">
                     Deploy, Monitor, Adapt
                 </h1>
                 <p
@@ -436,11 +553,17 @@
                             custom deployments.
                         </p>
                         <div class="code-block mb-6">
-                            <div class="text-purple-400"># Install and run</div>
+                            <div style="color: var(--accent-cyan);"># Install
+                                and run</div>
                             <div class="text-gray-300 mt-2">pip install
                                 phoenix-dashboard</div>
                             <div class="text-gray-300">python -m
                                 phoenix_dashboard</div>
+                            <div class="text-gray-500 mt-2"># Or run locally
+                                from source</div>
+                            <div class="text-gray-300"
+                                style="color: var(--accent-cyan);">python
+                                start.py</div>
                         </div>
                         <a
                             href="https://github.com/agBabbbyCakes/phoenix/releases"
@@ -453,10 +576,12 @@
 
                     <!-- macOS Download -->
                     <div
-                        class="card glass p-8 rounded-xl border-2 border-purple-500/30">
+                        class="card glass p-8 rounded-xl border-2"
+                        style="border-color: rgba(0,255,204,0.3);">
                         <div class="flex items-center justify-between mb-4">
                             <span
-                                class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">RECOMMENDED</span>
+                                class="text-xs px-2 py-1 rounded"
+                                style="background: rgba(0,255,204,0.2); color: #00ffcc;">RECOMMENDED</span>
                         </div>
                         <h3 class="text-2xl font-bold mb-2">macOS App</h3>
                         <p class="text-gray-400 mb-6 text-sm">
@@ -494,14 +619,154 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <p class="text-gray-400 mb-4">Looking for source code or
-                        building from scratch?</p>
-                    <a href="https://github.com/agBabbbyCakes/phoenix"
-                        target="_blank"
-                        rel="noopener"
-                        class="text-purple-400 hover:text-purple-300 underline">
-                        View on GitHub →
-                    </a>
+                    <p class="text-gray-400 mb-4">Looking for all releases,
+                        source code, or building from scratch?</p>
+                    <div
+                        class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <a href="releases.html"
+                            class="btn-secondary px-6 py-3 rounded-lg font-semibold">
+                            View All Releases
+                        </a>
+                        <a href="https://github.com/agBabbbyCakes/phoenix"
+                            target="_blank"
+                            rel="noopener"
+                            style="color: #00ffcc;"
+                            onmouseover="this.style.color='#ff0066'"
+                            onmouseout="this.style.color='#00ffcc'"
+                            class="underline">
+                            View on GitHub →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Run Locally Section -->
+        <section id="run-locally"
+            class="section bg-gradient-to-b from-[#1a0a2e] to-[#0a0a0a]">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6">Run
+                        Locally</h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Get Silverback running on your machine in minutes. No
+                        complex setup required.
+                    </p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="glass p-12 rounded-xl">
+                        <h3 class="text-3xl font-bold mb-6 text-center">Quick
+                            Start</h3>
+
+                        <!-- Option 1: start.py -->
+                        <div class="mb-8">
+                            <h4 class="text-xl font-bold mb-4"
+                                style="color: var(--accent-cyan);">
+                                Option 1: Using start.py (Easiest - Recommended)
+                            </h4>
+                            <div class="code-block mb-4">
+                                <div class="text-gray-500"># Clone the
+                                    repository</div>
+                                <div class="text-gray-300 mt-2">git clone
+                                    https://github.com/agBabbbyCakes/phoenix.git</div>
+                                <div class="text-gray-300">cd phoenix</div>
+                                <div class="text-gray-300 mt-2"># Run the
+                                    server</div>
+                                <div class="text-gray-300"
+                                    style="color: var(--accent-cyan);">python
+                                    start.py</div>
+                            </div>
+                            <p class="text-gray-400 text-sm">
+                                This automatically handles Python version
+                                checks, dependency installation, and port
+                                selection.
+                                The server will start at <code
+                                    style="background: var(--bg-panel); padding: 0.25rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--accent-pink); color: var(--accent-cyan);">http://localhost:8000</code>
+                            </p>
+                        </div>
+
+                        <!-- Option 2: uv -->
+                        <div class="mb-8">
+                            <h4 class="text-xl font-bold mb-4"
+                                style="color: var(--accent-cyan);">
+                                Option 2: Using uv (Fast & Modern)
+                            </h4>
+                            <div class="code-block mb-4">
+                                <div class="text-gray-500"># Install uv (if not
+                                    installed)</div>
+                                <div class="text-gray-300 mt-2">curl -LsSf
+                                    https://astral.sh/uv/install.sh | sh</div>
+                                <div class="text-gray-300 mt-2"># Run the
+                                    server</div>
+                                <div class="text-gray-300"
+                                    style="color: var(--accent-cyan);">uv run
+                                    uvicorn app.main:app --reload --port
+                                    8000</div>
+                            </div>
+                        </div>
+
+                        <!-- Option 3: Python venv -->
+                        <div class="mb-8">
+                            <h4 class="text-xl font-bold mb-4"
+                                style="color: var(--accent-cyan);">
+                                Option 3: Using Python venv
+                            </h4>
+                            <div class="code-block mb-4">
+                                <div class="text-gray-500"># Create virtual
+                                    environment</div>
+                                <div class="text-gray-300 mt-2">python3 -m venv
+                                    .venv</div>
+                                <div class="text-gray-300 mt-2"># Activate
+                                    it</div>
+                                <div class="text-gray-300">source
+                                    .venv/bin/activate <span
+                                        class="text-gray-500">#
+                                        macOS/Linux</span></div>
+                                <div
+                                    class="text-gray-300">.venv\Scripts\activate
+                                    <span class="text-gray-500">#
+                                        Windows</span></div>
+                                <div class="text-gray-300 mt-2"># Install
+                                    dependencies</div>
+                                <div class="text-gray-300">pip install -r
+                                    requirements.txt</div>
+                                <div class="text-gray-300 mt-2"># Run the
+                                    server</div>
+                                <div class="text-gray-300"
+                                    style="color: var(--accent-cyan);">uvicorn
+                                    app.main:app --reload --port 8000</div>
+                            </div>
+                        </div>
+
+                        <!-- Access URLs -->
+                        <div class="mt-8 p-6 rounded-lg"
+                            style="background: rgba(0,255,204,0.05); border: 1px solid rgba(0,255,204,0.2);">
+                            <h4 class="text-lg font-bold mb-4"
+                                style="color: var(--accent-cyan);">
+                                Access the Dashboard
+                            </h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>✓ <strong>Main Dashboard:</strong> <code
+                                        style="color: var(--accent-cyan);">http://localhost:8000/</code></li>
+                                <li>✓ <strong>Logs Viewer:</strong> <code
+                                        style="color: var(--accent-cyan);">http://localhost:8000/logs</code></li>
+                                <li>✓ <strong>Daily Report:</strong> <code
+                                        style="color: var(--accent-cyan);">http://localhost:8000/report</code></li>
+                                <li>✓ <strong>Health Check:</strong> <code
+                                        style="color: var(--accent-cyan);">http://localhost:8000/health</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-8 text-center">
+                            <a href="https://github.com/agBabbbyCakes/phoenix"
+                                target="_blank"
+                                rel="noopener"
+                                class="btn-primary px-8 py-4 rounded-lg font-semibold text-lg inline-block">
+                                View Full Documentation on GitHub →
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -532,19 +797,19 @@
                         <div class="space-y-4 mb-8">
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-purple-400">✓</span>
+                                <span style="color: #00ffcc;">✓</span>
                                 <span class="text-gray-300">Real-time metrics
                                     and charts</span>
                             </div>
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-purple-400">✓</span>
+                                <span style="color: #00ffcc;">✓</span>
                                 <span class="text-gray-300">Live event logs and
                                     transaction tracking</span>
                             </div>
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-purple-400">✓</span>
+                                <span style="color: #00ffcc;">✓</span>
                                 <span class="text-gray-300">Performance
                                     analytics and reports</span>
                             </div>
@@ -558,7 +823,7 @@
 
                         <p class="mt-6 text-sm text-gray-500">
                             Or run locally: <code
-                                class="bg-[#1a1a1a] px-2 py-1 rounded text-purple-400">python
+                                style="background: var(--bg-panel); padding: 0.25rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--accent-pink); color: var(--accent-cyan);">python
                                 start.py</code>
                         </p>
                     </div>
@@ -591,20 +856,23 @@
                             <ol class="space-y-4 text-gray-300">
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">1</span>
+                                        class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
+                                        style="background: #00ffcc; color: #000;">1</span>
                                     <span>Get your Silverback server URL (e.g.,
                                         <code
                                             class="bg-[#1a1a1a] px-2 py-1 rounded text-green-400">https://your-server.com</code>)</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">2</span>
+                                        class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
+                                        style="background: #00ffcc; color: #000;">2</span>
                                     <span>Copy the embed code from the options
                                         below and paste it into your HTML</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">3</span>
+                                        class="rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0"
+                                        style="background: #00ffcc; color: #000;">3</span>
                                     <span>Customize the width and height to fit
                                         your layout</span>
                                 </li>
@@ -741,6 +1009,40 @@
                                     allowfullscreen>
                                 </iframe>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3D Point Cloud Visualization Section -->
+        <section id="pointcloud" class="section bg-gradient-to-b from-[#1a0a2e] to-[#0a0a0a]">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6">3D Point Cloud Visualization</h2>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Interactive 3D point cloud visualization with raycasting. Experience real-time data visualization in three dimensions.
+                    </p>
+                </div>
+
+                <div class="max-w-6xl mx-auto">
+                    <div class="glass p-8 rounded-xl">
+                        <div id="marketingPointCloud" style="width: 100%; height: 600px; position: relative; background: #0a0a0a; border-radius: 8px;"></div>
+                        <p class="text-gray-400 text-center mt-4 text-sm">
+                            Move your mouse over the visualization to interact with the point cloud. Available in the dashboard as a chart view option.
+                        </p>
+                        <div class="mt-6 text-center">
+                            <a href="https://silverback-dashboard.netlify.app" 
+                               target="_blank"
+                               class="btn-primary px-6 py-3 rounded-lg font-semibold inline-block mr-4">
+                                Try in Dashboard →
+                            </a>
+                            <a href="https://github.com/agBabbbyCakes/phoenix" 
+                               target="_blank"
+                               rel="noopener"
+                               class="btn-secondary px-6 py-3 rounded-lg font-semibold inline-block">
+                                View Source Code
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1194,6 +1496,129 @@
                 content.classList.add('active');
             }
         }
+
+        // Initialize 3D Point Cloud on marketing site (inline version)
+        (function() {
+            // Wait for Three.js to load and DOM to be ready
+            function initMarketingPointCloud() {
+                if (typeof THREE === 'undefined') {
+                    setTimeout(initMarketingPointCloud, 100);
+                    return;
+                }
+                
+                const container = document.getElementById('marketingPointCloud');
+                if (!container) return;
+                
+                const COLOR_CYAN = new THREE.Color(0x00ffcc);
+                const COLOR_PINK = new THREE.Color(0xff0066);
+                const COLOR_MAGENTA = new THREE.Color(0xff00ff);
+                
+                let renderer, scene, camera;
+                let pointclouds = [];
+                let clock;
+                const pointSize = 0.05;
+                const width = 80;
+                const length = 160;
+                const rotateY = new THREE.Matrix4().makeRotationY(0.005);
+                
+                function generatePointCloudGeometry(color, width, length) {
+                    const geometry = new THREE.BufferGeometry();
+                    const numPoints = width * length;
+                    const positions = new Float32Array(numPoints * 3);
+                    const colors = new Float32Array(numPoints * 3);
+                    let k = 0;
+                    
+                    for (let i = 0; i < width; i++) {
+                        for (let j = 0; j < length; j++) {
+                            const u = i / width;
+                            const v = j / length;
+                            const x = u - 0.5;
+                            const y = (Math.cos(u * Math.PI * 4) + Math.sin(v * Math.PI * 8)) / 20;
+                            const z = v - 0.5;
+                            
+                            positions[3 * k] = x;
+                            positions[3 * k + 1] = y;
+                            positions[3 * k + 2] = z;
+                            
+                            const intensity = (y + 0.1) * 5;
+                            colors[3 * k] = color.r * intensity;
+                            colors[3 * k + 1] = color.g * intensity;
+                            colors[3 * k + 2] = color.b * intensity;
+                            k++;
+                        }
+                    }
+                    
+                    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                    return geometry;
+                }
+                
+                function generatePointcloud(color, width, length) {
+                    const geometry = generatePointCloudGeometry(color, width, length);
+                    const material = new THREE.PointsMaterial({ 
+                        size: pointSize, 
+                        vertexColors: true,
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    return new THREE.Points(geometry, material);
+                }
+                
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x0a0a0a);
+                clock = new THREE.Clock();
+                
+                camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 10000);
+                camera.position.set(10, 10, 10);
+                camera.lookAt(scene.position);
+                
+                const pc1 = generatePointcloud(COLOR_PINK, width, length);
+                pc1.scale.set(5, 10, 10);
+                pc1.position.set(-5, 0, 0);
+                scene.add(pc1);
+                pointclouds.push(pc1);
+                
+                const pc2 = generatePointcloud(COLOR_CYAN, width, length);
+                pc2.scale.set(5, 10, 10);
+                pc2.position.set(0, 0, 0);
+                scene.add(pc2);
+                pointclouds.push(pc2);
+                
+                const pc3 = generatePointcloud(COLOR_MAGENTA, width, length);
+                pc3.scale.set(5, 10, 10);
+                pc3.position.set(5, 0, 0);
+                scene.add(pc3);
+                pointclouds.push(pc3);
+                
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    camera.applyMatrix4(rotateY);
+                    camera.updateMatrixWorld();
+                    renderer.render(scene, camera);
+                }
+                
+                function onWindowResize() {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+                
+                window.addEventListener('resize', onWindowResize);
+                animate();
+            }
+            
+            // Start initialization when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMarketingPointCloud);
+            } else {
+                setTimeout(initMarketingPointCloud, 500);
+            }
+        })();
     </script>
     </body>
 </html>

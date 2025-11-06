@@ -382,10 +382,12 @@
         const chartPrimary = container.querySelector('#chartPrimary');
         const chartSecondary = container.querySelector('#chartSecondary');
         const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const pointcloudContainer = container.querySelector('#pointcloudContainer');
         const toolbar = container.querySelector('#chartToolbar');
         
         if (chartPrimary) chartPrimary.style.display = 'none';
         if (chartSecondary) chartSecondary.style.display = 'none';
+        if (pointcloudContainer) pointcloudContainer.style.display = 'none';
         if (toolbar) toolbar.style.display = 'none';
         if (graph3dCanvas) {
           graph3dCanvas.style.display = 'block';
@@ -393,17 +395,50 @@
           setTimeout(() => window.start3DAnimation(), 100);
         }
         return;
+      } else if (currentView === 'pointcloud') {
+        // Hide chart canvas, show point cloud
+        const chartPrimary = container.querySelector('#chartPrimary');
+        const chartSecondary = container.querySelector('#chartSecondary');
+        const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const pointcloudContainer = container.querySelector('#pointcloudContainer');
+        const toolbar = container.querySelector('#chartToolbar');
+        
+        if (chartPrimary) chartPrimary.style.display = 'none';
+        if (chartSecondary) chartSecondary.style.display = 'none';
+        if (graph3dCanvas) graph3dCanvas.style.display = 'none';
+        if (toolbar) toolbar.style.display = 'none';
+        if (pointcloudContainer) {
+          pointcloudContainer.style.display = 'block';
+          // Clean up any existing point cloud
+          if (window.cleanupPointCloud) {
+            window.cleanupPointCloud();
+          }
+          // Initialize point cloud
+          setTimeout(() => {
+            if (window.initPointCloud) {
+              window.initPointCloud(pointcloudContainer);
+            }
+          }, 100);
+        }
+        return;
       } else {
         // Show normal charts
         const chartPrimary = container.querySelector('#chartPrimary');
         const chartSecondary = container.querySelector('#chartSecondary');
         const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const pointcloudContainer = container.querySelector('#pointcloudContainer');
         const toolbar = container.querySelector('#chartToolbar');
         
         if (chartPrimary) chartPrimary.style.display = 'block';
         if (chartSecondary) chartSecondary.style.display = 'block';
         if (toolbar) toolbar.style.display = 'flex';
         if (graph3dCanvas) graph3dCanvas.style.display = 'none';
+        if (pointcloudContainer) {
+          pointcloudContainer.style.display = 'none';
+          if (window.cleanupPointCloud) {
+            window.cleanupPointCloud();
+          }
+        }
       }
       
       const latencyLabels = JSON.parse(card.dataset.latencyLabels || '[]');

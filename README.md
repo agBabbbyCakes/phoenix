@@ -6,19 +6,65 @@ FastAPI + SSE + HTMX + Tailwind/DaisyUI + Chart.js dashboard for real-time Ether
 
 ## Quickstart
 
-### Easiest Way (Recommended)
+### Run Locally (Recommended)
+
+The easiest way to get started is to run Silverback locally on your machine.
+
+#### Option 1: Using `start.py` (Easiest - Auto Setup)
 ```bash
 python start.py
 ```
 
-**What this does:** Automatically sets up dependencies, finds a free port, and starts the server. See [STARTUP_GUIDE.md](STARTUP_GUIDE.md) for all startup options.
+**What this does:**
+- ✅ Automatically checks Python 3.11+ is installed
+- ✅ Loads `.env` file if present
+- ✅ Auto-finds an available port (starts at 8000, tries higher if busy)
+- ✅ **If `uv` is installed**: Uses `uv run` (fastest, modern)
+- ✅ **If `uv` is NOT installed**: Creates `.venv`, installs dependencies, runs with uvicorn
+- ✅ Auto-reload enabled (code changes refresh automatically)
+- 🌐 Starts server at `http://localhost:8000` (or next available port)
 
-### Alternative (Using uv)
+**This is the best option for new users** - it handles everything automatically!
+
+#### Option 2: Using `uv` (Fast, Modern)
 ```bash
+# Install uv first (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Run the server
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
-Open `http://localhost:8000` in your browser.
+#### Option 3: Using Python venv
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate it
+source .venv/bin/activate  # On macOS/Linux
+# OR
+.venv\Scripts\activate  # On Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+uvicorn app.main:app --reload --port 8000
+```
+
+#### Option 4: Using the Bundled App
+Download the macOS DMG or Windows installer from the [Releases page](releases.html) and run the native application.
+
+### Access the Dashboard
+
+Once the server is running, open your browser and navigate to:
+
+- **Main Dashboard**: `http://localhost:8000/`
+- **Logs Viewer**: `http://localhost:8000/logs`
+- **Daily Report**: `http://localhost:8000/report`
+- **Health Check**: `http://localhost:8000/health`
+
+For more detailed startup options, see [STARTUP_GUIDE.md](STARTUP_GUIDE.md).
 
 ## Features
 

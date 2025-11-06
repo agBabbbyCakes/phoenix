@@ -1,9 +1,15 @@
 # Netlify configuration for Silverback
-# The root index.html serves as the marketing/welcome page
-# The entire repo is deployed, but index.html is the default landing page
+# Only deploy index.html and releases.html for the marketing site
+# All other files are ignored via .netlifyignore
 
 [build]
   publish = "."
+  # No build command needed - just serve static HTML files
+
+[[redirects]]
+  from = "/releases"
+  to = "/releases.html"
+  status = 200
 
 [[redirects]]
   from = "/*"

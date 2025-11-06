@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Releases - Silverback</title>
+        <meta name="description"
+            content="Download Silverback releases for macOS, Windows, and Python.">
+
+        <!-- Font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap"
+            rel="stylesheet">
+
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <style>
+        /* --- Silverback Cyber Theme --- */
+        
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-panel: #111827;
+            --text-main: #e5e5e5;
+            --accent-cyan: #00ffcc;
+            --accent-pink: #ff0066;
+            --gradient: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            letter-spacing: 0.2px;
+            overflow-x: hidden;
+        }
+        
+        /* --- Subtle Background Glow --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -25%;
+            left: -25%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 30% 20%, rgba(0,255,204,0.08), transparent 70%),
+                        radial-gradient(circle at 70% 80%, rgba(255,0,102,0.08), transparent 70%);
+            z-index: -1;
+            animation: hueShift 20s infinite alternate linear;
+        }
+        
+        @keyframes hueShift {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(45deg); }
+        }
+        
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,255,204,0.2);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background: var(--gradient);
+            border: 1px solid rgba(0,255,204,0.3);
+            transition: all 0.3s ease;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,255,204,0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(0,255,204,0.3);
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 0 25px rgba(0,255,204,0.4);
+            transform: translateY(-2px);
+        }
+        
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-panel);
+            border: 1px solid rgba(0,255,204,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: rgba(0,255,204,0.1);
+            color: var(--accent-cyan);
+            padding: 1rem;
+            text-align: left;
+            font-family: var(--font-display);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(0,255,204,0.3);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+        
+        tr:hover {
+            background: rgba(0,255,204,0.05);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-latest {
+            background: rgba(0,255,204,0.2);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0,255,204,0.3);
+        }
+        
+        .badge-beta {
+            background: rgba(255,0,102,0.2);
+            color: var(--accent-pink);
+            border: 1px solid rgba(255,0,102,0.3);
+        }
+        
+        .download-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .download-link:hover {
+            color: var(--accent-pink);
+            text-decoration: underline;
+        }
+        
+        .section {
+            padding: 6rem 2rem;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="fixed top-0 w-full z-50 glass">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <a href="index.html" class="flex items-center space-x-2">
+                        <img
+                            src="https://silverback-staging.apeworx.io/static/assets/silverback-logo.png"
+                            alt="Silverback Logo" class="logo-icon">
+                        <span class="text-xl font-bold">Silverback</span>
+                    </a>
+                    <div class="flex items-center space-x-8">
+                        <a href="index.html"
+                            class="text-gray-300 hover:text-white transition">Home</a>
+                        <a href="index.html#download"
+                            class="text-gray-300 hover:text-white transition">Download</a>
+                        <a href="https://github.com/agBabbbyCakes/phoenix"
+                            target="_blank" rel="noopener"
+                            class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Releases Section -->
+        <section class="section" style="padding-top: 8rem;">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6"
+                        style="background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                        Releases
+                    </h1>
+                    <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                        Download the latest versions of Silverback for macOS,
+                        Windows, and Python.
+                    </p>
+                </div>
+
+                <div class="glass p-8 rounded-xl">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Platform</th>
+                                <th>Release Date</th>
+                                <th>Download</th>
+                                <th>Size</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span
+                                        class="badge badge-latest">Latest</span>
+                                    <strong class="ml-2">v1.0.0</strong>
+                                </td>
+                                <td>macOS (DMG)</td>
+                                <td>2025-01-31</td>
+                                <td>
+                                    <a
+                                        href="https://github.com/agBabbbyCakes/phoenix/releases/download/v1.0.0/phoenix_dashboard-1.0.0-macos.dmg.zip"
+                                        class="download-link"
+                                        target="_blank"
+                                        rel="noopener">
+                                        Download DMG
+                                    </a>
+                                </td>
+                                <td>~120 MB</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>v1.0.0</strong>
+                                </td>
+                                <td>macOS (DMG)</td>
+                                <td>2025-01-31</td>
+                                <td>
+                                    <a
+                                        href="https://github.com/agBabbbyCakes/phoenix/releases/download/v1.0.0/phoenix_dashboard-1.0.0-macos.dmg.zip"
+                                        class="download-link"
+                                        target="_blank"
+                                        rel="noopener">
+                                        Download DMG
+                                    </a>
+                                </td>
+                                <td>~120 MB</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>v1.0.0</strong>
+                                </td>
+                                <td>Windows (Installer)</td>
+                                <td>2025-01-31</td>
+                                <td>
+                                    <a
+                                        href="https://github.com/agBabbbyCakes/phoenix/releases/download/v1.0.0/phoenix_dashboard-1.0.0-windows-installer.exe"
+                                        class="download-link"
+                                        target="_blank"
+                                        rel="noopener">
+                                        Download Installer
+                                    </a>
+                                </td>
+                                <td>~150 MB</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>v1.0.0</strong>
+                                </td>
+                                <td>Python Package</td>
+                                <td>2025-01-31</td>
+                                <td>
+                                    <a
+                                        href="https://github.com/agBabbbyCakes/phoenix/releases/download/v1.0.0/phoenix_dashboard-1.0.0-py3-none-any.whl"
+                                        class="download-link"
+                                        target="_blank"
+                                        rel="noopener">
+                                        Download Wheel
+                                    </a>
+                                </td>
+                                <td>~5 MB</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="badge badge-beta">Beta</span>
+                                    <strong class="ml-2">v0.9.0</strong>
+                                </td>
+                                <td>macOS (DMG)</td>
+                                <td>2025-01-15</td>
+                                <td>
+                                    <a
+                                        href="https://github.com/agBabbbyCakes/phoenix/releases/download/v0.9.0/phoenix_dashboard-0.9.0-macos.dmg.zip"
+                                        class="download-link"
+                                        target="_blank"
+                                        rel="noopener">
+                                        Download DMG
+                                    </a>
+                                </td>
+                                <td>~115 MB</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-12 glass p-8 rounded-xl">
+                    <h2 class="text-2xl font-bold mb-4">Installation
+                        Instructions</h2>
+                    <div class="space-y-4 text-gray-300">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2"
+                                style="color: var(--accent-cyan);">macOS</h3>
+                            <ol class="list-decimal list-inside space-y-2 ml-4">
+                                <li>Download the DMG file (zip format)</li>
+                                <li>Extract the zip file to get the .dmg</li>
+                                <li>Open the DMG file</li>
+                                <li>Drag "Phoenix Dashboard.app" to your
+                                    Applications folder</li>
+                                <li>Open the app from Applications</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2"
+                                style="color: var(--accent-cyan);">Windows</h3>
+                            <ol class="list-decimal list-inside space-y-2 ml-4">
+                                <li>Download the Windows installer (.exe)</li>
+                                <li>Run the installer and follow the setup
+                                    wizard</li>
+                                <li>Launch "Phoenix Dashboard" from the Start
+                                    menu</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2"
+                                style="color: var(--accent-cyan);">Python</h3>
+                            <ol class="list-decimal list-inside space-y-2 ml-4">
+                                <li>Download the wheel file (.whl)</li>
+                                <li>Install with: <code
+                                        style="background: var(--bg-panel); padding: 0.25rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--accent-pink); color: var(--accent-cyan);">pip
+                                        install
+                                        phoenix_dashboard-1.0.0-py3-none-any.whl</code></li>
+                                <li>Run with: <code
+                                        style="background: var(--bg-panel); padding: 0.25rem 0.5rem; border-radius: 4px; border-left: 2px solid var(--accent-pink); color: var(--accent-cyan);">python
+                                        -m phoenix_dashboard</code></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <a href="https://github.com/agBabbbyCakes/phoenix/releases"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn-primary">
+                        View All Releases on GitHub →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-[#080808] border-t border-gray-800 py-12">
+            <div
+                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+                <p>&copy; 2025 Silverback. Open source software.</p>
+            </div>
+        </footer>
+    </body>
+</html>

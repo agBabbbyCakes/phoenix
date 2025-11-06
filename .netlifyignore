@@ -1,0 +1,8 @@
+# Ignore everything except the marketing site files
+*
+
+# But include these files
+!index.html
+!releases.html
+!.gitignore
+
