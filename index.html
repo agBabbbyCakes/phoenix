@@ -45,7 +45,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
             animation: pulse 20s ease-in-out infinite;
         }
         
@@ -63,14 +63,14 @@
         
         /* Button styles */
         .btn-primary {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
             transition: all 0.3s ease;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
         }
         
         .btn-secondary {
@@ -205,13 +205,13 @@
         
         .download-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(34, 197, 94, 0.5);
+            border-color: rgba(168, 85, 247, 0.5);
             transform: translateY(-4px);
         }
         
         .download-btn.recommended {
-            border-color: rgba(34, 197, 94, 0.5);
-            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(168, 85, 247, 0.1);
         }
         
         .download-btn-title {
@@ -244,12 +244,12 @@
         
         .dropdown-header:hover {
             background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(34, 197, 94, 0.3);
+            border-color: rgba(168, 85, 247, 0.3);
         }
         
         .dropdown-header.active {
-            border-color: rgba(34, 197, 94, 0.5);
-            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(168, 85, 247, 0.1);
         }
         
         .dropdown-content {
@@ -283,7 +283,7 @@
                         <img
                             src="https://silverback-staging.apeworx.io/static/assets/silverback-logo.png"
                             alt="Silverback Logo" class="logo-icon">
-                        <span class="text-xl font-bold">Silverback</span>
+                        <span class="text-xl font-bold"></span>
                     </div>
                     <div class="hidden md:flex items-center space-x-8">
                         <a href="#features"
@@ -293,8 +293,8 @@
                         <a href="#web-app"
                             class="text-gray-300 hover:text-white transition">Web
                             App</a>
-                        <a href="#widget"
-                            class="text-gray-300 hover:text-white transition">Widget</a>
+                        <a href="#examples"
+                            class="text-gray-300 hover:text-white transition">Examples</a>
                         <a href="https://github.com/agBabbbyCakes/phoenix"
                             target="_blank" rel="noopener"
                             class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
@@ -311,7 +311,7 @@
                     <a href="#features">Features</a>
                     <a href="#download">Download</a>
                     <a href="#web-app">Web App</a>
-                    <a href="#widget">Widget</a>
+                    <a href="#examples">Examples</a>
                     <a href="https://github.com/agBabbbyCakes/phoenix"
                         target="_blank" rel="noopener">GitHub</a>
                 </div>
@@ -324,7 +324,7 @@
             <div
                 class="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
                 <h1
-                    class="text-6xl md:text-8xl font-black mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-green-400 to-white">
+                    class="text-6xl md:text-8xl font-black mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-400 to-white">
                     Deploy, Monitor, Adapt
                 </h1>
                 <p
@@ -383,7 +383,7 @@
 
                 <div class="grid md:grid-cols-3 gap-8 mt-16">
                     <div class="card glass p-8 rounded-xl">
-                        <h3 class="text-2xl font-bold mb-4">Deploy with
+                        <h3 class="text-2xl font-bold mb-4">aDeploy with
                             Ease</h3>
                         <p class="text-gray-400">
                             Get your bots up and running in minutes. No complex
@@ -436,7 +436,7 @@
                             custom deployments.
                         </p>
                         <div class="code-block mb-6">
-                            <div class="text-green-400"># Install and run</div>
+                            <div class="text-purple-400"># Install and run</div>
                             <div class="text-gray-300 mt-2">pip install
                                 phoenix-dashboard</div>
                             <div class="text-gray-300">python -m
@@ -453,10 +453,10 @@
 
                     <!-- macOS Download -->
                     <div
-                        class="card glass p-8 rounded-xl border-2 border-green-500/30">
+                        class="card glass p-8 rounded-xl border-2 border-purple-500/30">
                         <div class="flex items-center justify-between mb-4">
                             <span
-                                class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">RECOMMENDED</span>
+                                class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">RECOMMENDED</span>
                         </div>
                         <h3 class="text-2xl font-bold mb-2">macOS App</h3>
                         <p class="text-gray-400 mb-6 text-sm">
@@ -499,7 +499,7 @@
                     <a href="https://github.com/agBabbbyCakes/phoenix"
                         target="_blank"
                         rel="noopener"
-                        class="text-green-400 hover:text-green-300 underline">
+                        class="text-purple-400 hover:text-purple-300 underline">
                         View on GitHub →
                     </a>
                 </div>
@@ -532,19 +532,19 @@
                         <div class="space-y-4 mb-8">
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-green-400">✓</span>
+                                <span class="text-purple-400">✓</span>
                                 <span class="text-gray-300">Real-time metrics
                                     and charts</span>
                             </div>
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-green-400">✓</span>
+                                <span class="text-purple-400">✓</span>
                                 <span class="text-gray-300">Live event logs and
                                     transaction tracking</span>
                             </div>
                             <div
                                 class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
-                                <span class="text-green-400">✓</span>
+                                <span class="text-purple-400">✓</span>
                                 <span class="text-gray-300">Performance
                                     analytics and reports</span>
                             </div>
@@ -558,7 +558,7 @@
 
                         <p class="mt-6 text-sm text-gray-500">
                             Or run locally: <code
-                                class="bg-[#1a1a1a] px-2 py-1 rounded text-green-400">python
+                                class="bg-[#1a1a1a] px-2 py-1 rounded text-purple-400">python
                                 start.py</code>
                         </p>
                     </div>
@@ -591,20 +591,20 @@
                             <ol class="space-y-4 text-gray-300">
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">1</span>
+                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">1</span>
                                     <span>Get your Silverback server URL (e.g.,
                                         <code
                                             class="bg-[#1a1a1a] px-2 py-1 rounded text-green-400">https://your-server.com</code>)</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">2</span>
+                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">2</span>
                                     <span>Copy the embed code from the options
                                         below and paste it into your HTML</span>
                                 </li>
                                 <li class="flex items-start">
                                     <span
-                                        class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">3</span>
+                                        class="bg-purple-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">3</span>
                                     <span>Customize the width and height to fit
                                         your layout</span>
                                 </li>
@@ -625,14 +625,14 @@
                                     Widget --&gt;</div>
                                 <div class="text-blue-400 mt-2">&lt;iframe</div>
                                 <div class="text-gray-300 ml-4">src=<span
-                                        class="text-green-400">"https://your-server.com"</span></div>
+                                        class="text-purple-400">"https://your-server.com"</span></div>
                                 <div class="text-gray-300 ml-4">width=<span
-                                        class="text-green-400">"100%"</span></div>
+                                        class="text-purple-400">"100%"</span></div>
                                 <div class="text-gray-300 ml-4">height=<span
-                                        class="text-green-400">"600"</span></div>
+                                        class="text-purple-400">"600"</span></div>
                                 <div
                                     class="text-gray-300 ml-4">frameborder=<span
-                                        class="text-green-400">"0"</span></div>
+                                        class="text-purple-400">"0"</span></div>
                                 <div
                                     class="text-gray-300 ml-4">allowfullscreen</div>
                                 <div
@@ -653,16 +653,17 @@
                                 <div class="text-purple-400">const</div> <div
                                     class="text-yellow-400">widget</div> = <div
                                     class="text-blue-400">document.createElement</div>(<span
-                                    class="text-green-400">'iframe'</span>);<br>
+                                    class="text-purple-400">'iframe'</span>);<br>
                                 <div class="text-yellow-400">widget</div>.<div
                                     class="text-blue-400">src</div> = <span
-                                    class="text-green-400">'https://your-server.com'</span>;<br>
+                                    class="text-purple-400">'https://your-server.com'</span>;<br>
                                 <div class="text-yellow-400">widget</div>.<div
                                     class="text-blue-400">style.width</div> =
-                                <span class="text-green-400">'100%'</span>;<br>
+                                <span class="text-purple-400">'100%'</span>;<br>
                                 <div class="text-yellow-400">widget</div>.<div
                                     class="text-blue-400">style.height</div> =
-                                <span class="text-green-400">'600px'</span>;<br>
+                                <span
+                                    class="text-purple-400">'600px'</span>;<br>
                                 <div class="text-purple-400">document</div>.<div
                                     class="text-blue-400">body</div>.<div
                                     class="text-blue-400">appendChild</div>(<div
@@ -683,7 +684,7 @@
                                 <div class="text-purple-400">import</div> <div
                                     class="text-blue-400">React</div> <div
                                     class="text-purple-400">from</div> <span
-                                    class="text-green-400">'react'</span>;<br><br>
+                                    class="text-purple-400">'react'</span>;<br><br>
                                 <div class="text-purple-400">function</div> <div
                                     class="text-yellow-400">SilverbackWidget</div>(<span
                                     class="text-gray-300">{ serverUrl }</span>)
@@ -695,16 +696,16 @@
                                         class="text-blue-400">iframe</span></div>
                                 <div class="text-gray-300 ml-12"><span
                                         class="text-blue-400">src</span>=<span
-                                        class="text-green-400">{serverUrl}</span></div>
+                                        class="text-purple-400">{serverUrl}</span></div>
                                 <div class="text-gray-300 ml-12"><span
                                         class="text-blue-400">width</span>=<span
-                                        class="text-green-400">"100%"</span></div>
+                                        class="text-purple-400">"100%"</span></div>
                                 <div class="text-gray-300 ml-12"><span
                                         class="text-blue-400">height</span>=<span
-                                        class="text-green-400">"600"</span></div>
+                                        class="text-purple-400">"600"</span></div>
                                 <div class="text-gray-300 ml-12"><span
                                         class="text-blue-400">frameborder</span>=<span
-                                        class="text-green-400">"0"</span></div>
+                                        class="text-purple-400">"0"</span></div>
                                 <div class="text-gray-300 ml-12"><span
                                         class="text-blue-400">allowFullScreen</span></div>
                                 <div class="text-gray-300 ml-8">/&gt;</div>
@@ -828,16 +829,16 @@
                                     class="text-blue-400">os</div>.<div
                                     class="text-yellow-400">environ</div>.<div
                                     class="text-blue-400">get</div>(<span
-                                    class="text-green-400">"ROUTER"</span>,
+                                    class="text-purple-400">"ROUTER"</span>,
                                 <span
-                                    class="text-green-400">"0x1111111254EEB25477B68fb85Ed929f73A960582"</span>)<br><br>
+                                    class="text-purple-400">"0x1111111254EEB25477B68fb85Ed929f73A960582"</span>)<br><br>
                                 <div class="text-gray-500"># Initialize
                                     bot</div><br>
                                 <div class="text-blue-400">bot</div> = <div
                                     class="text-blue-400">SilverbackBot</div>()<br>
                                 <div class="text-blue-400">usdc</div> = <div
                                     class="text-blue-400">tokens</div>[<span
-                                    class="text-green-400">"USDC"</span>]<br><br>
+                                    class="text-purple-400">"USDC"</span>]<br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_startup</div>()<br>
                                 <div class="text-purple-400">def</div> <div
@@ -850,7 +851,7 @@
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">return</span>
                                     {<span
-                                        class="text-green-400">"block_number"</span>:
+                                        class="text-purple-400">"block_number"</span>:
                                     startup_state.last_block_seen}</div><br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_</div>(<span
@@ -882,14 +883,14 @@
                                         class="text-purple-400">raise</span>
                                     <span
                                         class="text-blue-400">ValueError</span>(<span
-                                        class="text-green-400">"I don't like the number 3."</span>)</div><br>
+                                        class="text-purple-400">"I don't like the number 3."</span>)</div><br>
                                 <div
                                     class="text-gray-300 ml-4">bot.state.logs_processed
                                     += 1</div><br>
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">return</span>
                                     {<span
-                                        class="text-green-400">"amount"</span>:
+                                        class="text-purple-400">"amount"</span>:
                                     log.amount}</div><br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_</div>(<span
@@ -917,7 +918,7 @@
                                     {token.symbol(): log.amount}</div><br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">cron</div>(<span
-                                    class="text-green-400">"* * * * *"</span>)<br>
+                                    class="text-purple-400">"* * * * *"</span>)<br>
                                 <div class="text-purple-400">def</div> <div
                                     class="text-yellow-400">sample_metric</div>(<span
                                     class="text-gray-300">time:
@@ -929,7 +930,7 @@
                                         class="text-blue-400">random</span>()</div><br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_metric</div>(<span
-                                    class="text-green-400">"sample_metric"</span>,
+                                    class="text-purple-400">"sample_metric"</span>,
                                 <span class="text-blue-400">gt</span>=<span
                                     class="text-yellow-400">0.5</span>)<br>
                                 <div class="text-purple-400">def</div> <div
@@ -940,7 +941,7 @@
                                         class="text-purple-400">raise</span>
                                     <span
                                         class="text-blue-400">ValueError</span>(<span
-                                        class="text-green-400">"The metric is too damn high!"</span>)</div><br><br>
+                                        class="text-purple-400">"The metric is too damn high!"</span>)</div><br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_shutdown</div>()<br>
                                 <div class="text-purple-400">def</div> <div
@@ -948,7 +949,7 @@
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">return</span>
                                     {<span
-                                        class="text-green-400">"some_metric"</span>:
+                                        class="text-purple-400">"some_metric"</span>:
                                     <span
                                         class="text-yellow-400">123</span>}</div>
                             </div>
@@ -989,7 +990,7 @@
                                     class="text-blue-400">SilverbackBot</div>()<br>
                                 <div class="text-blue-400">usdc</div> = <div
                                     class="text-blue-400">tokens</div>[<span
-                                    class="text-green-400">"USDC"</span>]<br><br>
+                                    class="text-purple-400">"USDC"</span>]<br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">on_</div>(<span
                                     class="text-blue-400">usdc.Transfer</span>)<br>
@@ -998,12 +999,12 @@
                                     class="text-gray-300">log</span>):<br>
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">print</span>(<span
-                                        class="text-green-400">f"Transfer:
+                                        class="text-purple-400">f"Transfer:
                                         {log.amount}"</span>)</div><br>
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">return</span>
                                     {<span
-                                        class="text-green-400">"amount"</span>:
+                                        class="text-purple-400">"amount"</span>:
                                     log.amount}</div>
                             </div>
                         </div>
@@ -1034,7 +1035,7 @@
                                     class="text-blue-400">SilverbackBot</div>()<br><br>
                                 <div class="text-purple-400">@bot</div>.<div
                                     class="text-blue-400">cron</div>(<span
-                                    class="text-green-400">"*/5 * * * *"</span>)
+                                    class="text-purple-400">"*/5 * * * *"</span>)
                                 <span class="text-gray-500"># Every 5
                                     minutes</span><br>
                                 <div class="text-purple-400">def</div> <div
@@ -1047,9 +1048,9 @@
                                 <div class="text-gray-300 ml-4"><span
                                         class="text-purple-400">return</span>
                                     {<span
-                                        class="text-green-400">"status"</span>:
+                                        class="text-purple-400">"status"</span>:
                                     <span
-                                        class="text-green-400">"ok"</span>}</div>
+                                        class="text-purple-400">"ok"</span>}</div>
                             </div>
                         </div>
                     </div>
@@ -1089,9 +1090,9 @@
                                     href="https://github.com/agBabbbyCakes/phoenix/issues"
                                     target="_blank" rel="noopener"
                                     class="hover:text-white transition">Issues</a></li>
-                            <li><a href="#widget"
-                                    class="hover:text-white transition">Widget
-                                    Docs</a></li>
+                            <li><a href="#examples"
+                                    class="hover:text-white transition">Example
+                                    Bots</a></li>
                         </ul>
                     </div>
 
