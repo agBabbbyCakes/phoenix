@@ -561,6 +561,33 @@
           buildOrUpdateChartsFromPartial(e.target);
         });
       }
+      
+      // Initialize Bot Health Table if present
+      const botHealthContainer = e.target.querySelector('[data-bot-health-table]');
+      if (botHealthContainer && typeof BotHealthTable !== 'undefined') {
+        // Clean up existing instance if any
+        if (botHealthContainer._botHealthTable) {
+          botHealthContainer._botHealthTable.destroy();
+        }
+        
+        const containerId = botHealthContainer.id || `bot-health-table-${Date.now()}`;
+        if (!botHealthContainer.id) {
+          botHealthContainer.id = containerId;
+        }
+        
+        const refreshInterval = botHealthContainer.dataset.refreshInterval 
+          ? parseInt(botHealthContainer.dataset.refreshInterval, 10) 
+          : 5000;
+        
+        const apiEndpoint = botHealthContainer.dataset.apiEndpoint || '/api/bots/status';
+        
+        const table = new BotHealthTable(containerId, {
+          refreshInterval,
+          apiEndpoint
+        });
+        table.init();
+        botHealthContainer._botHealthTable = table;
+      }
     }
   });
 

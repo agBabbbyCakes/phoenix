@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silverback - Deploy, Monitor, Adapt</title>
+    <meta name="description" content="Create, customize, and launch web3 bots to handle everything on-chain, from monitoring to trading and beyond.">
+    
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background gradient */
+        .hero-bg {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+            animation: pulse 20s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.5; }
+        }
+        
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Section spacing */
+        .section {
+            padding: 6rem 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .section {
+                padding: 8rem 2rem;
+            }
+        }
+        
+        /* Card hover effect */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Code block */
+        .code-block {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Logo/icon */
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="logo-icon"></div>
+                    <span class="text-xl font-bold">Silverback</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
+                    <a href="#download" class="text-gray-300 hover:text-white transition">Download</a>
+                    <a href="#web-app" class="text-gray-300 hover:text-white transition">Web App</a>
+                    <a href="#widget" class="text-gray-300 hover:text-white transition">Widget</a>
+                    <a href="https://github.com/agBabbbyCakes/phoenix" target="_blank" rel="noopener" class="btn-secondary px-4 py-2 rounded-lg text-sm font-semibold">
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center justify-center relative">
+        <div class="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
+            <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-green-400 to-white">
+                Deploy, Monitor, Adapt
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Create, customize, and launch web3 bots to handle everything on-chain, from monitoring to trading and beyond.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10">
+                <a href="#download" class="btn-primary px-8 py-4 rounded-lg font-semibold text-lg">
+                    GET STARTED
+                </a>
+                <a href="#web-app" class="btn-secondary px-8 py-4 rounded-lg font-semibold text-lg">
+                    LAUNCH WEB APP
+                </a>
+            </div>
+            <p class="mt-8 text-sm text-gray-500">Available for macOS, Windows, and Python</p>
+        </div>
+    </section>
+
+    <!-- What is Silverback Section -->
+    <section id="features" class="section bg-gradient-to-b from-[#0a0a0a] to-[#1a0a2e]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-6">What is Silverback?</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Silverback is a comprehensive bot monitoring and control platform for web3 applications. 
+                    Track your Ethereum bots in real-time, monitor performance metrics, and maintain complete control 
+                    over your bot infrastructure—all from one powerful dashboard.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mt-16">
+                <div class="card glass p-8 rounded-xl">
+                    <div class="text-5xl mb-4">🚀</div>
+                    <h3 class="text-2xl font-bold mb-4">Deploy with Ease</h3>
+                    <p class="text-gray-400">
+                        Get your bots up and running in minutes. No complex setup. No cloud dependencies. Just download and launch.
+                    </p>
+                </div>
+
+                <div class="card glass p-8 rounded-xl">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-2xl font-bold mb-4">Real-Time Monitoring</h3>
+                    <p class="text-gray-400">
+                        Watch your bots perform with live dashboards, latency tracking, success rates, and comprehensive analytics.
+                    </p>
+                </div>
+
+                <div class="card glass p-8 rounded-xl">
+                    <div class="text-5xl mb-4">⚡</div>
+                    <h3 class="text-2xl font-bold mb-4">Adapt & Optimize</h3>
+                    <p class="text-gray-400">
+                        Make data-driven decisions with detailed reports, performance insights, and actionable metrics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="section bg-[#1a0a2e]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-6">Download Silverback</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                    Choose your platform and get started in minutes. All downloads are standalone applications with no dependencies.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Python Download -->
+                <div class="card glass p-8 rounded-xl">
+                    <div class="text-5xl mb-4">🐍</div>
+                    <h3 class="text-2xl font-bold mb-2">Python Package</h3>
+                    <p class="text-gray-400 mb-6 text-sm">
+                        Run directly with Python. Perfect for developers and custom deployments.
+                    </p>
+                    <div class="code-block mb-6">
+                        <div class="text-green-400"># Install and run</div>
+                        <div class="text-gray-300 mt-2">pip install phoenix-dashboard</div>
+                        <div class="text-gray-300">python -m phoenix_dashboard</div>
+                    </div>
+                    <a href="https://github.com/agBabbbyCakes/phoenix/releases" 
+                       target="_blank" 
+                       rel="noopener"
+                       class="btn-primary w-full text-center py-3 rounded-lg font-semibold inline-block">
+                        Download Python
+                    </a>
+                </div>
+
+                <!-- macOS Download -->
+                <div class="card glass p-8 rounded-xl border-2 border-green-500/30">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-5xl">🍎</div>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">RECOMMENDED</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">macOS App</h3>
+                    <p class="text-gray-400 mb-6 text-sm">
+                        Native macOS application. Drag & drop install. No terminal required.
+                    </p>
+                    <p class="text-xs text-gray-500 mb-6">Requires macOS 10.14 or later</p>
+                    <a href="https://github.com/agBabbbyCakes/phoenix/releases" 
+                       target="_blank" 
+                       rel="noopener"
+                       class="btn-primary w-full text-center py-3 rounded-lg font-semibold inline-block">
+                        Download for macOS
+                    </a>
+                </div>
+
+                <!-- Windows Download -->
+                <div class="card glass p-8 rounded-xl">
+                    <div class="text-5xl mb-4">🪟</div>
+                    <h3 class="text-2xl font-bold mb-2">Windows App</h3>
+                    <p class="text-gray-400 mb-6 text-sm">
+                        Standalone Windows installer. Simple setup wizard. Ready to use.
+                    </p>
+                    <p class="text-xs text-gray-500 mb-6">Requires Windows 10 or later</p>
+                    <a href="https://github.com/agBabbbyCakes/phoenix/releases" 
+                       target="_blank" 
+                       rel="noopener"
+                       class="btn-primary w-full text-center py-3 rounded-lg font-semibold inline-block">
+                        Download for Windows
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-gray-400 mb-4">Looking for source code or building from scratch?</p>
+                <a href="https://github.com/agBabbbyCakes/phoenix" 
+                   target="_blank" 
+                   rel="noopener"
+                   class="text-green-400 hover:text-green-300 underline">
+                    View on GitHub →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Web App Section -->
+    <section id="web-app" class="section bg-gradient-to-b from-[#1a0a2e] to-[#0a0a0a]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-6">Launch Web App</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                    Access your Silverback dashboard from any browser. No installation required. 
+                    Full-featured web interface with real-time monitoring.
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <div class="glass p-12 rounded-xl text-center">
+                    <div class="text-6xl mb-6">🌐</div>
+                    <h3 class="text-3xl font-bold mb-4">Web Dashboard</h3>
+                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                        Connect to your Silverback instance and monitor your bots in real-time from anywhere. 
+                        Works on desktop, tablet, and mobile devices.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Real-time metrics and charts</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Live event logs and transaction tracking</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-3 text-left bg-[#1a1a1a] p-4 rounded-lg">
+                            <span class="text-green-400">✓</span>
+                            <span class="text-gray-300">Performance analytics and reports</span>
+                        </div>
+                    </div>
+
+                    <a href="https://silverback-dashboard.netlify.app" 
+                       target="_blank"
+                       class="btn-primary px-8 py-4 rounded-lg font-semibold text-lg inline-block">
+                        Launch Web App →
+                    </a>
+                    
+                    <p class="mt-6 text-sm text-gray-500">
+                        Or run locally: <code class="bg-[#1a1a1a] px-2 py-1 rounded text-green-400">python start.py</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Widget Embed Section -->
+    <section id="widget" class="section bg-[#0a0a0a]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl md:text-6xl font-bold mb-6">Embed Silverback Widget</h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                    Add live bot monitoring to your website or dashboard. Embed your Silverback feed as a widget 
+                    with just a few lines of code.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Instructions -->
+                <div class="glass p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4">How to Embed</h3>
+                    <ol class="space-y-4 text-gray-300">
+                        <li class="flex items-start">
+                            <span class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">1</span>
+                            <span>Get your Silverback server URL (e.g., <code class="bg-[#1a1a1a] px-2 py-1 rounded text-green-400">https://your-server.com</code>)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">2</span>
+                            <span>Copy the embed code below and paste it into your HTML</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0">3</span>
+                            <span>Customize the width and height to fit your layout</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Code Example -->
+                <div class="glass p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4">Embed Code</h3>
+                    <div class="code-block">
+                        <div class="text-gray-500">&lt;!-- Silverback Widget --&gt;</div>
+                        <div class="text-blue-400 mt-2">&lt;iframe</div>
+                        <div class="text-gray-300 ml-4">src=<span class="text-green-400">"https://your-server.com"</span></div>
+                        <div class="text-gray-300 ml-4">width=<span class="text-green-400">"100%"</span></div>
+                        <div class="text-gray-300 ml-4">height=<span class="text-green-400">"600"</span></div>
+                        <div class="text-gray-300 ml-4">frameborder=<span class="text-green-400">"0"</span></div>
+                        <div class="text-gray-300 ml-4">allowfullscreen</div>
+                        <div class="text-blue-400">&gt;&lt;/iframe&gt;</div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-[#1a1a1a] rounded-lg">
+                        <div class="text-sm text-gray-400 mb-2">Or use JavaScript:</div>
+                        <div class="code-block mt-2">
+                            <div class="text-purple-400">const</div> <div class="text-yellow-400">widget</div> = <div class="text-blue-400">document.createElement</div>(<span class="text-green-400">'iframe'</span>);<br>
+                            <div class="text-yellow-400">widget</div>.<div class="text-blue-400">src</div> = <span class="text-green-400">'https://your-server.com'</span>;<br>
+                            <div class="text-yellow-400">widget</div>.<div class="text-blue-400">style.width</div> = <span class="text-green-400">'100%'</span>;<br>
+                            <div class="text-yellow-400">widget</div>.<div class="text-blue-400">style.height</div> = <span class="text-green-400">'600px'</span>;<br>
+                            <div class="text-purple-400">document</div>.<div class="text-blue-400">body</div>.<div class="text-blue-400">appendChild</div>(<div class="text-yellow-400">widget</div>);
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Demo -->
+            <div class="mt-12 glass p-8 rounded-xl">
+                <h3 class="text-2xl font-bold mb-4 text-center">Live Demo</h3>
+                <p class="text-gray-400 text-center mb-6">
+                    See the widget in action (using sample data)
+                </p>
+                <div class="bg-[#1a1a1a] rounded-lg p-4" style="height: 500px;">
+                    <iframe 
+                        src="https://silverback-dashboard.netlify.app" 
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0"
+                        style="border-radius: 8px;"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0a0a0a] border-t border-gray-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="logo-icon"></div>
+                        <span class="text-xl font-bold">Silverback</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Deploy, monitor, and adapt your web3 bots with complete control.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="https://github.com/agBabbbyCakes/phoenix" target="_blank" rel="noopener" class="hover:text-white transition">GitHub</a></li>
+                        <li><a href="https://github.com/agBabbbyCakes/phoenix/releases" target="_blank" rel="noopener" class="hover:text-white transition">Releases</a></li>
+                        <li><a href="https://github.com/agBabbbyCakes/phoenix/issues" target="_blank" rel="noopener" class="hover:text-white transition">Issues</a></li>
+                        <li><a href="#widget" class="hover:text-white transition">Widget Docs</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="https://github.com/agBabbbyCakes/phoenix/blob/main/LICENSE" target="_blank" rel="noopener" class="hover:text-white transition">MIT License</a></li>
+                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+                <p>&copy; 2025 Silverback. Open source software.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Smooth scroll script -->
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80; // Account for fixed nav
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navbar
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 100) {
+                nav.style.background = 'rgba(10, 10, 10, 0.9)';
+            } else {
+                nav.style.background = 'rgba(255, 255, 255, 0.05)';
+            }
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>
+

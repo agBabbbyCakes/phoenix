@@ -194,6 +194,81 @@ async def logs_viewer(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("logs.html", {"request": request})
 
 
+@app.get("/api/bots/status")
+async def get_bots_status() -> JSONResponse:
+    """Get aggregated health status for all bots.
+    
+    Returns bot name, last heartbeat, success ratio, failure count, 
+    last block, and latency for each bot.
+    """
+    from datetime import datetime, timezone
+    
+    # Aggregate events by bot name
+    bot_stats = {}
+    events = list(store.events)
+    
+    for event in events:
+        bot_name = event.bot_name
+        if bot_name not in bot_stats:
+            bot_stats[bot_name] = {
+                "bot_name": bot_name,
+                "last_heartbeat": None,
+                "success_count": 0,
+                "failure_count": 0,
+                "total_count": 0,
+                "latencies": [],
+                "last_block": None,  # Not available in current model
+            }
+        
+        stats = bot_stats[bot_name]
+        
+        # Update last heartbeat (most recent timestamp)
+        if stats["last_heartbeat"] is None or event.timestamp > stats["last_heartbeat"]:
+            stats["last_heartbeat"] = event.timestamp
+        
+        # Count successes and failures
+        stats["total_count"] += 1
+        if event.error is None and event.status in (None, "ok"):
+            stats["success_count"] += 1
+        else:
+            stats["failure_count"] += 1
+        
+        # Collect latencies
+        if event.latency_ms:
+            stats["latencies"].append(event.latency_ms)
+    
+    # Convert to response format
+    bots = []
+    for bot_name, stats in bot_stats.items():
+        # Calculate success ratio
+        success_ratio = 0.0
+        if stats["total_count"] > 0:
+            success_ratio = (stats["success_count"] / stats["total_count"]) * 100.0
+        
+        # Calculate average latency
+        avg_latency = 0
+        if stats["latencies"]:
+            avg_latency = int(sum(stats["latencies"]) / len(stats["latencies"]))
+        
+        # Format last heartbeat as ISO string
+        last_heartbeat = None
+        if stats["last_heartbeat"]:
+            last_heartbeat = stats["last_heartbeat"].isoformat()
+        
+        bots.append({
+            "bot_name": bot_name,
+            "name": bot_name,  # Alias for compatibility
+            "last_heartbeat": last_heartbeat,
+            "success_ratio": round(success_ratio, 2),
+            "failure_count": stats["failure_count"],
+            "last_block": stats["last_block"],
+            "latency_ms": avg_latency,
+            "latency": avg_latency,  # Alias for compatibility
+        })
+    
+    return JSONResponse({"bots": bots})
+
+
 @app.post("/api/logs")
 async def receive_bot_logs(request: Request) -> JSONResponse:
     """API endpoint to receive live JSON log data from bots.
