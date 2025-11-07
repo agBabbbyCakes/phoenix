@@ -111,6 +111,7 @@ async def home(request: Request) -> HTMLResponse:
 @app.get("/tv", response_class=HTMLResponse)
 async def tv_dashboard(request: Request) -> HTMLResponse:
     """TV-style dashboard (original view)."""
+    version = os.getenv("APP_VERSION", "0.1.0")
     sample_mode = getattr(request.app.state, "sample_mode", False)
     # Build initial metrics HTML so charts render before first SSE update
     kpis = store.kpis()
@@ -130,7 +131,7 @@ async def tv_dashboard(request: Request) -> HTMLResponse:
     )
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html},
+        {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html, "last_events": store.last_events(25), "version": version},
     )
 
 
@@ -276,7 +277,8 @@ async def logs_viewer(request: Request) -> HTMLResponse:
 @app.get("/pointcloud", response_class=HTMLResponse)
 async def pointcloud_viewer(request: Request) -> HTMLResponse:
     """Standalone 3D point cloud visualization page."""
-    return templates.TemplateResponse("pointcloud.html", {"request": request})
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("pointcloud.html", {"request": request, "version": version})
 
 
 @app.get("/api/bots/status")
