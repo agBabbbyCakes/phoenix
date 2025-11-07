@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}Bot Profile - Blockchain Bot Positions{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
+     x-data="botProfileState()" 
+     x-init="init()">
+  
+  <!-- LEFT SIDEBAR (Fixed) -->
+  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-0 bottom-16 z-20 overflow-y-auto"
+         style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);">
+    
+    <!-- Logo & Title -->
+    <div class="p-4 border-b border-gray-800">
+      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        🦍 Silverback
+      </h1>
+      <p class="text-xs text-gray-500 mt-1">Blockchain Bot Positions</p>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="p-4">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Navigation</div>
+      <nav class="space-y-1">
+        <a href="/" class="sidebar-nav-link">Dashboard</a>
+        <a href="/" class="sidebar-nav-link">Live Charts</a>
+        <a href="/bots" class="sidebar-nav-link active">Bots</a>
+        <a href="/logs" class="sidebar-nav-link">Logs</a>
+        <a href="/report" class="sidebar-nav-link">Reports</a>
+        <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
+        <a href="/tv" class="sidebar-nav-link">TV Mode</a>
+      </nav>
+    </div>
+
+    <!-- Tools Section -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Tools</div>
+      <nav class="space-y-1">
+        <button @click="showCommandPalette = !showCommandPalette" class="sidebar-nav-link w-full text-left">Command Palette</button>
+        <button @click="exportData()" class="sidebar-nav-link w-full text-left">Export Data</button>
+        <button @click="toggleTheme()" class="sidebar-nav-link w-full text-left">Theme</button>
+      </nav>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="p-4 border-t border-gray-800 space-y-3">
+      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Quick Stats</div>
+      <div class="space-y-2">
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Avg Latency</div>
+          <div class="text-sm font-semibold text-cyan-400" 
+               x-text="bot.avg_latency + 'ms'"></div>
+        </div>
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Success Rate</div>
+          <div class="text-sm font-semibold text-green-400" 
+               x-text="bot.success_rate + '%'"></div>
+        </div>
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Uptime</div>
+          <div class="text-sm font-semibold text-yellow-400" 
+               x-text="bot.uptime || 'N/A'"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOP BAR (Global Navigation) -->
+  <header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+          style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
+    <div class="flex items-center gap-8">
+      <div class="text-lg font-semibold text-cyan-400">Blockchain Bot Positions</div>
+      <nav class="flex items-center gap-6">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/bots" class="nav-link active">Bots</a>
+        <a href="/logs" class="nav-link">Logs</a>
+        <a href="/report" class="nav-link">Reports</a>
+        <a href="/settings" class="nav-link">Settings</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-6 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Latency:</span>
+        <span class="text-cyan-400 font-semibold" x-text="bot.avg_latency + 'ms'"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Success:</span>
+        <span class="text-green-400 font-semibold" x-text="bot.success_rate + '%'"></span>
+      </div>
+      <a href="/bots" class="text-gray-400 hover:text-cyan-400">← Back to Bots</a>
+      <button @click="toggleTheme()" class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400">
+        <span x-show="theme === 'dark'">☀️</span>
+        <span x-show="theme === 'light'">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- RIGHT SIDEBAR (Event Stream) -->
+  <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-0 bottom-16 z-20 overflow-y-auto"
+         style="box-shadow: -2px 0 20px rgba(0, 0, 0, 0.5);">
+    
+    <div class="p-4 border-b border-gray-800">
+      <h2 class="text-sm font-semibold text-gray-300">Recent Events</h2>
+      <p class="text-xs text-gray-500">Live activity stream</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-2" id="event-stream">
+      <!-- Events will be populated dynamically -->
+    </div>
+
+    <!-- Bot Info -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="text-xs text-gray-500 mb-2">Bot Info</div>
+      <div class="text-xs text-gray-400 space-y-1">
+        <div>Strategy: <span x-text="bot.strategy || 'N/A'"></span></div>
+        <div>Status: <span x-text="bot.status || 'Unknown'"></span></div>
+        <div>Uptime: <span x-text="bot.uptime || 'N/A'"></span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950 p-6">
+    <div class="max-w-7xl mx-auto py-6">
+      <!-- Bot Header -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-100 mb-2" x-text="bot.name || 'Loading...'"></h1>
+            <div class="flex items-center gap-4">
+              <span class="status-badge" 
+                    :class="getStatusClass(bot.status)"
+                    x-text="getStatusEmoji(bot.status) + ' ' + (bot.status || 'Unknown')"></span>
+              <span class="text-sm text-gray-400" x-text="'Strategy: ' + (bot.strategy || 'N/A')"></span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button @click="restartBot()" 
+                    class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm transition-colors">
+              Restart
+            </button>
+            <button @click="toggleEnabled()" 
+                    :class="bot.enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+                    class="px-4 py-2 rounded-lg text-sm transition-colors"
+                    x-text="bot.enabled ? 'Disable' : 'Enable'"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Avg Latency</div>
+          <div class="text-lg font-semibold text-cyan-400" x-text="bot.avg_latency + 'ms'"></div>
+        </div>
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Success Rate</div>
+          <div class="text-lg font-semibold text-green-400" x-text="bot.success_rate + '%'"></div>
+        </div>
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Uptime</div>
+          <div class="text-lg font-semibold text-yellow-400" x-text="bot.uptime || 'N/A'"></div>
+        </div>
+        <div class="quick-stat-card glass-stat-card">
+          <div class="text-xs text-gray-400 mb-1">Total Transactions</div>
+          <div class="text-lg font-semibold text-purple-400" x-text="bot.total_tx || '0'"></div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Charts -->
+        <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-200">Performance Charts</h2>
+          <div class="mb-4">
+            <select x-model="selectedChart" @change="updateChart()"
+                    class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100">
+              <option value="latency">Latency</option>
+              <option value="success">Success Rate</option>
+              <option value="throughput">Throughput</option>
+              <option value="profit">Profit</option>
+            </select>
+          </div>
+          <div class="h-64">
+            <canvas id="bot-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Right: Recent Transactions -->
+        <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-200">Recent Transactions</h2>
+          <div class="space-y-2 max-h-64 overflow-y-auto">
+            <template x-for="tx in recentTransactions" :key="tx.hash">
+              <div class="p-3 rounded bg-gray-800/50 border border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                  <a :href="'https://etherscan.io/tx/' + tx.hash" 
+                     target="_blank"
+                     class="text-xs text-cyan-400 hover:text-cyan-300 font-mono">
+                    <span x-text="tx.hash.substring(0, 16) + '...'"></span>
+                  </a>
+                  <span class="text-xs text-gray-500" x-text="tx.time"></span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                  <span :class="tx.status === 'success' ? 'text-emerald-400' : 'text-red-400'"
+                        x-text="tx.status"></span>
+                  <span class="text-gray-400" x-text="tx.latency + 'ms'"></span>
+                  <span x-show="tx.profit !== undefined" 
+                        :class="tx.profit >= 0 ? 'text-green-400' : 'text-red-400'"
+                        x-text="(tx.profit >= 0 ? '+' : '') + tx.profit.toFixed(4)"></span>
+                </div>
+              </div>
+            </template>
+            <div x-show="recentTransactions.length === 0" class="text-center text-gray-500 py-8">
+              No transactions yet
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights Panel -->
+      <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4 text-gray-200">Insights</h2>
+        <div class="space-y-3">
+          <div class="p-4 rounded bg-gray-800/50 border border-gray-700">
+            <div class="text-sm text-gray-300 mb-2" x-html="insights.summary"></div>
+            <div class="text-xs text-gray-500" x-text="'Last updated: ' + insights.lastUpdated"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Config & Notes -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Config Parameters -->
+        <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-200">Configuration</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Address</label>
+              <input type="text" x-model="bot.address" 
+                     class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100 font-mono">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Strategy</label>
+              <input type="text" x-model="bot.strategy" 
+                     class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100">
+            </div>
+            <button @click="saveConfig()" 
+                    class="w-full px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm transition-colors">
+              Save Configuration
+            </button>
+          </div>
+        </div>
+
+        <!-- Notes / Strategy Log -->
+        <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-200">Notes & Strategy Log</h2>
+          <textarea x-model="bot.notes" 
+                    @blur="saveNotes()"
+                    placeholder="Write your insights, reflections, or strategy notes here..."
+                    class="w-full h-48 bg-gray-800 border border-gray-700 rounded p-3 text-sm text-gray-100 resize-none"></textarea>
+          <div class="mt-2 text-xs text-gray-500">
+            <div>Last note: <span x-text="bot.lastNote || 'Never'"></span></div>
+            <div class="mt-1">Notes this week: <span x-text="notesThisWeek"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Bar -->
+  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 z-20"
+          style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5), 0 -2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50"></div>
+          <span class="text-sm text-gray-400">Silverback v{{ version }}</span>
+        </div>
+        <div class="text-xs text-gray-500">
+          Last updated: <span x-text="lastUpdated"></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
+          Dashboard
+        </a>
+        <a href="/bots" class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
+          Bots
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="/static/js/bot-profile.js"></script>
+{% endblock %}
+

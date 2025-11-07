@@ -160,6 +160,27 @@ async def dashboard(request: Request) -> HTMLResponse:
     )
 
 
+@app.get("/bots", response_class=HTMLResponse)
+async def bots_page(request: Request) -> HTMLResponse:
+    """Bots management page."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("bots.html", {"request": request, "version": version})
+
+
+@app.get("/bots/{bot_id}", response_class=HTMLResponse)
+async def bot_profile(request: Request, bot_id: str) -> HTMLResponse:
+    """Individual bot profile page."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("bot-profile.html", {"request": request, "bot_id": bot_id, "version": version})
+
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request) -> HTMLResponse:
+    """Settings page."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("settings.html", {"request": request, "version": version})
+
+
 @app.get("/report", response_class=HTMLResponse)
 async def report(request: Request) -> HTMLResponse:
     summary = store.daily_summary()

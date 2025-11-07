@@ -43,8 +43,19 @@ function ideDashboardState() {
       'strategy-bot': '🧠'
     },
     
+    // Current page tracking
+    currentPage: 'dashboard',
+    
+    // Add Bot Modal
+    showAddBotModal: false,
+    newBot: { name: '', address: '', strategy: 'arbitrage', apiKey: '' },
+    
+    // Last updated timestamp
+    lastUpdated: new Date().toLocaleTimeString(),
+    
     // Initialize
     init() {
+      this.detectCurrentPage();
       this.loadKPIs();
       this.loadHealthSummary();
       this.loadAvailableBots();
@@ -56,7 +67,23 @@ function ideDashboardState() {
       setInterval(() => {
         this.loadKPIs();
         this.loadHealthSummary();
+        this.lastUpdated = new Date().toLocaleTimeString();
       }, 5000);
+    },
+    
+    detectCurrentPage() {
+      const path = window.location.pathname;
+      if (path === '/bots' || path.startsWith('/bots/')) {
+        this.currentPage = 'bots';
+      } else if (path === '/logs') {
+        this.currentPage = 'logs';
+      } else if (path === '/report') {
+        this.currentPage = 'reports';
+      } else if (path === '/settings') {
+        this.currentPage = 'settings';
+      } else {
+        this.currentPage = 'dashboard';
+      }
     },
     
     // Theme Management
@@ -312,6 +339,29 @@ function ideDashboardState() {
           this.showCommandPalette = false;
         }
       });
+    },
+    
+    // Add Bot
+    addBot() {
+      const bot = {
+        id: this.newBot.name.toLowerCase().replace(/\s+/g, '-'),
+        name: this.newBot.name,
+        address: this.newBot.address,
+        strategy: this.newBot.strategy,
+        apiKey: this.newBot.apiKey,
+        enabled: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      const stored = JSON.parse(localStorage.getItem('phoenix:registeredBots') || '[]');
+      stored.push(bot);
+      localStorage.setItem('phoenix:registeredBots', JSON.stringify(stored));
+      
+      this.newBot = { name: '', address: '', strategy: 'arbitrage', apiKey: '' };
+      this.showAddBotModal = false;
+      this.loadAvailableBots();
+      
+      alert(`Bot "${bot.name}" added successfully!`);
     }
   };
 }
