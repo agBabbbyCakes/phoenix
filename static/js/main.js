@@ -382,17 +382,52 @@
         const chartPrimary = container.querySelector('#chartPrimary');
         const chartSecondary = container.querySelector('#chartSecondary');
         const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const financial3dCanvas = container.querySelector('#financial3dCanvas');
         const pointcloudContainer = container.querySelector('#pointcloudContainer');
         const toolbar = container.querySelector('#chartToolbar');
         
         if (chartPrimary) chartPrimary.style.display = 'none';
         if (chartSecondary) chartSecondary.style.display = 'none';
         if (pointcloudContainer) pointcloudContainer.style.display = 'none';
+        if (financial3dCanvas) financial3dCanvas.style.display = 'none';
         if (toolbar) toolbar.style.display = 'none';
         if (graph3dCanvas) {
           graph3dCanvas.style.display = 'block';
           window.init3DGraph(container);
           setTimeout(() => window.start3DAnimation(), 100);
+        }
+        return;
+      } else if (currentView === 'financial3d') {
+        // Hide chart canvas, show financial 3D chart
+        const chartPrimary = container.querySelector('#chartPrimary');
+        const chartSecondary = container.querySelector('#chartSecondary');
+        const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const financial3dCanvas = container.querySelector('#financial3dCanvas');
+        const pointcloudContainer = container.querySelector('#pointcloudContainer');
+        const toolbar = container.querySelector('#chartToolbar');
+        
+        if (chartPrimary) chartPrimary.style.display = 'none';
+        if (chartSecondary) chartSecondary.style.display = 'none';
+        if (graph3dCanvas) graph3dCanvas.style.display = 'none';
+        if (pointcloudContainer) pointcloudContainer.style.display = 'none';
+        if (toolbar) toolbar.style.display = 'none';
+        if (financial3dCanvas) {
+          financial3dCanvas.style.display = 'block';
+          financial3dCanvas.width = financial3dCanvas.clientWidth;
+          financial3dCanvas.height = financial3dCanvas.clientHeight;
+          if (window.initFinancial3D) {
+            window.initFinancial3D(container);
+            // Fetch and update data
+            if (window.fetchFinancial3DData) {
+              window.fetchFinancial3DData('/api/charts/data');
+              // Auto-refresh every 5 seconds
+              setInterval(() => {
+                if (window.fetchFinancial3DData) {
+                  window.fetchFinancial3DData('/api/charts/data');
+                }
+              }, 5000);
+            }
+          }
         }
         return;
       } else if (currentView === 'pointcloud') {
@@ -426,6 +461,7 @@
         const chartPrimary = container.querySelector('#chartPrimary');
         const chartSecondary = container.querySelector('#chartSecondary');
         const graph3dCanvas = container.querySelector('#graph3dCanvas');
+        const financial3dCanvas = container.querySelector('#financial3dCanvas');
         const pointcloudContainer = container.querySelector('#pointcloudContainer');
         const toolbar = container.querySelector('#chartToolbar');
         
@@ -433,11 +469,15 @@
         if (chartSecondary) chartSecondary.style.display = 'block';
         if (toolbar) toolbar.style.display = 'flex';
         if (graph3dCanvas) graph3dCanvas.style.display = 'none';
+        if (financial3dCanvas) financial3dCanvas.style.display = 'none';
         if (pointcloudContainer) {
           pointcloudContainer.style.display = 'none';
           if (window.cleanupPointCloud) {
             window.cleanupPointCloud();
           }
+        }
+        if (window.cleanupFinancial3D) {
+          window.cleanupFinancial3D();
         }
       }
       
@@ -570,6 +610,9 @@
         ensureLineChart(window.__chartSecondary, ctx2, latencyLabels, latencyValues, 'Latency (ms)', colors.primary);
       } else if (current === 'graph3d'){
         // 3D graph is handled separately above
+        return;
+      } else if (current === 'financial3d'){
+        // Financial 3D chart is handled separately above
         return;
       } else if (current === 'sensors'){
         ensureLineChart(window.__chartPrimary, ctx1, sensorLabels, sensorTempValues, 'Temperature (°C)', colors.primary);

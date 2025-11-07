@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}BotScope{% endblock %}</title>
+    <title>{% block title %}Silverback{% endblock %}</title>
     <meta name="description"
       content="Realtime Ethereum bot monitoring dashboard with SSE, HTMX, and Chart.js." />
     <meta property="og:title"
-      content="BotScope - Realtime Bot Monitoring" />
+      content="Silverback - Realtime Bot Monitoring" />
     <meta property="og:description"
       content="Live charts, alerts, and reports for Ethereum bots. Demo-ready in sample mode." />
     <meta property="og:type" content="website" />
@@ -37,8 +37,12 @@
     <!-- Three.js for 3D Graph Visualization -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+      onerror="console.warn('OrbitControls not loaded, using simple controls')"></script>
     <script src="/static/js/graph3d.js"></script>
     <script src="/static/js/pointcloud3d.js"></script>
+    <script src="/static/js/financial3d.js"></script>
     <!-- Chart.js annotations plugin for markers -->
     <script
       src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
@@ -756,6 +760,9 @@
         }
       </style>
     <link rel="stylesheet" href="/static/css/theme.css" />
+    <link rel="stylesheet" href="/static/css/dashboard-enhancements.css" />
+    <link rel="stylesheet" href="/static/css/dashboard-theme.css" />
+    <link rel="stylesheet" href="/static/css/ide-dashboard.css" />
     {% block head %}{% endblock %}
   </head>
   <body class="min-h-screen bg-base-200">

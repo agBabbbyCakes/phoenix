@@ -1,0 +1,187 @@
+/* Light/Dark Theme Styles for New Dashboard */
+
+/* Light Theme Overrides */
+.light-theme {
+  color-scheme: light;
+}
+
+.light-theme .bg-gray-950 {
+  background-color: #f9fafb !important;
+}
+
+.light-theme .bg-gray-900 {
+  background-color: #ffffff !important;
+}
+
+.light-theme .bg-gray-800 {
+  background-color: #f3f4f6 !important;
+}
+
+.light-theme .text-gray-100 {
+  color: #111827 !important;
+}
+
+.light-theme .text-gray-300 {
+  color: #4b5563 !important;
+}
+
+.light-theme .text-gray-400 {
+  color: #6b7280 !important;
+}
+
+.light-theme .border-gray-800 {
+  border-color: #d1d5db !important;
+}
+
+.light-theme .border-gray-700 {
+  border-color: #e5e7eb !important;
+}
+
+.light-theme .divide-gray-800 {
+  border-color: #e5e7eb !important;
+}
+
+/* Chart Container Light Theme */
+.light-theme #chart-container {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Table Light Theme */
+.light-theme table thead {
+  background-color: #f9fafb !important;
+  color: #374151 !important;
+}
+
+.light-theme table tbody tr:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Input Fields Light Theme */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.light-theme input:focus,
+.light-theme select:focus,
+.light-theme textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Button Light Theme */
+.light-theme button {
+  color: #111827 !important;
+}
+
+.light-theme .bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.light-theme .bg-blue-600:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.light-theme .bg-emerald-600 {
+  background-color: #059669 !important;
+}
+
+.light-theme .bg-emerald-600:hover {
+  background-color: #047857 !important;
+}
+
+/* Command Palette Light Theme */
+.light-theme .fixed.inset-0.bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Smooth Transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Row Highlight Animation */
+@keyframes row-highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.3);
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+
+tr.bg-blue-600\/20 {
+  animation: row-highlight 2s ease-out;
+}
+
+/* Health Chip Animations */
+@keyframes chip-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.health-chip-update {
+  animation: chip-pulse 0.6s ease;
+}
+
+/* KPI Value Transitions */
+.stat-value {
+  transition: color 0.5s ease, transform 0.3s ease;
+}
+
+.stat-value.pulse {
+  animation: value-pulse 0.6s ease;
+}
+
+@keyframes value-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Command Palette Fade In */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+[x-show].fixed {
+  animation: fade-in 0.2s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .flex.h-screen .w-1\/3 {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid;
+  }
+  
+  .flex.h-screen .w-2\/3 {
+    width: 100% !important;
+  }
+  
+  .flex.h-screen {
+    flex-direction: column;
+  }
+}
+

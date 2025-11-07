@@ -1,8 +1,8 @@
 #!/bin/bash
-# Quick startup script for BotScope Dashboard
+# Quick startup script for Silverback Dashboard
 # Usage: ./start.sh
 
-echo "🚀 Starting BotScope Dashboard..."
+echo "🦍 Starting Silverback Dashboard..."
 echo ""
 
 # Check if Python is available

@@ -76,9 +76,41 @@ async def home(request: Request) -> HTMLResponse:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    # Optional clean UI: redirect to /home when CLEAN_UI is enabled
-    if os.getenv("CLEAN_UI", "").lower() in {"1", "true", "yes"}:
-        return RedirectResponse(url="/home", status_code=307)
+    """IDE Dashboard - Unified interface. Default entry point."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    sample_mode = getattr(request.app.state, "sample_mode", False)
+    # Build initial metrics HTML so charts render before first SSE update
+    kpis = store.kpis()
+    labels, values = store.latency_series()
+    thr_labels, thr_values = store.throughput_series()
+    prof_labels, prof_values = store.profit_series()
+    heat = store.heatmap_matrix()
+    initial_metrics_html = templates.env.get_template("partials/metrics.html").render(
+        {
+            "kpis": kpis,
+            "latency_series": list(zip(labels, values)),
+            "throughput_series": list(zip(thr_labels, thr_values)),
+            "profit_series": list(zip(prof_labels, prof_values)),
+            "heatmap": heat,
+            "last_events": store.last_events(25),
+        }
+    )
+    return templates.TemplateResponse(
+        "ide-dashboard.html",
+        {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html, "version": version},
+    )
+
+
+@app.get("/home", response_class=HTMLResponse)
+async def home(request: Request) -> HTMLResponse:
+    """Home page with feature overview / start menu."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("home.html", {"request": request, "version": version})
+
+
+@app.get("/tv", response_class=HTMLResponse)
+async def tv_dashboard(request: Request) -> HTMLResponse:
+    """TV-style dashboard (original view)."""
     sample_mode = getattr(request.app.state, "sample_mode", False)
     # Build initial metrics HTML so charts render before first SSE update
     kpis = store.kpis()
@@ -98,6 +130,32 @@ async def index(request: Request) -> HTMLResponse:
     )
     return templates.TemplateResponse(
         "index.html",
+        {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html},
+    )
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request) -> HTMLResponse:
+    """New sidebar dashboard layout with Alpine.js."""
+    sample_mode = getattr(request.app.state, "sample_mode", False)
+    # Build initial metrics HTML so charts render before first SSE update
+    kpis = store.kpis()
+    labels, values = store.latency_series()
+    thr_labels, thr_values = store.throughput_series()
+    prof_labels, prof_values = store.profit_series()
+    heat = store.heatmap_matrix()
+    initial_metrics_html = templates.env.get_template("partials/metrics.html").render(
+        {
+            "kpis": kpis,
+            "latency_series": list(zip(labels, values)),
+            "throughput_series": list(zip(thr_labels, thr_values)),
+            "profit_series": list(zip(prof_labels, prof_values)),
+            "heatmap": heat,
+            "last_events": store.last_events(25),
+        }
+    )
+    return templates.TemplateResponse(
+        "dashboard.html",
         {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html},
     )
 
@@ -273,6 +331,36 @@ async def get_bots_status() -> JSONResponse:
         })
     
     return JSONResponse({"bots": bots})
+
+
+@app.get("/api/charts/data")
+async def get_charts_data() -> JSONResponse:
+    """Get chart data in JSON format for 3D visualizations.
+    
+    Returns recent events with all metrics for chart rendering.
+    """
+    events = store.last_events(100)  # Get last 100 events
+    
+    chart_data = []
+    for event in events:
+        chart_data.append({
+            "timestamp": event.timestamp.isoformat(),
+            "bot_name": event.bot_name,
+            "latency_ms": event.latency_ms,
+            "latency": event.latency_ms,
+            "success_rate": event.success_rate if hasattr(event, 'success_rate') else None,
+            "success_ratio": event.success_rate if hasattr(event, 'success_rate') else None,
+            "profit": event.profit if hasattr(event, 'profit') else None,
+            "status": event.status,
+            "error": event.error,
+            "tx_hash": event.tx_hash if hasattr(event, 'tx_hash') else None,
+        })
+    
+    return JSONResponse({
+        "events": chart_data,
+        "count": len(chart_data),
+        "kpis": store.kpis()
+    })
 
 
 @app.post("/api/logs")

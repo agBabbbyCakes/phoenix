@@ -1,24 +1,37 @@
 {% set labels = latency_series | map(attribute=0) | list %}
 {% set values = latency_series | map(attribute=1) | list %}
 
-<!-- KPI Cards -->
+<!-- Health Summary Chips (will be populated by JS) -->
+<div id="health-summary-chips"></div>
+
+<!-- KPI Cards with Live Transitions -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
   <div
-    class="stat glass-card shadow-xl rounded-box border border-primary/30 hover:border-primary transition-all">
-    <div class="stat-title">Avg Latency</div>
-    <div class="stat-value">{{ kpis.avg_latency_ms }}ms</div>
+    class="stat glass-card shadow-xl rounded-box border border-primary/30 hover:border-primary transition-all enhanced-card">
+    <div class="stat-title">
+      <span class="tooltip-definition" data-definition="Average response time for bot operations">Avg Latency</span>
+    </div>
+    <div class="stat-value" 
+         data-status="{{ 'error' if kpis.avg_latency_ms > 300 else 'warning' if kpis.avg_latency_ms > 200 else 'ok' }}"
+         id="kpi-latency-value">{{ kpis.avg_latency_ms }}ms</div>
     <div class="stat-desc">Last 60s</div>
   </div>
   <div
-    class="stat glass-card shadow-xl rounded-box border border-secondary/30 hover:border-secondary transition-all">
-    <div class="stat-title">Success Rate</div>
-    <div class="stat-value">{{ kpis.success_rate_pct }}%</div>
+    class="stat glass-card shadow-xl rounded-box border border-secondary/30 hover:border-secondary transition-all enhanced-card">
+    <div class="stat-title">
+      <span class="tooltip-definition" data-definition="Percentage of successful operations">Success Rate</span>
+    </div>
+    <div class="stat-value" 
+         data-status="{{ 'error' if kpis.success_rate_pct < 80 else 'warning' if kpis.success_rate_pct < 90 else 'ok' }}"
+         id="kpi-success-value">{{ kpis.success_rate_pct }}%</div>
     <div class="stat-desc">Last 60s</div>
   </div>
   <div
-    class="stat glass-card shadow-xl rounded-box border border-accent/30 hover:border-accent transition-all">
-    <div class="stat-title">Throughput</div>
-    <div class="stat-value">{{ kpis.throughput_1m }}/min</div>
+    class="stat glass-card shadow-xl rounded-box border border-accent/30 hover:border-accent transition-all enhanced-card">
+    <div class="stat-title">
+      <span class="tooltip-definition" data-definition="Number of events processed per minute">Throughput</span>
+    </div>
+    <div class="stat-value" id="kpi-throughput-value">{{ kpis.throughput_1m }}/min</div>
     <div class="stat-desc">Events</div>
   </div>
 </div>
@@ -33,6 +46,7 @@
     <option value="profit">Cumulative Profit</option>
     <option value="heatmap">Latency Heatmap</option>
     <option value="graph3d">3D Bot Network</option>
+    <option value="financial3d">3D Financial Chart</option>
     <option value="pointcloud">3D Point Cloud</option>
     <option value="sensors">Sensors (Temp/Humidity)</option>
   </select>
@@ -81,6 +95,7 @@
       <div class="h-48 min-h-32">
         <canvas id="chartSecondary"></canvas>
         <canvas id="graph3dCanvas" style="display: none;"></canvas>
+        <canvas id="financial3dCanvas" style="display: none;"></canvas>
         <div id="pointcloudContainer" style="display: none; width: 100%; height: 100%; position: relative;"></div>
       </div>
     </div>
@@ -103,18 +118,21 @@
   </div>
 </div>
 
-<!-- Recent Events Table -->
-<div class="card bg-base-100 shadow mt-4 glass-event-table">
+<!-- Recent Events Table with Enhanced Interactions -->
+<div class="card bg-base-100 shadow mt-4 glass-event-table enhanced-card">
   <div class="card-body">
     <div class="flex justify-between items-center">
       <h2 class="card-title">Recent Events</h2>
       <div class="flex gap-2">
+        <button class="btn btn-sm btn-ghost" onclick="window.dashboardUI.showCommandPalette()" title="Command Palette (⌘K)">
+          ⌘K
+        </button>
         <a href="/home" class="btn btn-sm btn-ghost">🏠 Home</a>
         <a href="/logs" class="btn btn-sm btn-outline">📋 View All Logs</a>
       </div>
     </div>
     <div class="overflow-x-auto max-h-80 overflow-y-auto neon-scroll">
-      <table class="table table-compact">
+      <table class="table table-compact" id="recent-events-table">
         <thead>
           <tr>
             <th>Time</th>
@@ -127,11 +145,21 @@
         </thead>
         <tbody>
           {% for e in last_events %}
-          <tr>
-            <td>{{ e.timestamp.strftime('%H:%M:%S') }}</td>
-            <td>{{ e.bot_name }}</td>
-            <td>-</td>
-            <td>{{ e.latency_ms }}ms</td>
+          <tr data-bot-name="{{ e.bot_name }}" 
+              data-timestamp="{{ e.timestamp.isoformat() }}"
+              onclick="window.dashboardUIHighlightRow(this)">
+            <td class="code-data">{{ e.timestamp.strftime('%H:%M:%S') }}</td>
+            <td>
+              <span class="bot-avatar" style="color: {{ 'var(--bot-color-' + e.bot_name + ')' if e.bot_name else '#888' }}">
+                {{ '🎯' if 'arb' in e.bot_name.lower() else '👁️' if 'mev' in e.bot_name.lower() else '⚡' if 'relay' in e.bot_name.lower() else '🛡️' if 'guard' in e.bot_name.lower() else '🤖' }}
+              </span>
+              <span class="font-semibold" style="margin-left: 8px;">{{ e.bot_name }}</span>
+            </td>
+            <td class="code-data">-</td>
+            <td class="code-data" 
+                data-status="{{ 'error' if e.latency_ms > 300 else 'warning' if e.latency_ms > 200 else 'ok' }}">
+              {{ e.latency_ms }}ms
+            </td>
             <td>
               {% if e.error %}
               <span class="badge"
@@ -143,10 +171,10 @@
             </td>
             <td>
               {% if e.tx_hash %}
-              <a class="link link-primary" target="_blank"
+              <a class="link link-primary code-data" target="_blank"
                 rel="noopener"
-                href="https://etherscan.io/tx/{{ e.tx_hash }}">{{
-                e.tx_hash }}</a>
+                href="https://etherscan.io/tx/{{ e.tx_hash }}"
+                title="View on Etherscan">{{ e.tx_hash }}</a>
               {% else %}-{% endif %}
             </td>
           </tr>
