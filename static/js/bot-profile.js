@@ -14,6 +14,8 @@ function botProfileState() {
     lastUpdated: new Date().toLocaleTimeString(),
     theme: localStorage.getItem('phoenix:theme') || 'dark',
     showCommandPalette: false,
+    commandInput: '',
+    connectionStatus: 'connected',
     
     init() {
       this.loadBot();
@@ -327,6 +329,27 @@ function botProfileState() {
         this.bot.enabled = stored[index].enabled;
         localStorage.setItem('phoenix:registeredBots', JSON.stringify(stored));
       }
+    },
+    
+    executeCommand() {
+      const cmd = this.commandInput.trim().toLowerCase();
+      const parts = cmd.split(' ');
+      const action = parts[0];
+      
+      switch (action) {
+        case 'restart':
+          this.restartBot();
+          break;
+        case 'export':
+          this.exportData();
+          break;
+        case 'theme':
+          this.toggleTheme();
+          break;
+      }
+      
+      this.commandInput = '';
+      this.showCommandPalette = false;
     }
   };
 }

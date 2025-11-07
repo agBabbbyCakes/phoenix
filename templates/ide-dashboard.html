@@ -89,7 +89,7 @@
     </div>
   </main>
 
-  <!-- TOP BAR (Global Navigation) -->
+  <!-- TOP BAR (Unified Global Navigation) -->
   <header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
     
@@ -105,7 +105,7 @@
       </nav>
     </div>
 
-    <!-- Right: Live Info -->
+    <!-- Right: Live Info & Controls -->
     <div class="flex items-center gap-6 text-xs">
       <div class="flex items-center gap-2">
         <span class="text-gray-500">Latency:</span>
@@ -126,12 +126,14 @@
               x-text="connectionStatus === 'connected' ? 'Connected' : 'Disconnected'"></span>
       </div>
       <button @click="toggleTheme()" 
-              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400">
+              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
+              title="Toggle theme">
         <span x-show="theme === 'dark'">☀️</span>
         <span x-show="theme === 'light'">🌙</span>
       </button>
       <button @click="showCommandPalette = !showCommandPalette" 
-              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs">
+              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
+              title="Command Palette (⌘K)">
         ⌘K
       </button>
     </div>

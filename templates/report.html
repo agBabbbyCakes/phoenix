@@ -64,9 +64,11 @@
     </div>
   </aside>
 
-  <!-- TOP BAR (Global Navigation) -->
+  <!-- TOP BAR (Unified Global Navigation) -->
   <header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
+    
+    <!-- Left: Brand & Navigation -->
     <div class="flex items-center gap-8">
       <div class="text-lg font-semibold text-cyan-400">Blockchain Bot Positions</div>
       <nav class="flex items-center gap-6">
@@ -77,13 +79,35 @@
         <a href="/settings" class="nav-link">Settings</a>
       </nav>
     </div>
+
+    <!-- Right: Live Info & Controls -->
     <div class="flex items-center gap-6 text-xs">
-      <button @click="toggleTheme()" class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400">
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Latency:</span>
+        <span class="text-cyan-400 font-semibold">{{ summary.avg_latency_ms }}ms</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Success:</span>
+        <span class="text-green-400 font-semibold">{{ summary.success_rate_pct }}%</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Auto-refresh:</span>
+        <span class="text-gray-400">5s</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50"></div>
+        <span class="text-gray-400">Connected</span>
+      </div>
+      <button @click="toggleTheme()" 
+              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
+              title="Toggle theme">
         <span x-show="theme === 'dark'">☀️</span>
         <span x-show="theme === 'light'">🌙</span>
       </button>
-      <button @click="printReport()" class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs">
-        🖨️ Print
+      <button @click="showCommandPalette = !showCommandPalette" 
+              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
+              title="Command Palette (⌘K)">
+        ⌘K
       </button>
     </div>
   </header>
@@ -242,9 +266,11 @@ function reportPageState() {
     theme: localStorage.getItem('phoenix:theme') || 'dark',
     lastUpdated: new Date().toLocaleTimeString(),
     showCommandPalette: false,
+    commandInput: '',
     
     init() {
       this.applyTheme();
+      this.setupKeyboardShortcuts();
       setInterval(() => {
         this.lastUpdated = new Date().toLocaleTimeString();
       }, 5000);
@@ -291,6 +317,35 @@ function reportPageState() {
       a.download = `silverback-report-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
+    },
+    
+    executeCommand() {
+      const cmd = this.commandInput.trim().toLowerCase();
+      switch (cmd) {
+        case 'print':
+          this.printReport();
+          break;
+        case 'export':
+          this.exportData();
+          break;
+        case 'theme':
+          this.toggleTheme();
+          break;
+      }
+      this.commandInput = '';
+      this.showCommandPalette = false;
+    },
+    
+    setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          this.showCommandPalette = !this.showCommandPalette;
+        }
+        if (e.key === 'Escape' && this.showCommandPalette) {
+          this.showCommandPalette = false;
+        }
+      });
     }
   };
 }
