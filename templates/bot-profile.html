@@ -67,12 +67,11 @@
   </aside>
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
     
-    <!-- Left: Brand & Navigation -->
-    <div class="flex items-center gap-8">
-      <div class="text-lg font-semibold text-cyan-400">Blockchain Bot Positions</div>
+    <!-- Left: Navigation -->
+    <div class="flex items-center gap-8 ml-64">
       <nav class="flex items-center gap-6">
         <a href="/" class="nav-link">Dashboard</a>
         <a href="/bots" class="nav-link active">Bots</a>
@@ -83,7 +82,7 @@
     </div>
 
     <!-- Right: Live Info & Controls -->
-    <div class="flex items-center gap-6 text-xs">
+    <div class="flex items-center gap-6 text-xs mr-80">
       <div class="flex items-center gap-2">
         <span class="text-gray-500">Latency:</span>
         <span class="text-cyan-400 font-semibold" x-text="bot.avg_latency + 'ms'"></span>

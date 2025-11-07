@@ -65,12 +65,11 @@
   </aside>
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
     
-    <!-- Left: Brand & Navigation -->
-    <div class="flex items-center gap-8">
-      <div class="text-lg font-semibold text-cyan-400">Blockchain Bot Positions</div>
+    <!-- Left: Navigation -->
+    <div class="flex items-center gap-8 ml-64">
       <nav class="flex items-center gap-6">
         <a href="/" class="nav-link">Dashboard</a>
         <a href="/bots" class="nav-link">Bots</a>
@@ -81,7 +80,7 @@
     </div>
 
     <!-- Right: Live Info & Controls -->
-    <div class="flex items-center gap-6 text-xs">
+    <div class="flex items-center gap-6 text-xs mr-80">
       <div class="flex items-center gap-2">
         <span class="text-gray-500">Latency:</span>
         <span class="text-cyan-400 font-semibold">{{ summary.avg_latency_ms }}ms</span>
@@ -171,12 +170,12 @@
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Avg Latency</div>
           <div class="text-2xl font-semibold text-yellow-400">{{ summary.avg_latency_ms }}ms</div>
-        </div>
+                    </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Success Rate</div>
           <div class="text-2xl font-semibold text-green-400">{{ summary.success_rate_pct }}%</div>
-        </div>
-      </div>
+                    </div>
+                </div>
 
       <!-- Details Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -205,25 +204,25 @@
               </div>
               <span class="text-red-400 font-semibold">{{ summary.status_counts.critical }}</span>
             </div>
-          </div>
-        </div>
+                        </div>
+                    </div>
 
         <!-- Top Bots by Profit -->
         <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6">
           <h3 class="text-lg font-semibold text-gray-200 mb-4">Top Bots by Profit</h3>
           <div class="space-y-2">
-            {% for name, p in summary.top_bots %}
+                                {% for name, p in summary.top_bots %}
             <div class="flex items-center justify-between p-3 rounded bg-gray-800/50 border border-gray-700">
               <span class="text-gray-300 font-semibold">{{ name }}</span>
               <span class="text-cyan-400 font-semibold">{{ p }}</span>
             </div>
-            {% else %}
+                                {% else %}
             <div class="text-center text-gray-500 py-8">No data available</div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
+                                {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                </div>
   </main>
 
   <!-- BOTTOM BAR (Fixed) -->
@@ -234,7 +233,7 @@
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50"></div>
           <span class="text-sm text-gray-400">Silverback v{{ version }}</span>
-        </div>
+            </div>
         <div class="text-xs text-gray-500">
           Last updated: <span x-text="lastUpdated"></span>
         </div>
@@ -252,7 +251,7 @@
         <a href="/report" class="text-sm text-gray-400 hover:text-green-400 transition-colors hover:shadow-lg hover:shadow-green-400/20 px-3 py-1 rounded">
           Reports
         </a>
-      </div>
+        </div>
     </div>
   </footer>
 </div>
@@ -350,4 +349,4 @@ function reportPageState() {
   };
 }
 </script>
-{% endblock %}
+    {% endblock %}
