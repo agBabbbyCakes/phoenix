@@ -67,6 +67,35 @@
         </div>
       </div>
 
+      <!-- Live Streaming Event Feed -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Live Event Feed</h2>
+        <div id="sidebar-event-feed-container" class="h-32 overflow-y-auto border border-gray-700 rounded p-2">
+          <div id="sidebar-event-feed"></div>
+        </div>
+        <div hx-get="/events" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-event-feed"></div>
+      </div>
+
+      <!-- Silverback Advisor Panel -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Silverback Advisor</h2>
+        <div id="sidebar-advisor-container" class="h-28 overflow-y-auto border border-gray-700 rounded p-2">
+          <div id="sidebar-advisor-feed"></div>
+        </div>
+        <div hx-get="/advisor" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-advisor-feed"></div>
+      </div>
+
+      <!-- Mini Streaming Chart (Charts.css) -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Mini Chart</h2>
+        <div class="border border-gray-700 rounded p-2">
+          <ul id="sidebar-mini-chart" class="charts-css bar tiny show-data show-primary-axis">
+            <!-- Bars stream here -->
+          </ul>
+        </div>
+        <div hx-get="/charts/mini" hx-trigger="load" hx-swap="beforeend" hx-target="#sidebar-mini-chart"></div>
+      </div>
+
       <!-- Bot Filter -->
       <div class="mb-6">
         <h2 class="text-xs uppercase text-gray-400 mb-2">Filter Bots</h2>
@@ -332,6 +361,10 @@
   // Smooth scroll behavior for the feed container
   (function () {
     var feedContainer = document.getElementById('event-feed-container');
+    var sidebarEventContainer = document.getElementById('sidebar-event-feed-container');
+    var sidebarEventAnchor = document.getElementById('sidebar-event-feed');
+    var sidebarAdvisorContainer = document.getElementById('sidebar-advisor-container');
+    var sidebarAdvisorAnchor = document.getElementById('sidebar-advisor-feed');
     if (!feedContainer) return;
     // Auto-scroll on each HTMX swap (new chunk received)
     document.addEventListener('htmx:afterSwap', function (evt) {
@@ -346,6 +379,18 @@
           // Scroll to bottom
           requestAnimationFrame(function () {
             feedContainer.scrollTop = feedContainer.scrollHeight;
+          });
+        }
+        // Sidebar Event Feed
+        if (sidebarEventContainer && sidebarEventAnchor && (target === sidebarEventAnchor || sidebarEventAnchor.nextSibling === target || sidebarEventAnchor.parentElement === target)) {
+          requestAnimationFrame(function () {
+            sidebarEventContainer.scrollTop = sidebarEventContainer.scrollHeight;
+          });
+        }
+        // Sidebar Advisor Feed
+        if (sidebarAdvisorContainer && sidebarAdvisorAnchor && (target === sidebarAdvisorAnchor || sidebarAdvisorAnchor.nextSibling === target || sidebarAdvisorAnchor.parentElement === target)) {
+          requestAnimationFrame(function () {
+            sidebarAdvisorContainer.scrollTop = sidebarAdvisorContainer.scrollHeight;
           });
         }
       } catch (e) { /* noop */ }

@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 import json, os
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timezone
+import random
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
@@ -376,6 +377,79 @@ async def logs_stream(request: Request) -> StreamingResponse:
             ).render(ts=now, level_name=lvl, level_class=cls, message=msg)
             yield html + "\n"
             await asyncio.sleep(random.uniform(0.8, 2.2))
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
+
+@app.get("/advisor")
+async def advisor_stream(request: Request) -> StreamingResponse:
+    async def stream():
+        yield "<!-- advisor-stream-start -->\n"
+        tips = [
+            "Consider raising latency alert threshold by 10% based on last-minute volatility.",
+            "arb-scout shows elevated latency; investigate upstream RPC provider.",
+            "mev-watch success rate dipped to 82% — check recent bundle rejections.",
+            "Opportunity detected: widening spread suggests short-lived arbitrage.",
+            "High gas detected; defer non-urgent transactions for 2–3 blocks.",
+            "Sandwich-guard flagged potential frontrun pattern; tighten slippage.",
+            "tx-relay queue depth rising — enable backpressure on submissions.",
+            "Bot allocation skewed; rebalance CPU time toward strategy-bot.",
+        ]
+        badges = [
+            ("info", "text-blue-400", "bg-blue-500/10 border-blue-500/30"),
+            ("warn", "text-yellow-400", "bg-yellow-500/10 border-yellow-500/30"),
+            ("crit", "text-red-400", "bg-red-500/10 border-red-500/30"),
+            ("ok", "text-emerald-400", "bg-emerald-500/10 border-emerald-500/30"),
+        ]
+        while True:
+            try:
+                if await request.is_disconnected():
+                    break
+            except Exception:
+                break
+            ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            level, color, frame = random.choice(badges)
+            msg = random.choice(tips)
+            html = templates.env.from_string(
+                """
+<div class="advisor-line text-xs border rounded px-2 py-1 mb-1 {{ frame }}">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{{ ts }}</span>
+    <span class="{{ color }} font-semibold uppercase">Advisor</span>
+  </div>
+  <div class="mt-0.5">{{ msg }}</div>
+</div>
+"""
+            ).render(ts=ts, color=color, frame=frame, msg=msg)
+            yield html + "\n"
+            await asyncio.sleep(random.uniform(1.5, 3.5))
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
+
+@app.get("/charts/mini")
+async def charts_mini_stream(request: Request) -> StreamingResponse:
+    async def stream():
+        yield "<!-- mini-chart-stream-start -->\n"
+        # Stream small bar entries as Charts.css <li> items, one per tick
+        while True:
+            try:
+                if await request.is_disconnected():
+                    break
+            except Exception:
+                break
+            # Normalize to 0..1 for --size
+            val = random.uniform(0.05, 0.95)
+            ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            html = templates.env.from_string(
+                """
+<li style="--size: {{ size }};">
+  <span class="data">{{ label }}</span>
+</li>
+"""
+            ).render(size=f"{val:.3f}", label=ts)
+            yield html + "\n"
+            await asyncio.sleep(random.uniform(1.0, 2.0))
 
     return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
 
