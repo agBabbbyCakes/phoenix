@@ -83,6 +83,21 @@
           <div id="sidebar-advisor-feed"></div>
         </div>
         <div hx-get="/advisor" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-advisor-feed"></div>
+        <!-- Ask Advisor Form -->
+        <form class="mt-2 flex gap-2"
+              hx-post="/advisor"
+              hx-target="#sidebar-advisor-feed"
+              hx-swap="afterend">
+          <input name="q"
+                 type="text"
+                 placeholder="Ask the advisor…"
+                 class="flex-1 bg-gray-900 border border-gray-700 rounded-md p-2 text-xs text-gray-100"
+                 :class="theme === 'light' ? 'bg-white border-gray-300 text-gray-900' : ''" />
+          <button type="submit"
+                  class="px-3 py-2 text-xs rounded-md bg-blue-600 hover:bg-blue-700">
+            Ask
+          </button>
+        </form>
       </div>
 
       <!-- Mini Streaming Chart (Charts.css) -->

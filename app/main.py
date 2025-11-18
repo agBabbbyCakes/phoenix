@@ -453,6 +453,82 @@ async def charts_mini_stream(request: Request) -> StreamingResponse:
 
     return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
 
+@app.post("/advisor")
+async def advisor_chat(request: Request) -> StreamingResponse:
+    async def stream():
+        yield "<!-- advisor-chat-start -->\n"
+        # Extract question from form or JSON
+        question = ""
+        try:
+            # Prefer form data (HTMX default)
+            form = await request.form()
+            question = str(form.get("q") or "").strip()
+        except Exception:
+            question = ""
+        if not question:
+            try:
+                data = await request.json()
+                question = str(data.get("q") or "").strip()
+            except Exception:
+                question = ""
+        if not question:
+            question = "What can you do?"
+
+        # 1) Echo the question
+        echo_html = templates.env.from_string(
+            """
+<div class="advisor-line text-xs border rounded px-2 py-1 mb-1 bg-blue-500/10 border-blue-500/30">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{{ ts }}</span>
+    <span class="text-blue-400 font-semibold">You</span>
+  </div>
+  <div class="mt-0.5">{{ question }}</div>
+</div>
+"""
+        ).render(ts=datetime.now(timezone.utc).strftime("%H:%M:%S"), question=question)
+        yield echo_html + "\n"
+        await asyncio.sleep(0.4)
+
+        # 2) Thinking...
+        thinking_html = templates.env.from_string(
+            """
+<div class="advisor-line text-xs border rounded px-2 py-1 mb-1 bg-gray-800/60 border-gray-700">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{{ ts }}</span>
+    <span class="text-gray-300 font-semibold">Advisor</span>
+  </div>
+  <div class="mt-0.5 italic opacity-80">Thinking&hellip;</div>
+</div>
+"""
+        ).render(ts=datetime.now(timezone.utc).strftime("%H:%M:%S"))
+        yield thinking_html + "\n"
+        await asyncio.sleep(1.0)
+
+        # 3) Final advisor message (simple heuristic response)
+        tip_bank = [
+            "Consider examining recent latency spikes and adjusting your alert thresholds.",
+            "Review recent error logs for tx-relay; queue depth may be increasing.",
+            "Throughput looks uneven across bots — a small rebalance could help.",
+            "Gas conditions are volatile; consider postponing non-critical sends.",
+            "Enable more conservative slippage for sandwich-guard temporarily.",
+        ]
+        import random as _rnd
+        picked = _rnd.choice(tip_bank)
+        final_html = templates.env.from_string(
+            """
+<div class="advisor-line text-xs border rounded px-2 py-1 mb-1 bg-emerald-500/10 border-emerald-500/30">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{{ ts }}</span>
+    <span class="text-emerald-400 font-semibold">Advisor</span>
+  </div>
+  <div class="mt-0.5">{{ answer }}</div>
+</div>
+"""
+        ).render(ts=datetime.now(timezone.utc).strftime("%H:%M:%S"), answer=f"{picked} (Q: {question})")
+        yield final_html + "\n"
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
 @app.on_event("startup")
 async def _on_startup() -> None:
     def render_html(name: str, context: dict) -> str:
