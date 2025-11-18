@@ -17,6 +17,7 @@ import json, os
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timezone
 import random
+from typing import AsyncIterator
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
@@ -377,6 +378,81 @@ async def logs_stream(request: Request) -> StreamingResponse:
             ).render(ts=now, level_name=lvl, level_class=cls, message=msg)
             yield html + "\n"
             await asyncio.sleep(random.uniform(0.8, 2.2))
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
+@app.post("/silverback/streaming-demo/advisor")
+async def silverback_streaming_demo_advisor(request: Request) -> StreamingResponse:
+    """Streaming Advisor Bot demo for the Silverback streaming demo page.
+    
+    Accepts a 'question' field (form or JSON) and streams a sequence of Divs:
+      1) Echo of the user's question
+      2) 'Thinking...' placeholder
+      3) Final advisor-style response
+    """
+    async def stream() -> AsyncIterator[str]:
+        yield "<!-- streaming-demo-advisor-start -->\n"
+        # Extract question from form (preferred for HTMX), fall back to JSON
+        question = ""
+        try:
+            form = await request.form()
+            question = str(form.get("question") or "").strip()
+        except Exception:
+            pass
+        if not question:
+            try:
+                data = await request.json()
+                question = str(data.get("question") or "").strip()
+            except Exception:
+                question = ""
+        if not question:
+            question = "What can you do?"
+
+        now_ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        # 1) Echo user question
+        yield f'''
+<div class="msg user px-2 py-1 mb-1 border border-blue-500/30 bg-blue-500/10 rounded">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{now_ts}</span>
+    <span class="text-blue-400 font-semibold">You</span>
+  </div>
+  <div class="mt-0.5">You: {question}</div>
+</div>
+'''.strip() + "\n"
+        await asyncio.sleep(0.5)
+
+        # 2) Thinking placeholder
+        now_ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        yield f'''
+<div class="msg bot px-2 py-1 mb-1 border border-gray-700 bg-gray-800/60 rounded">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{now_ts}</span>
+    <span class="text-gray-300 font-semibold">Advisor</span>
+  </div>
+  <div class="mt-0.5 italic opacity-80">Thinking&hellip;</div>
+</div>
+'''.strip() + "\n"
+        await asyncio.sleep(1.0)
+
+        # 3) Final advisor response
+        suggestions = [
+            "Here's what Silverback recommends: review recent latency spikes and adjust alert thresholds.",
+            "Here's what Silverback recommends: check tx-relay queue depth; consider backpressure on submissions.",
+            "Here's what Silverback recommends: minor rebalancing across bots to smooth throughput.",
+            "Here's what Silverback recommends: hold non-critical sends; gas volatility detected.",
+            "Here's what Silverback recommends: tighten slippage temporarily to reduce frontrun risk.",
+        ]
+        answer = random.choice(suggestions)
+        now_ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        yield f'''
+<div class="msg bot px-2 py-1 mb-1 border border-emerald-500/30 bg-emerald-500/10 rounded">
+  <div class="flex items-center gap-2">
+    <span class="opacity-60">{now_ts}</span>
+    <span class="text-emerald-400 font-semibold">Advisor</span>
+  </div>
+  <div class="mt-0.5">Advisor: {answer}</div>
+</div>
+'''.strip() + "\n"
 
     return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
 

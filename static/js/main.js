@@ -1,4 +1,7 @@
 (() => {
+  // Developer toggle: renders dummy data when backend endpoints are not ready.
+  // When true, chart and sidebar pollers will use random data but keep the same code paths.
+  const USE_DUMMY_DATA = false;
   const connIndicator = () => document.getElementById("conn-status");
   const sampleModeBadge = () => document.getElementById("sample-mode-ind");
   const successRateEl = () => document.getElementById("successRateValue");
@@ -130,6 +133,103 @@
     latencyChart.update();
   }
 
+  // Live Charts poller (fallback when SSE metrics are not wiring the specific live API).
+  // Polls /api/live/<metric> every 5s, logs status, and updates the primary chart instance.
+  // Expects payload: { timestamps: [...], values: [...] }
+  (function setupLiveChartsPolling() {
+    const POLL_MS = 5000;
+    let timer = null;
+    async function loadChart() {
+      try {
+        const selector = document.getElementById('viewSelector');
+        const currentMetric = selector ? selector.value : 'latency';
+        const endpoint = `/api/live/${currentMetric}`;
+        console.log('[LiveCharts] Poll tick →', currentMetric, 'at', new Date().toISOString());
+
+        let data;
+        if (USE_DUMMY_DATA) {
+          const now = Date.now();
+          data = {
+            timestamps: [now - 2000, now - 1000, now],
+            values: [
+              250 + Math.random() * 100,
+              300 + Math.random() * 120,
+              200 + Math.random() * 180
+            ].map(v => Math.round(v))
+          };
+          console.log('[LiveCharts] Using dummy data:', data);
+        } else {
+          const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' } });
+          console.log('[LiveCharts] Request', endpoint, 'status=', res.status);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          data = await res.json();
+          console.log('[LiveCharts] Data returned:', data);
+        }
+
+        // Update the primary chart (Chart.js) if present
+        const chartRef = window.__chartPrimary && window.__chartPrimary.value;
+        const canvas = document.querySelector('#chartPrimary');
+        if (!canvas) {
+          console.warn('[LiveCharts] #chartPrimary not found; skipping update');
+          return;
+        }
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        console.log('[LiveCharts] Canvas size:', w, 'x', h);
+        if (w === 0 || h === 0) {
+          // Ensure non-zero rendering area if needed
+          canvas.width = canvas.parentElement ? canvas.parentElement.clientWidth : 640;
+          canvas.height = canvas.parentElement ? canvas.parentElement.clientHeight : 240;
+          console.log('[LiveCharts] Adjusted canvas WH to', canvas.width, 'x', canvas.height);
+        }
+
+        if (!chartRef) {
+          console.warn('[LiveCharts] Primary chart is not initialized yet');
+          return;
+        }
+        if (!data || !Array.isArray(data.timestamps) || !Array.isArray(data.values)) {
+          console.warn('[LiveCharts] Unexpected payload; expected {timestamps, values}');
+          return;
+        }
+        // Normalize labels
+        const labels = data.timestamps.map(ts =>
+          new Date(ts).toLocaleTimeString('en-US', { hour12: false })
+        );
+        const values = data.values;
+        console.log('[LiveCharts] Updating chart with', values.length, 'points');
+
+        // Push points onto the Chart.js instance and keep a rolling window
+        const maxPointsPrimary = 60;
+        const c = chartRef;
+        c.data.labels.push(...labels);
+        if (!c.data.datasets[0]) c.data.datasets[0] = { data: [] };
+        c.data.datasets[0].data.push(...values);
+        while (c.data.labels.length > maxPointsPrimary) c.data.labels.shift();
+        while (c.data.datasets[0].data.length > maxPointsPrimary) c.data.datasets[0].data.shift();
+        // Optional: update moving average dataset if present
+        if (c.data.datasets[1] && Array.isArray(c.data.datasets[1].data)) {
+          const src = c.data.datasets[0].data;
+          const ma = [];
+          const windowN = 5;
+          for (let i = 0; i < src.length; i++) {
+            const start = Math.max(0, i - windowN + 1);
+            const slice = src.slice(start, i + 1);
+            const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+            ma.push(Number.isFinite(mean) ? Number(mean.toFixed(1)) : null);
+          }
+          c.data.datasets[1].data = ma;
+        }
+        c.update();
+        console.log('[LiveCharts] Chart updated');
+      } catch (err) {
+        console.error('[LiveCharts] Polling error:', err);
+      }
+    }
+    // Start interval
+    timer = setInterval(loadChart, POLL_MS);
+    // Immediate kick
+    loadChart();
+  })();
+
   function updateSuccessRate(value) {
     if (!successRateEl()) return;
     successRateEl().textContent = `${value}%`;
@@ -250,6 +350,15 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     initCharts();
+    // Ensure initial charts are built from the pre-rendered metrics HTML
+    const metricsPanel = document.getElementById('metrics-panel');
+    if (metricsPanel) {
+      try {
+        buildOrUpdateChartsFromPartial(metricsPanel);
+      } catch (e) {
+        console.warn('[LiveCharts] Initial chart init failed', e);
+      }
+    }
     // Show Sample Mode indicator if present on body dataset
     const body = document.body;
     if (body && body.dataset && body.dataset.sampleMode === "true" && sampleModeBadge()) {

@@ -126,6 +126,15 @@ function dashboardState() {
         const shouldShow = this.selectedBots.length === 0 || this.selectedBots.includes(botName);
         row.style.display = shouldShow ? '' : 'none';
       });
+      // Filter live stream feed (sidebar) if present
+      const streamItems = document.querySelectorAll('#sidebar-event-feed .event-item');
+      streamItems.forEach(div => {
+        // bot name is in a span.font-semibold inside the event item
+        const botSpan = div.querySelector('.font-semibold');
+        const botText = botSpan ? botSpan.textContent.trim() : '';
+        const shouldShow = this.selectedBots.length === 0 || this.selectedBots.includes(botText);
+        div.style.display = shouldShow ? '' : 'none';
+      });
     },
     
     // Load Data

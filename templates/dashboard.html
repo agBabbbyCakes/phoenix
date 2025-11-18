@@ -76,6 +76,86 @@
         <div hx-get="/events" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-event-feed"></div>
       </div>
 
+      <!-- Bot Filter Buttons (quick filter) -->
+      <div class="mb-4">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Bot Filter</h2>
+        <div class="flex gap-2">
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.length === 0 ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = []; localStorage.setItem('phoenix:selectedBots','[]'); applyFilters();">
+            All
+          </button>
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.includes('tx-relay') ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = ['tx-relay']; localStorage.setItem('phoenix:selectedBots', JSON.stringify(selectedBots)); applyFilters();">
+            tx-relay
+          </button>
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.includes('eth-sniper') ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = ['eth-sniper']; localStorage.setItem('phoenix:selectedBots', JSON.stringify(selectedBots)); applyFilters();">
+            eth-sniper
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Events (Auto-refresh via polling) -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Recent Events (Auto-refresh)</h2>
+        <div x-data="{
+               botFilter: 'all',
+               items: [],
+               init() {
+                 const load = async () => {
+                   try {
+                     console.log('[Sidebar] Poll /api/events/recent');
+                     const res = await fetch('/api/events/recent', { headers: { 'Accept': 'application/json' } });
+                     if (!res.ok) throw new Error('HTTP ' + res.status);
+                     const json = await res.json();
+                     console.log('[Sidebar] events returned', json);
+                     this.items = Array.isArray(json?.events) ? json.events.slice(0, 50) : [];
+                   } catch (e) {
+                     // Dummy fallback
+                     console.warn('[Sidebar] Using dummy recent events', e);
+                     const bots = ['tx-relay', 'eth-sniper', 'arb-scout'];
+                     const now = Date.now();
+                     this.items = Array.from({ length: 10 }).map((_, i) => ({
+                       ts: new Date(now - i * 1000).toLocaleTimeString('en-US', { hour12: false }),
+                       bot: bots[Math.floor(Math.random() * bots.length)],
+                       latency_ms: Math.round(150 + Math.random() * 250),
+                       status: Math.random() < 0.85 ? 'ok' : 'warning'
+                     }));
+                   }
+                 };
+                 load();
+                 setInterval(load, 5000);
+               }
+             }"
+             class="border border-gray-700 rounded p-2 max-h-48 overflow-y-auto">
+          <div class="flex gap-2 mb-2">
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'all'">All</button>
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'tx-relay' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'tx-relay'">tx-relay</button>
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'eth-sniper' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'eth-sniper'">eth-sniper</button>
+          </div>
+          <ul class="text-xs space-y-1">
+            <template x-for="(item, i) in items" :key="i">
+              <li x-show="botFilter === 'all' || item.bot === botFilter"
+                  class="flex items-center justify-between">
+                <span class="opacity-60" x-text="item.ts"></span>
+                <span class="font-semibold" x-text="item.bot"></span>
+                <span class="font-mono" x-text="(item.latency_ms||0) + 'ms'"></span>
+                <span :class="item.status === 'ok' ? 'text-emerald-400' : item.status === 'warning' ? 'text-yellow-400' : 'text-red-400'"
+                      x-text="(item.status||'ok').toUpperCase()"></span>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
       <!-- Silverback Advisor Panel -->
       <div class="mb-6">
         <h2 class="text-xs uppercase text-gray-400 mb-2">Silverback Advisor</h2>

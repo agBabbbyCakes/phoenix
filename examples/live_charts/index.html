@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QuikUI Live Charts — Streaming Demo</title>
+    <!-- Charts.css (used for simple HTML/CSS-driven chart rendering) -->
+    <link rel="stylesheet" href="https://unpkg.com/charts.css/dist/charts.min.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <!-- Left Panel: Live Chart -->
+      <section class="panel panel--left">
+        <header class="panel__header">
+          <h1>Live Latency</h1>
+          <div class="panel__sub">
+            <span class="badge">Streaming HTML updates</span>
+            <button id="toggle-mock" class="btn" aria-pressed="false">Use mock data</button>
+          </div>
+        </header>
+
+        <!-- Single-row Charts.css table. We only update the --size on this one cell. -->
+        <figure class="chart-figure">
+          <table class="charts-css column show-labels show-primary-axis show-data-on-hover live-chart" id="live-chart">
+            <caption>Current latency (normalized 0–500ms)</caption>
+            <tbody>
+              <tr>
+                <th scope="row">Now</th>
+                <td id="bar" style="--size: 0.20;">
+                  <span class="data" id="bar-label">100 ms</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </figure>
+
+        <footer class="panel__footer">
+          <small>
+            This example avoids spamming rows; we mutate a single <code>&lt;td style="--size: …"&gt;</code> as data streams.
+          </small>
+        </footer>
+      </section>
+
+      <!-- Right Panel: Stats / Health -->
+      <aside class="panel panel--right">
+        <header class="panel__header">
+          <h2>Stats</h2>
+        </header>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat__label">Current</div>
+            <div class="stat__value" id="stat-current">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">5s moving avg</div>
+            <div class="stat__value" id="stat-ma">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">Threshold</div>
+            <div class="stat__value">
+              <span id="stat-threshold">350 ms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="health">
+          <div class="health__row">
+            <div class="health__indicator" id="health-indicator" aria-label="Health status" title="Health"></div>
+            <div class="health__text">
+              <div class="health__label">Health</div>
+              <div class="health__state" id="health-state">—</div>
+            </div>
+          </div>
+          <div class="health__legend">
+            <span class="dot dot--ok"></span> OK
+            <span class="dot dot--warn"></span> Warning
+            <span class="dot dot--crit"></span> Critical
+          </div>
+        </div>
+
+        <div class="controls">
+          <label for="threshold" class="controls__label">Alert threshold (ms)</label>
+          <input type="range" id="threshold" min="100" max="1000" step="10" value="350" />
+        </div>
+      </aside>
+    </div>
+
+    <script src="./chart.js" type="module"></script>
+    <script src="./stream.js" type="module"></script>
+  </body>
+  </html>
+
+

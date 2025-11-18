@@ -34,6 +34,25 @@
                     {% endif %}
                 </div>
 
+                <!-- Advisor Bot (Streaming Demo) -->
+                <div class="mb-4">
+                    <h2 class="text-sm font-semibold mb-2">Advisor Bot (Streaming Demo)</h2>
+                    <div id="advisor-feed" class="h-24 overflow-y-auto border border-gray-800 rounded p-2 mb-2"></div>
+                    <form class="flex gap-2"
+                          hx-post="/silverback/streaming-demo/advisor"
+                          hx-target="#advisor-feed"
+                          hx-swap="afterend">
+                        <input name="question"
+                               type="text"
+                               placeholder="Ask a question…"
+                               class="flex-1 bg-gray-900 border border-gray-700 rounded-md p-2 text-xs text-gray-100" />
+                        <button type="submit"
+                                class="px-3 py-2 text-xs rounded-md bg-blue-600 hover:bg-blue-700">
+                            Send
+                        </button>
+                    </form>
+                </div>
+
                 <div hx-ext="sse" sse-connect="/stream">
                     <div id="metrics-panel" sse-swap="metrics_update"
                         hx-swap="innerHTML" class="h-full">
