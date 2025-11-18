@@ -14,6 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
 from dotenv import load_dotenv
 import json, os
+from fastapi.responses import StreamingResponse
+from datetime import datetime, timezone
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
@@ -217,6 +219,165 @@ async def stream(request: Request):
     # Use the global broker that's already publishing data
     return EventSourceResponse(client_event_stream(request, broker))
 
+
+@app.get("/events")
+async def events(request: Request) -> StreamingResponse:
+    async def stream():
+        last_sent_index = 0
+        # Initial small chunk to kick off streaming
+        yield "<!-- event-stream-start -->\n"
+        while True:
+            try:
+                if await request.is_disconnected():
+                    break
+            except Exception:
+                break
+            events = list(store.events)
+            while last_sent_index < len(events):
+                e = events[last_sent_index]
+                last_sent_index += 1
+                # Determine status styling
+                ok = (e.error is None) and (e.status in (None, "ok"))
+                status_class = "text-emerald-400"
+                if not ok and (e.status == "warning"):
+                    status_class = "text-yellow-400"
+                elif not ok:
+                    status_class = "text-red-400"
+                # Render a compact event row (Div component)
+                html = templates.env.from_string(
+                    """
+<div class="event-item flex items-center gap-2 py-1 text-xs">
+  <span class="opacity-60">{{ ts }}</span>
+  <span class="font-semibold">{{ bot }}</span>
+  <span class="ml-2 font-mono opacity-70">{{ latency }}</span>
+  <span class="ml-2 {{ status_class }}">{{ status_text }}</span>
+  {% if tx %}<span class="ml-2 font-mono text-[10px] opacity-70">{{ tx }}</span>{% endif %}
+</div>
+"""
+                ).render(
+                    ts=e.timestamp.strftime("%H:%M:%S"),
+                    bot=e.bot_name,
+                    latency=f"{int(e.latency_ms)}ms",
+                    status_class=status_class,
+                    status_text=("OK" if ok else (str(e.status or "error")).upper()),
+                    tx=e.tx_hash,
+                )
+                # Each yield flushes immediately to the client
+                yield html + "\n"
+            # Idle wait before checking for new events
+            await asyncio.sleep(0.5)
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
+
+@app.get("/logs/stream")
+async def logs_stream(request: Request) -> StreamingResponse:
+    async def stream():
+        # Start the stream with a small chunk for immediate flush
+        yield "<!-- logs-stream-start -->\n"
+        # If a Silverback JSONL log path is configured, tail that file; else stream demo lines
+        log_path = os.getenv("SILVERBACK_LOG_PATH")
+        if log_path and Path(log_path).exists():
+            try:
+                with Path(log_path).open("r", encoding="utf-8") as f:
+                    # Start tailing from end of file (live only)
+                    f.seek(0, 2)
+                    while True:
+                        try:
+                            if await request.is_disconnected():
+                                break
+                        except Exception:
+                            break
+                        line = f.readline()
+                        if line == "":
+                            # No new line; small idle sleep and continue
+                            await asyncio.sleep(0.3)
+                            # Handle file truncation/rotation
+                            try:
+                                if f.tell() > Path(log_path).stat().st_size:
+                                    break
+                            except FileNotFoundError:
+                                break
+                            continue
+                        line = line.strip()
+                        if not line:
+                            continue
+                        # Try JSON parse; fallback to raw message
+                        ts_str = datetime.now(timezone.utc).strftime("%H:%M:%S")
+                        level_name = "INFO"
+                        level_class = "text-blue-400"
+                        message = line
+                        try:
+                            obj = json.loads(line)
+                            message = str(obj.get("message", line))
+                            # timestamp normalization
+                            raw_ts = obj.get("timestamp") or obj.get("time")
+                            if isinstance(raw_ts, str):
+                                try:
+                                    ts_dt = datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
+                                    ts_str = ts_dt.strftime("%H:%M:%S")
+                                except Exception:
+                                    ts_str = str(raw_ts)
+                            # map level
+                            level = obj.get("level")
+                            if isinstance(level, int):
+                                if level >= 50:
+                                    level_name, level_class = "CRITICAL", "text-red-600"
+                                elif level >= 40:
+                                    level_name, level_class = "ERROR", "text-red-400"
+                                elif level >= 30:
+                                    level_name, level_class = "WARN", "text-yellow-400"
+                                elif level >= 20:
+                                    level_name, level_class = "INFO", "text-blue-400"
+                                else:
+                                    level_name, level_class = f"LVL-{level}", "text-gray-400"
+                        except Exception:
+                            # keep defaults for raw line
+                            pass
+                        html = templates.env.from_string(
+                            """
+<div class="log-line flex items-center gap-2 py-1 text-xs">
+  <span class="opacity-60">{{ ts }}</span>
+  <span class="{{ level_class }} font-semibold">[{{ level_name }}]</span>
+  <span class="whitespace-pre-wrap break-words">{{ message }}</span>
+</div>
+"""
+                        ).render(ts=ts_str, level_name=level_name, level_class=level_class, message=message)
+                        yield html + "\n"
+            except Exception:
+                # If file tailing fails, fall back to demo stream
+                pass
+        # Demo/sample streaming fallback
+        import random
+        levels = [
+            ("INFO", "text-blue-400"),
+            ("WARN", "text-yellow-400"),
+            ("ERROR", "text-red-400"),
+        ]
+        bots = ["arb-scout", "mev-watch", "sandwich-guard", "tx-relay", "eth-sniper"]
+        while True:
+            try:
+                if await request.is_disconnected():
+                    break
+            except Exception:
+                break
+            now = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            lvl, cls = random.choice(levels)
+            bot = random.choice(bots)
+            msg = f"{bot}: simulated {lvl.lower()} event - latency={random.randint(50,450)}ms"
+            html = templates.env.from_string(
+                """
+<div class="log-line flex items-center gap-2 py-1 text-xs">
+  <span class="opacity-60">{{ ts }}</span>
+  <span class="{{ level_class }} font-semibold">[{{ level_name }}]</span>
+  <span class="whitespace-pre-wrap break-words">{{ message }}</span>
+</div>
+"""
+            ).render(ts=now, level_name=lvl, level_class=cls, message=msg)
+            yield html + "\n"
+            await asyncio.sleep(random.uniform(0.8, 2.2))
+
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
 
 @app.on_event("startup")
 async def _on_startup() -> None:

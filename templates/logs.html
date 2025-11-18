@@ -163,6 +163,20 @@
       </div>
 
       <!-- Input Section -->
+      <!-- Live Stream Section -->
+      <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-gray-200">Live Stream</h2>
+          <div class="text-xs text-gray-500">Streaming log entries in real time</div>
+        </div>
+        <div id="logs-stream-container" class="h-64 overflow-y-auto border border-gray-800 rounded p-2">
+          <div id="logsStreamAnchor"></div>
+        </div>
+        <!-- Start streaming on load; each streamed div is inserted after the anchor -->
+        <div hx-get="/logs/stream" hx-trigger="load" hx-swap="afterend" hx-target="#logsStreamAnchor"></div>
+      </div>
+
+      <!-- Input Section -->
       <div class="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-lg p-6 mb-6">
         <h2 class="text-lg font-semibold text-gray-200 mb-4">Import Logs</h2>
         <div class="flex gap-4 flex-col md:flex-row">
@@ -793,5 +807,20 @@ function logsPageState() {
     URL.revokeObjectURL(url);
   });
 })();
+
+// Auto-scroll behavior for the live logs stream container
+document.addEventListener('htmx:afterSwap', function (evt) {
+  try {
+    var target = evt.detail && evt.detail.target;
+    var anchor = document.getElementById('logsStreamAnchor');
+    var container = document.getElementById('logs-stream-container');
+    if (!target || !anchor || !container) return;
+    if (target === anchor || anchor.nextSibling === target || anchor.parentElement === target) {
+      requestAnimationFrame(function () {
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+  } catch (e) { /* noop */ }
+});
 </script>
 {% endblock %}

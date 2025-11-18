@@ -286,6 +286,17 @@
         </table>
       </div>
 
+      <!-- Live Event Feed (streaming via HTMX) -->
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold">📣 Live Event Feed</h3>
+        <div id="event-feed-container" class="mt-2 h-40 overflow-y-auto border border-gray-800 rounded p-2 autoscroll"
+             :class="theme === 'light' ? 'border-gray-300' : ''">
+          <div id="event-feed"></div>
+        </div>
+        <!-- Start streaming on load; each streamed div will be inserted after #event-feed anchor -->
+        <div hx-get="/events" hx-trigger="load" hx-swap="afterend" hx-target="#event-feed"></div>
+      </div>
+
       <!-- Command bar -->
       <div class="flex gap-2">
         <input type="text" 
@@ -317,5 +328,29 @@
 <script src="/static/js/dashboard-ui.js"></script>
 <script src="/static/js/main.js"></script>
 <script src="/static/js/dashboard-alpine.js"></script>
+<script>
+  // Smooth scroll behavior for the feed container
+  (function () {
+    var feedContainer = document.getElementById('event-feed-container');
+    if (!feedContainer) return;
+    // Auto-scroll on each HTMX swap (new chunk received)
+    document.addEventListener('htmx:afterSwap', function (evt) {
+      // Only scroll when the swap target relates to the event feed anchor
+      try {
+        var target = evt.detail && evt.detail.target;
+        if (!target) return;
+        var anchor = document.getElementById('event-feed');
+        if (!anchor) return;
+        // If the swap targeted our anchor or inserted adjacent to it, scroll the container
+        if (target === anchor || anchor.nextSibling === target || anchor.parentElement === target) {
+          // Scroll to bottom
+          requestAnimationFrame(function () {
+            feedContainer.scrollTop = feedContainer.scrollHeight;
+          });
+        }
+      } catch (e) { /* noop */ }
+    });
+  })();
+</script>
 {% endblock %}
 
