@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Blockchain Bot Positions{% endblock %}
+{% block title %}Silverback — IDE Dashboard{% endblock %}
 
 {% block content %}
 <div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
@@ -8,7 +8,7 @@
      x-init="init()">
   
   <!-- LEFT SIDEBAR (Fixed) -->
-  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-0 bottom-16 z-20 overflow-y-auto"
+  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
          style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);">
     
     <!-- Logo & Title -->
@@ -29,7 +29,6 @@
         <a href="/logs" class="sidebar-nav-link">Logs</a>
         <a href="/report" class="sidebar-nav-link">Reports</a>
         <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
-        <a href="/tv" class="sidebar-nav-link">TV Mode</a>
       </nav>
     </div>
 
@@ -81,7 +80,33 @@
   </aside>
 
   <!-- MAIN CONTENT AREA (Scrollable) -->
-  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950 p-6">
+  <main class="flex-1 ml-64 mr-80 pr-80 mt-11 mb-16 overflow-auto bg-gray-950 p-6">
+    <!-- Always-visible basic chart at the top -->
+    <div class="chart-frame-premium rounded-lg p-4 mb-3">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Live Latency</h2>
+        <div class="text-xs text-gray-500">Last 100 events</div>
+      </div>
+      <div class="h-[70vh] md:h-[65vh] lg:h-[70vh]">
+        <canvas id="basicDashboardChart"></canvas>
+      </div>
+      <div class="mt-3 flex items-center justify-end">
+        <div class="chart-nav">
+          <button class="chart-nav-btn" id="topChartPrev" title="Previous">‹</button>
+          <button class="chart-pill active" data-topchart="latency">Latency</button>
+          <button class="chart-pill" data-topchart="throughput">Throughput</button>
+          <button class="chart-pill" data-topchart="profit">Profit</button>
+          <button class="chart-nav-btn" id="topChartNext" title="Next">›</button>
+        </div>
+      </div>
+    </div>
+    <!-- Premium subnav for quick in-page navigation -->
+    <nav class="premium-subnav mb-6" aria-label="Section navigation">
+      <a class="premium-pill" href="#overview">Overview</a>
+      <a class="premium-pill" href="#health">Bot Health</a>
+      <a class="premium-pill" href="#events">Events</a>
+      <a class="premium-pill" href="#charts">Charts</a>
+    </nav>
     <div hx-ext="sse" sse-connect="/stream">
       <div id="metrics-panel" sse-swap="metrics_update" hx-swap="innerHTML" class="h-full">
         {{ initial_metrics_html | safe }}
@@ -90,7 +115,7 @@
   </main>
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+  <header class="header-compact fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
     
     <!-- Left: Navigation -->
@@ -139,9 +164,17 @@
   </header>
 
   <!-- RIGHT SIDEBAR (Event Stream) -->
-  <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-0 bottom-16 z-20 overflow-y-auto"
+  <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto"
          style="box-shadow: -2px 0 20px rgba(0, 0, 0, 0.5);">
     
+    <!-- Context-aware informational panel -->
+    <div class="p-4 border-b border-gray-800">
+      <h2 class="text-sm font-semibold text-gray-300">Context & Insights</h2>
+      <div id="contextPanel" class="mt-2 space-y-2">
+        <div class="text-xs text-gray-400">Loading insights…</div>
+      </div>
+    </div>
+
     <div class="p-4 border-b border-gray-800">
       <h2 class="text-sm font-semibold text-gray-300">Recent Events</h2>
       <p class="text-xs text-gray-500">Live activity stream</p>
@@ -324,4 +357,148 @@
 <script src="/static/js/dashboard-ui.js"></script>
 <script src="/static/js/main.js"></script>
 <script src="/static/js/ide-dashboard.js"></script>
+<script>
+  // Render a basic Chart.js line chart with real data from /api/charts/data
+  (function () {
+    try {
+      var el = document.getElementById('basicDashboardChart');
+      if (!el || !window.Chart) return;
+      var ctx = el.getContext('2d');
+      var ctxPanel = document.getElementById('contextPanel');
+      function fmt(ts) {
+        try { return new Date(ts).toLocaleTimeString('en-US', { hour12: false }); } catch { return ts; }
+      }
+      async function loadData() {
+        const res = await fetch('/api/charts/data', { headers: { 'Accept': 'application/json' } });
+        const json = await res.json();
+        const events = Array.isArray(json?.events) ? json.events : [];
+        // Sort by timestamp ascending
+        events.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        return { events, kpis: json?.kpis || {} };
+      }
+      function toLatencySeries(events) {
+        return {
+          labels: events.map(e => fmt(e.timestamp)),
+          values: events.map(e => Number(e.latency_ms || e.latency || 0)),
+          label: 'Latency (ms)'
+        };
+      }
+      function toThroughputSeries(events) {
+        const buckets = new Map(); // minute -> count
+        events.forEach(e => {
+          const d = new Date(e.timestamp);
+          const key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+          buckets.set(key, (buckets.get(key)||0)+1);
+        });
+        const keys = Array.from(buckets.keys()).sort();
+        return { labels: keys, values: keys.map(k => buckets.get(k)), label: 'Throughput (/min)' };
+      }
+      function toProfitSeries(events) {
+        let acc = 0;
+        const labels = [], values = [];
+        events.forEach(e => {
+          const p = Number(e.profit ?? 0);
+          acc += p;
+          labels.push(fmt(e.timestamp));
+          values.push(Number(acc.toFixed(4)));
+        });
+        return { labels, values, label: 'Cumulative Profit' };
+      }
+      function renderSeries(series) {
+        if (el._basicChartInstance) { el._basicChartInstance.destroy(); }
+        el._basicChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: { labels: series.labels, datasets: [{
+            label: series.label,
+            data: series.values,
+            borderColor: '#22d3ee',
+            backgroundColor: 'rgba(34, 211, 238, 0.2)',
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.25
+          }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+      }
+      function summarize(values) {
+        if (!values || !values.length) return { min: 0, max: 0, avg: 0, last: 0, first: 0, change: 0 };
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const sum = values.reduce((a,b)=>a+b,0);
+        const avg = sum / values.length;
+        const first = values[0];
+        const last = values[values.length-1];
+        const change = last - first;
+        return { min, max, avg, last, first, change };
+      }
+      function insightBadge(text, colorClass) {
+        return '<span class="stat-chip '+colorClass+'">'+text+'</span>';
+      }
+      function updateContextPanel(type, series, kpis) {
+        if (!ctxPanel) return;
+        const s = summarize(series.values);
+        const lines = [];
+        if (type === 'latency') {
+          lines.push(insightBadge('Avg '+Math.round(s.avg)+'ms','text-emerald-300'));
+          lines.push(insightBadge('Peak '+Math.round(s.max)+'ms','text-yellow-300'));
+          lines.push(insightBadge((s.change>=0?'+':'')+Math.round(s.change)+'ms vs start','text-blue-300'));
+          if (s.last > 300) lines.push(insightBadge('High latency','text-red-300'));
+        } else if (type === 'throughput') {
+          lines.push(insightBadge('Buckets '+series.values.length,'text-emerald-300'));
+          lines.push(insightBadge('Peak '+Math.max(...series.values||[0])+'/min','text-yellow-300'));
+        } else if (type === 'profit') {
+          lines.push(insightBadge('Cum '+(series.values.slice(-1)[0]||0),'text-emerald-300'));
+          if ((series.values.slice(-1)[0]||0) < 0) lines.push(insightBadge('Negative trend','text-red-300'));
+        }
+        const tips = [];
+        if (type === 'latency' && s.last > 250) tips.push('Consider raising alert threshold or investigating RPC performance.');
+        if (type === 'throughput' && (Math.max(...series.values||[0]) < 2)) tips.push('Low activity: verify bots are connected.');
+        if (type === 'profit' && (series.values.slice(-1)[0]||0) <= 0) tips.push('Profit flat/negative: review strategy parameters.');
+        ctxPanel.innerHTML = ''
+          + '<div class="flex flex-wrap gap-2 mb-2">'+lines.join('')+'</div>'
+          + (tips.length ? '<ul class="list-disc list-inside text-xs text-gray-400">'+tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>' : '<div class="text-xs text-gray-500">All systems nominal.</div>');
+      }
+      async function renderTopChart(type) {
+        try {
+          const { events, kpis } = await loadData();
+          let series;
+          if (type === 'throughput') series = toThroughputSeries(events);
+          else if (type === 'profit') series = toProfitSeries(events);
+          else series = toLatencySeries(events);
+          renderSeries(series);
+          updateContextPanel(type, series, kpis);
+        } catch {}
+      }
+      // initial render and periodic refresh (latency default)
+      renderTopChart('latency');
+      setInterval(() => renderTopChart(document.querySelector('.chart-pill.active')?.dataset.topchart || 'latency'), 5000);
+      // nav bindings
+      document.querySelectorAll('.chart-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.chart-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderTopChart(btn.dataset.topchart);
+        });
+      });
+      // prev/next controls
+      const order = ['latency','throughput','profit'];
+      function setActive(type) {
+        document.querySelectorAll('.chart-pill').forEach(b => b.classList.remove('active'));
+        const target = document.querySelector(`.chart-pill[data-topchart="${type}"]`);
+        if (target) target.classList.add('active');
+        renderTopChart(type);
+      }
+      function step(dir) {
+        const current = document.querySelector('.chart-pill.active')?.dataset.topchart || 'latency';
+        const idx = Math.max(0, order.indexOf(current));
+        const next = order[(idx + dir + order.length) % order.length];
+        setActive(next);
+      }
+      const prevBtn = document.getElementById('topChartPrev');
+      const nextBtn = document.getElementById('topChartNext');
+      if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
+      if (nextBtn) nextBtn.addEventListener('click', () => step(1));
+    } catch (e) { /* no-op */ }
+  })();
+</script>
 {% endblock %}

@@ -294,6 +294,66 @@
 
   // Expose for hx-on or other inline handlers if needed
   window.setSSEStatus = setSSEStatus;
+  // Rolling counters for CSS-only ring and sparkline updates
+  const ringCounts = { ok: 0, slow: 0, err: 0 };
+  const sparklineVals = [];
+  const SPARK_MAX = 30;
+
+  function updateChartsFromMetrics(evt){
+    try {
+      const latency = typeof evt.latency_ms === 'number' ? evt.latency_ms : 0;
+      const successPct = typeof evt.success_rate === 'number' ? evt.success_rate : 0;
+      const normLatency = Math.max(0, Math.min(1, latency / 500));
+      const normSuccess = Math.max(0, Math.min(1, successPct / 100));
+      // Throughput proxy from rolling window length
+      const normThroughput = Math.max(0, Math.min(1, eventTimes.length / 60));
+
+      // 1) Update quick stat bars in sidebar (first three bars in the aside)
+      const asideBars = document.querySelectorAll('aside .css-bar');
+      if (asideBars && asideBars.length >= 3) {
+        asideBars[0].style.setProperty('--value', normLatency);
+        asideBars[1].style.setProperty('--value', normSuccess);
+        asideBars[2].style.setProperty('--value', normThroughput);
+      }
+
+      // 2) Update status ring by classifying latest latency (rolling distribution)
+      if (latency > 0) {
+        if (latency < 250) ringCounts.ok += 1;
+        else if (latency < 400) ringCounts.slow += 1;
+        else ringCounts.err += 1;
+        const total = ringCounts.ok + ringCounts.slow + ringCounts.err;
+        if (total > 0) {
+          const okPct = Math.round((ringCounts.ok / total) * 100);
+          const slowPct = Math.round((ringCounts.slow / total) * 100);
+          const errPct = Math.max(0, 100 - okPct - slowPct);
+          const ring = document.querySelector('.css-status-ring');
+          if (ring) {
+            ring.style.setProperty('--ok', String(okPct));
+            ring.style.setProperty('--slow', String(slowPct));
+            ring.style.setProperty('--err', String(errPct));
+          }
+        }
+      }
+
+      // 3) Update sparkline with normalized latency
+      if (!Number.isNaN(normLatency)) {
+        sparklineVals.push(normLatency);
+        while (sparklineVals.length > SPARK_MAX) sparklineVals.shift();
+        const spark = document.querySelector('#live-log-sparkline .css-sparkline');
+        if (spark) {
+          const bars = spark.querySelectorAll('i');
+          const pad = Math.max(0, bars.length - sparklineVals.length);
+          bars.forEach((bar, idx) => {
+            const v = sparklineVals[idx - pad] ?? 0;
+            bar.style.setProperty('--v', v);
+          });
+        }
+      }
+    } catch (e) {
+      // non-fatal
+    }
+  }
+
   window.handleMetrics = function(detail) {
     // detail is the event data string per htmx sse extension
     try {
@@ -321,6 +381,8 @@
       if (evt.price_eth_usd != null) {
         priceEl.textContent = `ETH/USD: ${evt.price_eth_usd.toFixed(2)}`;
       }
+      // Update CSS-only charts
+      updateChartsFromMetrics(evt);
     } catch (e) {
       console.error("Failed to parse metrics event", e);
     }

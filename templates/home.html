@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Silverback - Home{% endblock %}
+{% block title %}Silverback — Home{% endblock %}
 
 {% block content %}
 <div
@@ -57,42 +57,7 @@
                 </div>
             </a>
 
-            <!-- TV Style Dashboard -->
-            <a href="/tv"
-                class="group relative card bg-gray-900/80 backdrop-blur-xl border border-gray-800 hover:border-blue-500/50 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 transition-all transform hover:scale-105 rounded-xl overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all"></div>
-                <div class="card-body relative z-10">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="card-title text-2xl text-blue-400">📺 TV
-                            Dashboard</h2>
-                        <div
-                            class="badge badge-accent badge-lg bg-blue-500/20 text-blue-400 border-blue-500/50">Classic</div>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        Retro TV-style interface with channel dials and
-                        immersive visuals.
-                    </p>
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span
-                            class="badge badge-outline border-gray-700 text-gray-400">TV
-                            Format</span>
-                        <span
-                            class="badge badge-outline border-gray-700 text-gray-400">Channels</span>
-                        <span
-                            class="badge badge-outline border-gray-700 text-gray-400">3D
-                            View</span>
-                        <span
-                            class="badge badge-outline border-gray-700 text-gray-400">Heatmaps</span>
-                    </div>
-                    <div class="card-actions justify-end">
-                        <button
-                            class="btn bg-blue-600 hover:bg-blue-700 border-blue-500 text-white">
-                            Open TV View →
-                        </button>
-                    </div>
-                </div>
-            </a>
+            <!-- Removed TV Mode card -->
 
             <!-- Logs Viewer -->
             <a href="/logs"
@@ -345,10 +310,7 @@
                         class="text-sm text-gray-400 hover:text-green-400 transition-colors hover:shadow-lg hover:shadow-green-400/20 px-3 py-1 rounded">
                         Report
                     </a>
-                    <a href="/tv"
-                        class="text-sm text-gray-400 hover:text-blue-400 transition-colors hover:shadow-lg hover:shadow-blue-400/20 px-3 py-1 rounded">
-                        TV View
-                    </a>
+                    <!-- TV View removed -->
                 </div>
             </div>
         </div>

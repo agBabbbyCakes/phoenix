@@ -271,6 +271,31 @@ async def events(request: Request) -> StreamingResponse:
 
     return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
 
+@app.get("/silverback/streaming-demo/chart-stream")
+async def silverback_streaming_demo_chart_stream(request: Request) -> StreamingResponse:
+    """Streams table rows for a Charts.css column chart on the streaming demo page."""
+    async def stream() -> AsyncIterator[str]:
+        yield "<!-- streaming-demo-chart-rows -->\n"
+        while True:
+            try:
+                if await request.is_disconnected():
+                    break
+            except Exception:
+                break
+            ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+            val = random.randint(0, 100)
+            row = templates.env.from_string(
+                """
+<tr>
+  <td class="font-mono text-xs opacity-70">{{ ts }}</td>
+  <td data-c="{{ val }}">{{ val }}</td>
+</tr>
+"""
+            ).render(ts=ts, val=val)
+            yield row + "\n"
+            await asyncio.sleep(random.uniform(0.6, 1.6))
+    return StreamingResponse(stream(), media_type="text/html; charset=utf-8")
+
 
 @app.get("/logs/stream")
 async def logs_stream(request: Request) -> StreamingResponse:
@@ -638,7 +663,8 @@ async def _on_shutdown() -> None:
     task: Optional[asyncio.Task] = getattr(app.state, "publisher_task", None)
     if task is not None:
         task.cancel()
-        with contextlib.suppress(Exception):
+        # CancelledError inherits from BaseException, not Exception; suppress explicitly.
+        with contextlib.suppress(asyncio.CancelledError):
             await task
 
 

@@ -53,6 +53,26 @@
                     </form>
                 </div>
 
+                <!-- Streaming Chart (Charts.css + HTMX) -->
+                <div class="mb-6">
+                    <h2 class="text-sm font-semibold mb-2">Streaming Chart</h2>
+                    <table class="w-full charts-css column show-primary-axis show-data-axes border border-gray-800 rounded">
+                        <thead class="bg-gray-900/60">
+                            <tr>
+                                <th class="px-2 py-1 text-left text-xs text-gray-400">Time</th>
+                                <th class="px-2 py-1 text-left text-xs text-gray-400">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="live-chart-body">
+                        </tbody>
+                    </table>
+                    <div
+                        hx-get="/silverback/streaming-demo/chart-stream"
+                        hx-trigger="load"
+                        hx-swap="afterend"
+                        hx-target="#live-chart-body"></div>
+                </div>
+
                 <div hx-ext="sse" sse-connect="/stream">
                     <div id="metrics-panel" sse-swap="metrics_update"
                         hx-swap="innerHTML" class="h-full">

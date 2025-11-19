@@ -1,3 +1,146 @@
+/* Premium look & feel additions */
+.premium-subnav {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  background: rgba(20,20,20,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-radius: 14px;
+}
+.premium-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  color: #cfd8e3;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  transition: all .15s ease;
+  text-decoration: none;
+}
+.premium-pill:hover {
+  color: white;
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.28);
+  transform: translateY(-1px);
+}
+.card-premium {
+  background: rgba(26, 26, 30, 0.7) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+.table-compact-premium table,
+.table-compact-premium .table {
+  font-size: 12px;
+}
+.table-compact-premium .table th,
+.table-compact-premium .table td {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  font-size: 12px;
+}
+.divider-lux {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.18), rgba(255,255,255,0));
+  margin: 8px 0;
+}
+
+/* Premium header scale (+25% font size and paddings) */
+.premium-header {
+  font-size: 1.25em;
+}
+.premium-header .nav-link {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.premium-header .px-3 { padding-left: 0.9375rem !important; padding-right: 0.9375rem !important; }
+.premium-header .py-1\.5 { padding-top: 0.46875rem !important; padding-bottom: 0.46875rem !important; }
+.premium-header .h-14 { height: 3.9375rem !important; } /* 56px * 1.125 approximate comfort bump */
+
+/* Compact header variant */
+.header-compact { font-size: 0.90em; }
+.header-compact .nav-link {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.header-compact .px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+.header-compact .py-1\.5 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+.header-compact .h-14 { height: 2.75rem !important; } /* 44px */
+
+/* Top chart frame luxe feel */
+.chart-frame-premium {
+  background: radial-gradient(1200px 400px at 20% -20%, rgba(34, 211, 238, 0.08), transparent 60%),
+              radial-gradient(900px 300px at 80% -30%, rgba(99, 102, 241, 0.06), transparent 60%),
+              rgba(15, 15, 18, 0.85);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Chart nav pills under the top chart */
+.chart-nav {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.chart-pill {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #cfd8e3;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  cursor: pointer;
+  transition: all .15s ease;
+  user-select: none;
+}
+.chart-pill:hover { color: #fff; border-color: rgba(255,255,255,0.22); }
+.chart-pill.active {
+  color: #0b111f;
+  background: linear-gradient(180deg, #22d3ee, #60a5fa);
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(96, 165, 250, 0.25);
+}
+
+.chart-nav-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: #cfd8e3;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.chart-nav-btn:hover { color: #fff; border-color: rgba(255,255,255,0.22); }
 /* Expert UI Dashboard Enhancements - Animations, Transitions, and Visual Polish */
 
 /* Live State Transitions */

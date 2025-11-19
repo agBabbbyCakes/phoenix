@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Silverback{% endblock %}
+{% block title %}Silverback — Dashboard{% endblock %}
 
 {% block content %}
 <div class="flex h-screen bg-gray-950 text-gray-100 font-mono" 
@@ -37,8 +37,9 @@
           <p class="text-lg font-semibold transition-colors duration-500"
              :class="getLatencyColor(kpis.avg_latency_ms)"
              x-text="kpis.avg_latency_ms + 'ms'"></p>
-          {% include 'components/css_bar_chart.html' %}
-          <div :style="`--value:${Math.min(1, (kpis.avg_latency_ms||0)/500)}`" class="mt-2"></div>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.avg_latency_ms||0)/500)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="p-3 rounded-lg border"
              :class="theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'">
@@ -46,8 +47,9 @@
           <p class="text-lg font-semibold transition-colors duration-500"
              :class="getSuccessColor(kpis.success_rate_pct)"
              x-text="kpis.success_rate_pct + '%'"></p>
-          {% include 'components/css_bar_chart.html' %}
-          <div :style="`--value:${Math.min(1, (kpis.success_rate_pct||0)/100)}`" class="mt-2"></div>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.success_rate_pct||0)/100)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="p-3 rounded-lg border"
              :class="theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'">
@@ -55,8 +57,9 @@
           <p class="text-lg font-semibold text-yellow-400"
              :class="theme === 'light' ? 'text-yellow-600' : ''"
              x-text="kpis.throughput_1m + '/min'"></p>
-          {% include 'components/css_bar_chart.html' %}
-          <div :style="`--value:${Math.min(1, (kpis.throughput_1m||0)/60)}`" class="mt-2"></div>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.throughput_1m||0)/60)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
       </div>
 
@@ -70,9 +73,10 @@
                x-text="'🟡 ' + healthSummary.slow + ' Slow'"></div>
           <div class="px-3 py-1 rounded-full text-xs font-semibold border border-red-500/30 bg-red-500/10 text-red-400"
                x-text="'🔴 ' + healthSummary.error + ' Errors'"></div>
-          {% include 'components/css_status_ring.html' %}
           <div class="ml-2"
-               :style="(() => { const t=(healthSummary.ok+healthSummary.slow+healthSummary.error)||1; const ok=Math.round(100*healthSummary.ok/t); const slow=Math.round(100*healthSummary.slow/t); const err=100-ok-slow; return `--ok:${ok};--slow:${slow};--err:${err}`; })()"></div>
+               :style="(() => { const t=(healthSummary.ok+healthSummary.slow+healthSummary.error)||1; const ok=Math.round(100*healthSummary.ok/t); const slow=Math.round(100*healthSummary.slow/t); const err=100-ok-slow; return `--ok:${ok};--slow:${slow};--err:${err}`; })()">
+            {% include 'components/css_status_ring.html' %}
+          </div>
         </div>
       </div>
 
@@ -301,16 +305,29 @@
   <main class="w-2/3 flex flex-col overflow-hidden"
         :class="theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'">
     
-    <!-- TOP: CHART AREA -->
+    <!-- TOP: CHART AREA with Carousel Controls -->
     <section class="flex-1 border-b border-gray-800 p-4 overflow-auto"
              :class="theme === 'dark' ? 'border-gray-800' : 'border-gray-300'">
       <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold">📊 Live Metrics</h2>
-        <button @click="resetZoom()" 
-                class="text-sm text-gray-400 border border-gray-700 rounded-md px-3 py-1 hover:bg-gray-800 transition-colors"
-                :class="theme === 'light' ? 'text-gray-600 border-gray-300 hover:bg-gray-100' : ''">
-          Reset Zoom
-        </button>
+        <div class="flex items-center gap-2">
+          <button @click="resetZoom()" 
+                  class="text-sm text-gray-400 border border-gray-700 rounded-md px-3 py-1 hover:bg-gray-800 transition-colors"
+                  :class="theme === 'light' ? 'text-gray-600 border-gray-300 hover:bg-gray-100' : ''">
+            Reset Zoom
+          </button>
+          <div class="hidden sm:flex items-center gap-1">
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Prev chart"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.prev()">‹</button>
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Next chart"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.next()">›</button>
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Toggle autoplay"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.toggle()">▶︎/⏸</button>
+          </div>
+        </div>
       </div>
       
       <!-- Chart Container -->
@@ -397,8 +414,12 @@
                 <span class="ml-1">{{ e.bot_name }}</span>
               </td>
               <td class="p-2 font-mono"
-                  :class="getLatencyColor({{ e.latency_ms }})"
-                  x-text="{{ e.latency_ms }} + 'ms'"></td>
+                  :class="getLatencyColor({{ e.latency_ms }})">
+                {{ e.latency_ms }}ms
+                <div class="mt-1" style="--value: calc({{ e.latency_ms }} / 500)">
+                  {% include 'components/css_bar_chart.html' %}
+                </div>
+              </td>
               <td class="p-2">
                 {% if e.error %}
                 <span class="text-red-400">Error</span>
@@ -499,6 +520,31 @@
         }
       } catch (e) { /* noop */ }
     });
+  })();
+</script>
+<script>
+  // Simple carousel that cycles the metrics view by changing #viewSelector
+  (function () {
+    var views = ['latency', 'throughput', 'profit', 'heatmap'];
+    var idx = 0;
+    var timer = null;
+    function setView(v) {
+      try {
+        var sel = document.getElementById('viewSelector') || (document.querySelector('#metrics-panel') && document.querySelector('#metrics-panel #viewSelector'));
+        if (!sel) return;
+        sel.value = v;
+        sel.dispatchEvent(new Event('change'));
+      } catch {}
+    }
+    window.dashboardCarousel = {
+      next: function () { idx = (idx + 1) % views.length; setView(views[idx]); },
+      prev: function () { idx = (idx - 1 + views.length) % views.length; setView(views[idx]); },
+      autoplayOn: function () { if (timer) return; timer = setInterval(function () { window.dashboardCarousel.next(); }, 5000); },
+      autoplayOff: function () { if (!timer) return; clearInterval(timer); timer = null; },
+      toggle: function () { if (timer) this.autoplayOff(); else this.autoplayOn(); }
+    };
+    // Optionally start autoplay by default:
+    // window.dashboardCarousel.autoplayOn();
   })();
 </script>
 {% endblock %}

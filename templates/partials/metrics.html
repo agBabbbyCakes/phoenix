@@ -2,7 +2,7 @@
 {% set values = latency_series | map(attribute=1) | list %}
 
 <!-- Health Summary Chips (will be populated by JS) -->
-<div id="health-summary-chips"></div>
+<div id="overview"></div>
 
 <!-- KPI Cards with Live Transitions -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -37,7 +37,7 @@
 </div>
 
 <!-- View Selector -->
-<div class="flex items-center justify-between mt-4">
+<div id="charts" class="flex items-center justify-between mt-4">
   <h2 class="text-lg font-semibold">Live Charts</h2>
   <select id="viewSelector"
     class="select select-bordered bg-base-100 hover-glow">
@@ -102,24 +102,33 @@
   </div>
 </div>
 
-<!-- Bot Health Table -->
-<div class="card bg-base-100 shadow mt-4 glass-event-table">
+<!-- Bot Health (Compact Premium) -->
+<div id="health" class="card bg-base-100 shadow mt-4 glass-event-table card-premium table-compact-premium">
   <div class="card-body">
-    <div class="flex justify-between items-center">
-      <h2 class="card-title">Bot Health Status</h2>
-      <div class="text-sm text-gray-500">Auto-refreshing every 5s</div>
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="card-title">Bot Health</h2>
+      <div class="text-sm text-gray-500">Auto-refresh 5s</div>
     </div>
-    <div id="bot-health-table-container" 
+    <div class="flex items-center gap-3 mb-2">
+      <div class="stat-chip text-emerald-300">OK</div>
+      <div class="stat-chip text-yellow-300">Slow</div>
+      <div class="stat-chip text-red-300">Errors</div>
+      <div class="ml-2" style="--ok:60;--slow:25;--err:15">
+        {% include 'components/css_status_ring.html' %}
+      </div>
+    </div>
+    <div class="divider-lux"></div>
+    <div id="bot-health-table-container"
          data-bot-health-table
          data-refresh-interval="5000"
          data-api-endpoint="/api/bots/status">
-      <!-- Component will render here -->
+      <!-- Compact BotHealthTable renders here -->
     </div>
   </div>
 </div>
 
 <!-- Recent Events Table with Enhanced Interactions -->
-<div class="card bg-base-100 shadow mt-4 glass-event-table enhanced-card">
+<div id="events" class="card bg-base-100 shadow mt-4 glass-event-table enhanced-card card-premium table-compact-premium">
   <div class="card-body">
     <div class="flex justify-between items-center">
       <h2 class="card-title">Recent Events</h2>

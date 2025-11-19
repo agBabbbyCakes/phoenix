@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Logs Viewer - Blockchain Bot Positions{% endblock %}
+{% block title %}Silverback — Logs Viewer{% endblock %}
 
 {% block content %}
 <div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
@@ -29,7 +29,6 @@
         <a href="/logs" class="sidebar-nav-link active">Logs</a>
         <a href="/report" class="sidebar-nav-link">Reports</a>
         <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
-        <a href="/tv" class="sidebar-nav-link">TV Mode</a>
       </nav>
     </div>
 
@@ -50,14 +49,23 @@
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Total Logs</div>
           <div class="text-sm font-semibold text-cyan-400" id="sidebarTotalLogs">0</div>
+          <div id="sidebarTotalLogsBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Errors</div>
           <div class="text-sm font-semibold text-red-400" id="sidebarErrorCount">0</div>
+          <div id="sidebarErrorCountBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Warnings</div>
           <div class="text-sm font-semibold text-yellow-400" id="sidebarWarningCount">0</div>
+          <div id="sidebarWarningCountBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
       </div>
     </div>
@@ -169,6 +177,9 @@
           <h2 class="text-lg font-semibold text-gray-200">Live Stream</h2>
           <div class="text-xs text-gray-500">Streaming log entries in real time</div>
         </div>
+        <div class="mb-4" id="live-log-sparkline">
+          {% include 'components/css_sparkline.html' %}
+        </div>
         <div id="logs-stream-container" class="h-64 overflow-y-auto border border-gray-800 rounded p-2">
           <div id="logsStreamAnchor"></div>
         </div>
@@ -244,6 +255,9 @@
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Total Logs</div>
           <div class="text-lg font-semibold text-cyan-400" id="totalLogs">0</div>
+          <div id="totalLogsBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">INFO</div>
@@ -252,10 +266,16 @@
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">WARNING</div>
           <div class="text-lg font-semibold text-yellow-400" id="warningCount">0</div>
+          <div id="warningCountBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">ERROR</div>
           <div class="text-lg font-semibold text-red-400" id="errorCount">0</div>
+          <div id="errorCountBar">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
         </div>
         <div class="quick-stat-card glass-stat-card">
           <div class="text-xs text-gray-400 mb-1">Transactions</div>
@@ -393,6 +413,9 @@ function logsPageState() {
 (() => {
   let allLogs = [];
   let filteredLogs = [];
+  // Sparkline buffer for logs page
+  const sparkValues = [];
+  const SPARK_LEN = 30;
 
   // Log level mapping
   const levelMap = {
@@ -609,6 +632,40 @@ function logsPageState() {
     if (sidebarTotal) sidebarTotal.textContent = stats.total;
     if (sidebarError) sidebarError.textContent = stats.error;
     if (sidebarWarning) sidebarWarning.textContent = stats.warning;
+
+    // Update CSS bars (0..1 normalization)
+    try {
+      const setBar = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.setProperty('--value', Math.max(0, Math.min(1, val)));
+      };
+      setBar('sidebarTotalLogsBar', stats.total / 100);
+      setBar('sidebarErrorCountBar', stats.error / 50);
+      setBar('sidebarWarningCountBar', stats.warning / 50);
+      setBar('totalLogsBar', stats.total / 100);
+      setBar('errorCountBar', stats.error / 50);
+      setBar('warningCountBar', stats.warning / 50);
+    } catch {}
+
+    // Update sparklines with latest total (simple signal)
+    try {
+      sparkValues.push(Math.max(0, Math.min(1, stats.total / 100)));
+      while (sparkValues.length > SPARK_LEN) sparkValues.shift();
+      const applySpark = (containerId) => {
+        const container = document.querySelector(`#${containerId} .css-sparkline`);
+        if (!container) return;
+        const bars = container.querySelectorAll('i');
+        const pad = Math.max(0, bars.length - sparkValues.length);
+        bars.forEach((bar, idx) => {
+          const v = sparkValues[idx - pad] ?? 0;
+          bar.style.setProperty('--v', v);
+        });
+      };
+      applySpark('live-log-sparkline');
+      const inlineSpark = document.querySelector('#log-sparkline .css-sparkline') ? 'log-sparkline' : null;
+      if (inlineSpark) applySpark(inlineSpark);
+    } catch {}
   }
 
   // Apply filters
