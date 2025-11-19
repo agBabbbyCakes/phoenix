@@ -1,0 +1,92 @@
+/* CSS-only charts for Silverback
+   - Bars, sparklines/line, status ring, heatmap.
+   Values are driven by CSS variables updated via Alpine.js or inline styles.
+*/
+
+/* Horizontal bar (0..1) */
+.css-bar {
+  --value: 0.0;
+  position: relative;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.css-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: calc(var(--value) * 100%);
+  background: linear-gradient(90deg, #22d3ee, #60a5fa);
+  border-radius: 999px;
+  transition: width 200ms linear;
+}
+
+/* Sparkline / Line: stack of tiny bars */
+.css-sparkline, .css-linechart {
+  display: grid;
+  gap: 2px;
+  grid-auto-flow: column;
+  align-items: end;
+}
+.css-sparkline {
+  height: 22px;
+}
+.css-linechart {
+  height: 80px;
+}
+.css-sparkline i,
+.css-linechart i {
+  --v: 0;
+  width: 3px;
+  height: calc(var(--v) * 100%);
+  background: rgba(99, 102, 241, 0.9);
+  display: inline-block;
+  border-radius: 2px;
+  transition: height 150ms linear, background 150ms linear;
+}
+.css-linechart i {
+  width: 2px;
+  background: rgba(34, 211, 238, 0.9);
+}
+
+/* Status ring using conic-gradient.
+   Requires variables:
+     --ok, --slow, --err (percentages)
+*/
+.css-status-ring {
+  --ok: 60;
+  --slow: 30;
+  --err: 10;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      #10b981 0% calc(var(--ok) * 1%),
+      #f59e0b calc(var(--ok) * 1%) calc((var(--ok) + var(--slow)) * 1%),
+      #ef4444 calc((var(--ok) + var(--slow)) * 1%) 100%
+    );
+  -webkit-mask: radial-gradient(farthest-side, transparent 55%, black 56%);
+          mask: radial-gradient(farthest-side, transparent 55%, black 56%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Heatmap grid */
+.css-heatmap {
+  --cols: 12;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 4px;
+}
+.css-heatmap i {
+  --val: 0.0; /* 0..1 */
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  background: hsl(191deg 100% 46% / calc(0.1 + var(--val) * 0.9));
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background 120ms linear;
+}
+
+
