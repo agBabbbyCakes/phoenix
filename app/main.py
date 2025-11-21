@@ -21,6 +21,8 @@ from typing import AsyncIterator
 
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
+from .models import BotRental, RentalRequest, RentalDuration, PaymentMethod, RentalStatus
+import random
 
 # Optional import for Ethereum realtime feed (only if src directory exists)
 try:
@@ -163,6 +165,13 @@ async def dashboard(request: Request) -> HTMLResponse:
         "dashboard.html",
         {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html},
     )
+
+
+@app.get("/explorer", response_class=HTMLResponse)
+async def bot_explorer_page(request: Request) -> HTMLResponse:
+    """Bot Explorer page - Etherscan meets stock research."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("bot-explorer.html", {"request": request, "version": version})
 
 
 @app.get("/bots", response_class=HTMLResponse)
@@ -872,6 +881,236 @@ async def receive_bot_logs(request: Request) -> JSONResponse:
             "status": "success",
             "logs_received": len(logs),
             "metrics_created": metrics_created
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+# Bot Rental Endpoints
+@app.post("/api/bots/rent")
+async def rent_bot(request: RentalRequest) -> JSONResponse:
+    """Rent a bot for a specified duration.
+    
+    Creates a rental record and returns rental information.
+    In production, this would integrate with payment processing.
+    """
+    try:
+        from datetime import timedelta
+        
+        # Calculate expiration time based on duration
+        now = datetime.now(timezone.utc)
+        if request.duration == RentalDuration.HOURLY:
+            expires_at = now + timedelta(hours=1)
+            base_price = 0.5  # Base hourly price
+        elif request.duration == RentalDuration.DAILY:
+            expires_at = now + timedelta(days=1)
+            base_price = 12.0  # Daily price
+        elif request.duration == RentalDuration.MONTHLY:
+            expires_at = now + timedelta(days=30)
+            base_price = 300.0  # Monthly price (with discount)
+        else:
+            return JSONResponse({"status": "error", "message": "Invalid duration"}, status_code=400)
+        
+        # Get bot info to calculate price
+        bot_stats = {}
+        events = list(store.events)
+        for event in events:
+            if event.bot_name.lower().replace(" ", "-") == request.bot_id:
+                bot_stats["bot_name"] = event.bot_name
+                break
+        
+        # Create rental record
+        rental = BotRental(
+            bot_id=request.bot_id,
+            bot_name=bot_stats.get("bot_name", request.bot_id),
+            duration=request.duration,
+            price=base_price,
+            payment_method=request.payment_method,
+            status=RentalStatus.ACTIVE,
+            rented_at=now,
+            expires_at=expires_at
+        )
+        
+        # In production, store in database
+        # For now, return success response
+        return JSONResponse({
+            "status": "success",
+            "rental": {
+                "id": f"rental_{request.bot_id}_{int(now.timestamp())}",
+                "bot_id": rental.bot_id,
+                "bot_name": rental.bot_name,
+                "duration": rental.duration.value,
+                "price": rental.price,
+                "status": rental.status.value,
+                "rented_at": rental.rented_at.isoformat(),
+                "expires_at": rental.expires_at.isoformat()
+            }
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+@app.get("/api/bots/rentals")
+async def get_rentals() -> JSONResponse:
+    """Get all active rentals for the current user.
+    
+    Returns list of active bot rentals.
+    """
+    # In production, filter by user_id
+    # For now, return empty list (rentals stored client-side)
+    return JSONResponse({
+        "status": "success",
+        "rentals": []
+    })
+
+
+@app.get("/api/bots/{bot_id}/rental-info")
+async def get_bot_rental_info(bot_id: str) -> JSONResponse:
+    """Get rental information and pricing for a specific bot.
+    
+    Returns pricing tiers and availability.
+    """
+    try:
+        # Get bot stats
+        bot_stats = {}
+        events = list(store.events)
+        for event in events:
+            if event.bot_name.lower().replace(" ", "-") == bot_id:
+                bot_stats["bot_name"] = event.bot_name
+                break
+        
+        # Calculate pricing based on bot type/strategy
+        strategy = "arbitrage"  # Default
+        if "mev" in bot_id.lower():
+            strategy = "mev"
+        elif "trade" in bot_id.lower() or "snipe" in bot_id.lower():
+            strategy = "trading"
+        elif "monitor" in bot_id.lower():
+            strategy = "monitoring"
+        
+        base_prices = {
+            "arbitrage": 0.5,
+            "mev": 0.8,
+            "trading": 0.6,
+            "monitoring": 0.3,
+            "defi": 0.7,
+            "nft": 0.4
+        }
+        
+        hourly_price = base_prices.get(strategy, 0.5)
+        daily_price = hourly_price * 24
+        monthly_price = hourly_price * 24 * 30 * 0.8  # 20% discount
+        
+        return JSONResponse({
+            "status": "success",
+            "bot_id": bot_id,
+            "bot_name": bot_stats.get("bot_name", bot_id),
+            "pricing": {
+                "hourly": round(hourly_price, 2),
+                "daily": round(daily_price, 2),
+                "monthly": round(monthly_price, 2)
+            },
+            "available": True
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+@app.delete("/api/bots/rentals/{rental_id}")
+async def cancel_rental(rental_id: str) -> JSONResponse:
+    """Cancel an active rental.
+    
+    Marks rental as cancelled and processes refund if applicable.
+    """
+    try:
+        # In production, update rental status in database
+        return JSONResponse({
+            "status": "success",
+            "message": f"Rental {rental_id} cancelled successfully"
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+@app.post("/api/bots/trade")
+async def trade_bot(request: Request) -> JSONResponse:
+    """Trade bot shares (buy/sell).
+    
+    Allows users to buy or sell shares of high-performing bots.
+    In production, this would integrate with a trading system.
+    """
+    try:
+        data = await request.json()
+        bot_id = data.get("bot_id")
+        trade_type = data.get("type")  # 'buy' or 'sell'
+        amount = float(data.get("amount", 0))
+        price = float(data.get("price", 0))
+        
+        if not bot_id or amount <= 0 or price <= 0:
+            return JSONResponse({"status": "error", "message": "Invalid trade parameters"}, status_code=400)
+        
+        total_cost = amount * price
+        
+        # In production, this would:
+        # 1. Validate user balance
+        # 2. Execute trade on exchange/marketplace
+        # 3. Update user portfolio
+        # 4. Record transaction
+        
+        return JSONResponse({
+            "status": "success",
+            "trade": {
+                "bot_id": bot_id,
+                "type": trade_type,
+                "amount": amount,
+                "price": price,
+                "total": total_cost,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
+
+
+@app.get("/api/bots/{bot_id}/trading-info")
+async def get_bot_trading_info(bot_id: str) -> JSONResponse:
+    """Get trading information for a bot (price, volume, market data).
+    
+    Returns current market price, 24h volume, and trading statistics.
+    """
+    try:
+        # Get bot stats
+        bot_stats = {}
+        events = list(store.events)
+        for event in events:
+            if event.bot_name.lower().replace(" ", "-") == bot_id:
+                bot_stats["bot_name"] = event.bot_name
+                bot_stats["success_rate"] = event.success_rate
+                break
+        
+        # Calculate market price based on performance
+        base_price = 0.5
+        if bot_stats.get("success_rate", 0) > 95:
+            base_price = 1.0
+        elif bot_stats.get("success_rate", 0) > 90:
+            base_price = 0.75
+        elif bot_stats.get("success_rate", 0) > 80:
+            base_price = 0.5
+        
+        share_price = base_price * 100  # Convert to share price
+        
+        return JSONResponse({
+            "status": "success",
+            "bot_id": bot_id,
+            "bot_name": bot_stats.get("bot_name", bot_id),
+            "market_data": {
+                "current_price": share_price,
+                "24h_volume": random.randint(10000, 1000000),
+                "24h_high": share_price * 1.1,
+                "24h_low": share_price * 0.9,
+                "market_cap": share_price * 1000000,  # Simulated
+                "available_shares": 1000000
+            }
         })
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)

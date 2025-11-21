@@ -1,0 +1,954 @@
+{% extends 'base.html' %}
+
+{% block title %}Silverback — Bot Explorer{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/bot-explorer.css">
+<div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden bot-explorer-page"
+     x-data="botExplorerPageState()" 
+     x-init="init()">
+  
+  <!-- LEFT SIDEBAR (Fixed) -->
+  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
+         style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5); scrollbar-width: thin; scrollbar-color: rgba(6, 182, 212, 0.3) transparent;">
+    
+    <!-- Logo & Title -->
+    <div class="p-4 border-b border-gray-800">
+      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        🦍 Silverback
+      </h1>
+      <p class="text-xs text-gray-500 mt-1">Blockchain Bot Positions</p>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="p-4">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Navigation</div>
+      <nav class="space-y-1">
+        <a href="/" class="sidebar-nav-link">Dashboard</a>
+        <a href="/" class="sidebar-nav-link">Live Charts</a>
+        <a href="/explorer" class="sidebar-nav-link active">Bot Explorer</a>
+        <a href="/bots" class="sidebar-nav-link">Bots</a>
+        <a href="/logs" class="sidebar-nav-link">Logs</a>
+        <a href="/report" class="sidebar-nav-link">Reports</a>
+        <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
+      </nav>
+    </div>
+
+    <!-- Tools Section -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Tools</div>
+      <nav class="space-y-1">
+        <button @click="showCommandPalette = !showCommandPalette" class="sidebar-nav-link w-full text-left">Command Palette</button>
+        <button @click="showAddBotModal = true" class="sidebar-nav-link w-full text-left">Add Bot</button>
+        <button @click="exportData()" class="sidebar-nav-link w-full text-left">Export Data</button>
+        <button @click="toggleTheme()" class="sidebar-nav-link w-full text-left">Theme</button>
+      </nav>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="p-4 border-t border-gray-800 space-y-2">
+      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Quick Stats</div>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="text-center">
+          <div class="text-xs text-gray-400">Latency</div>
+          <div class="text-xs font-semibold text-cyan-400" 
+               x-text="(kpis && kpis.avg_latency_ms ? kpis.avg_latency_ms : 0) + 'ms'"></div>
+        </div>
+        <div class="text-center">
+          <div class="text-xs text-gray-400">Success</div>
+          <div class="text-xs font-semibold text-green-400" 
+               x-text="(kpis && kpis.success_rate_pct ? kpis.success_rate_pct : 0) + '%'"></div>
+        </div>
+        <div class="text-center">
+          <div class="text-xs text-gray-400">Throughput</div>
+          <div class="text-xs font-semibold text-yellow-400" 
+               x-text="(kpis && kpis.throughput_1m ? kpis.throughput_1m : 0)"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Health Status -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Health</div>
+      <div class="flex gap-2 flex-wrap">
+        <div class="health-chip-glass health-chip-ok"
+             x-text="'🟢 ' + (healthSummary && healthSummary.ok ? healthSummary.ok : 0)"></div>
+        <div class="health-chip-glass health-chip-slow"
+             x-text="'🟡 ' + (healthSummary && healthSummary.slow ? healthSummary.slow : 0)"></div>
+        <div class="health-chip-glass health-chip-error"
+             x-text="'🔴 ' + (healthSummary && healthSummary.error ? healthSummary.error : 0)"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOP BAR (Unified Global Navigation) -->
+  <header class="header-compact fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+          style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
+    
+    <!-- Left: Navigation -->
+    <div class="flex items-center gap-8 ml-64">
+      <nav class="flex items-center gap-6">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/explorer" class="nav-link active">Bot Explorer</a>
+        <a href="/bots" class="nav-link">Bots</a>
+        <a href="/logs" class="nav-link">Logs</a>
+        <a href="/report" class="nav-link">Reports</a>
+        <a href="/settings" class="nav-link">Settings</a>
+      </nav>
+    </div>
+
+    <!-- Right: Live Info & Controls -->
+    <div class="flex items-center gap-6 text-xs mr-80">
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Bots:</span>
+        <span class="text-cyan-400 font-semibold" x-text="filteredBots.length"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Latency:</span>
+        <span class="text-cyan-400 font-semibold" x-text="(kpis && kpis.avg_latency_ms ? kpis.avg_latency_ms : 0) + 'ms'"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Success:</span>
+        <span class="text-green-400 font-semibold" x-text="(kpis && kpis.success_rate_pct ? kpis.success_rate_pct : 0) + '%'"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-500">Auto-refresh:</span>
+        <span class="text-gray-400">5s</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50"></div>
+        <span class="text-gray-400">Connected</span>
+      </div>
+      <button @click="toggleTheme()" 
+              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
+              title="Toggle theme">
+        <span x-show="theme === 'dark'">☀️</span>
+        <span x-show="theme === 'light'">🌙</span>
+      </button>
+      <button @click="showCommandPalette = !showCommandPalette" 
+              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
+              title="Command Palette (⌘K)">
+        ⌘K
+      </button>
+    </div>
+  </header>
+
+  <!-- RIGHT SIDEBAR (Event Stream) -->
+  <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto"
+         style="box-shadow: -2px 0 20px rgba(0, 0, 0, 0.5);">
+    
+    <div class="p-4 border-b border-gray-800">
+      <h2 class="text-sm font-semibold text-gray-300">Recent Events</h2>
+      <p class="text-xs text-gray-500">Live activity stream</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-2" id="event-stream">
+      <!-- Events will be populated dynamically -->
+      <div class="text-xs text-gray-500 text-center py-4">Loading events...</div>
+    </div>
+
+    <!-- Bot Filter -->
+    <div class="p-4 border-t border-gray-800">
+      <div class="text-xs text-gray-500 mb-2">View Mode</div>
+      <div class="flex gap-2">
+        <button @click="viewMode = 'list'"
+                :class="viewMode === 'list' ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400'"
+                class="flex-1 px-2 py-1 rounded text-xs border border-gray-700 hover:border-cyan-500/50 transition-colors">
+          List
+        </button>
+        <button @click="viewMode = 'grid'"
+                :class="viewMode === 'grid' ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400'"
+                class="flex-1 px-2 py-1 rounded text-xs border border-gray-700 hover:border-cyan-500/50 transition-colors">
+          Grid
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950 p-6">
+    
+    <!-- Search and Filter Bar (Etherscan Style) -->
+    <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <!-- Search -->
+        <div class="flex-1 relative">
+          <input type="text" 
+                 x-model="searchQuery"
+                 @input="applyFilters()"
+                 placeholder="Search by bot name, symbol, strategy, or address..."
+                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 pl-10 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-500/50">
+          <span class="absolute left-3 top-3 text-gray-500 text-sm">🔍</span>
+        </div>
+        
+        <!-- Filters -->
+        <div class="flex gap-2">
+          <select x-model="statusFilter" @change="applyFilters()"
+                  class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+            <option value="idle">Idle</option>
+          </select>
+          
+          <select x-model="strategyFilter" @change="applyFilters()"
+                  class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50">
+            <option value="all">All Strategies</option>
+            <option value="arbitrage">Arbitrage</option>
+            <option value="mev">MEV</option>
+            <option value="trading">Trading</option>
+            <option value="monitoring">Monitoring</option>
+          </select>
+          
+          <select x-model="performanceFilter" @change="applyFilters()"
+                  class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50">
+            <option value="all">All Performance</option>
+            <option value="high">High Performers (>90%)</option>
+            <option value="medium">Medium (80-90%)</option>
+            <option value="low">Low (<80%)</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Category Pills -->
+      <div class="flex flex-wrap gap-2 mt-4">
+        <button @click="selectedCategory = 'all'; applyFilters()"
+                :class="selectedCategory === 'all' ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-gray-800 text-gray-400 border-gray-700'"
+                class="px-3 py-1 rounded-lg text-xs border transition-colors">
+          All Bots
+        </button>
+        <template x-for="(label, key) in categories" :key="key">
+          <button @click="selectedCategory = key; applyFilters()"
+                  :class="selectedCategory === key ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-gray-800 text-gray-400 border-gray-700'"
+                  class="px-3 py-1 rounded-lg text-xs border transition-colors"
+                  x-text="label"></button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Bot List/Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Main Content Area -->
+      <div class="lg:col-span-2" x-show="viewMode === 'list' || viewMode === 'grid'">
+        <!-- Sort Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm text-gray-400">
+            Showing <span class="text-cyan-400 font-semibold" x-text="filteredBots.length"></span> bots
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <span>Sort by:</span>
+            <select x-model="sortBy" @change="applyFilters()"
+                    class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-gray-300">
+              <option value="name">Name</option>
+              <option value="success_rate">Success Rate</option>
+              <option value="performance_24h">24h Performance</option>
+              <option value="performance_7d">7d Performance</option>
+              <option value="rentalPrice">Price</option>
+              <option value="rating">Rating</option>
+            </select>
+            <button @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; applyFilters()"
+                    class="px-2 py-1 rounded border border-gray-700 hover:bg-gray-800">
+              <span x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- List View -->
+        <template x-if="viewMode === 'list'">
+          <div class="space-y-3">
+            <template x-for="bot in filteredBots" :key="bot.id">
+              <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-cyan-500/50 transition-all cursor-pointer"
+                   @click="selectBot(bot)">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-start gap-4 flex-1">
+                    <!-- Bot Icon/Avatar -->
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center text-xl">
+                      🤖
+                    </div>
+                    
+                    <!-- Bot Info -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-semibold text-cyan-400 hover:text-cyan-300" x-text="bot.name"></h3>
+                        <span class="text-xs text-gray-500 font-mono" x-text="bot.symbol"></span>
+                        <button @click.stop="toggleFavorite(bot.id)"
+                                :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                                class="hover:text-yellow-400 text-xs">⭐</button>
+                        <span :class="getStatusColor(bot.status)" 
+                              class="text-xs px-2 py-0.5 rounded border"
+                              :class="getStatusClass(bot.status)"
+                              x-text="bot.status.toUpperCase()"></span>
+                      </div>
+                      
+                      <div class="flex items-center gap-4 text-xs text-gray-400 mb-2">
+                        <span x-text="bot.strategy"></span>
+                        <span>•</span>
+                        <span x-text="bot.category"></span>
+                        <span>•</span>
+                        <span x-text="bot.rating + ' ⭐'"></span>
+                        <span>•</span>
+                        <span x-text="bot.reviews + ' reviews'"></span>
+                      </div>
+                      
+                      <p class="text-xs text-gray-500 line-clamp-2" x-text="bot.description"></p>
+                    </div>
+                  </div>
+                  
+                  <!-- Performance Metrics -->
+                  <div class="flex items-center gap-6 ml-4">
+                    <div class="text-right">
+                      <div class="text-xs text-gray-500 mb-1">Success Rate</div>
+                      <div :class="bot.success_rate >= 90 ? 'text-emerald-400' : bot.success_rate >= 80 ? 'text-yellow-400' : 'text-red-400'"
+                           class="text-sm font-semibold" x-text="bot.success_rate.toFixed(1) + '%'"></div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xs text-gray-500 mb-1">24h</div>
+                      <div :class="parseFloat(bot.performance_24h) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                           class="text-sm font-semibold" 
+                           x-text="(parseFloat(bot.performance_24h) >= 0 ? '+' : '') + bot.performance_24h + '%'"></div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xs text-gray-500 mb-1">Price</div>
+                      <div class="text-sm font-semibold text-cyan-400" x-text="formatPrice(bot.rentalPrice) + '/hr'"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-800">
+                  <button @click.stop="openTradeModal(bot)"
+                          class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 text-xs font-semibold transition-colors">
+                    Trade
+                  </button>
+                  <button @click.stop="openRentModal(bot)"
+                          :class="bot.isRented ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-cyan-600 hover:bg-cyan-700'"
+                          class="flex-1 rounded-lg px-4 py-2 text-xs font-semibold transition-colors">
+                    <template x-if="bot.isRented">Manage Rental</template>
+                    <template x-if="!bot.isRented">Rent</template>
+                  </button>
+                  <button @click.stop="viewBotDetails(bot.id)"
+                          class="px-4 py-2 border border-gray-700 hover:bg-gray-800 rounded-lg text-xs text-gray-400 hover:text-cyan-400 transition-colors">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </template>
+            
+            <div x-show="filteredBots.length === 0" class="text-center text-gray-500 py-12">
+              <div class="text-4xl mb-4">🔍</div>
+              <div>No bots found matching your criteria</div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Grid View -->
+        <template x-if="viewMode === 'grid'">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <template x-for="bot in filteredBots" :key="bot.id">
+              <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-cyan-500/50 transition-all cursor-pointer"
+                   @click="selectBot(bot)">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
+                      🤖
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-cyan-400 text-sm" x-text="bot.name"></h3>
+                      <span class="text-xs text-gray-500 font-mono" x-text="bot.symbol"></span>
+                    </div>
+                  </div>
+                  <button @click.stop="toggleFavorite(bot.id)"
+                          :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                          class="hover:text-yellow-400">⭐</button>
+                </div>
+                
+                <div class="space-y-2 mb-3">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500">Success Rate</span>
+                    <span :class="bot.success_rate >= 90 ? 'text-emerald-400' : 'text-yellow-400'"
+                          class="font-semibold" x-text="bot.success_rate.toFixed(1) + '%'"></span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500">24h Performance</span>
+                    <span :class="parseFloat(bot.performance_24h) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                          class="font-semibold" 
+                          x-text="(parseFloat(bot.performance_24h) >= 0 ? '+' : '') + bot.performance_24h + '%'"></span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-500">Rating</span>
+                    <span class="text-yellow-400 font-semibold" x-text="bot.rating + ' ⭐'"></span>
+                  </div>
+                </div>
+                
+                <div class="flex gap-2">
+                  <button @click.stop="openTradeModal(bot)"
+                          class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+                    Trade
+                  </button>
+                  <button @click.stop="openRentModal(bot)"
+                          class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+                    Rent
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+      
+      <!-- Sidebar - Selected Bot Details (Etherscan Style) -->
+      <div class="lg:col-span-1">
+        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 sticky top-24">
+          <h3 class="text-sm font-semibold mb-4 text-gray-300">Bot Details</h3>
+          
+          <template x-if="selectedBot">
+            <div class="space-y-4">
+              <!-- Bot Header -->
+              <div class="pb-4 border-b border-gray-800">
+                <div class="flex items-center gap-2 mb-2">
+                  <h4 class="text-lg font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
+                  <span class="text-xs text-gray-500 font-mono" x-text="selectedBot.symbol"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span :class="getStatusColor(selectedBot.status)" 
+                        class="text-xs px-2 py-0.5 rounded border"
+                        :class="getStatusClass(selectedBot.status)"
+                        x-text="selectedBot.status.toUpperCase()"></span>
+                  <span class="text-xs text-gray-500" x-text="selectedBot.strategy"></span>
+                </div>
+              </div>
+              
+              <!-- Performance Chart Placeholder -->
+              <div class="h-32 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center text-xs text-gray-500">
+                Performance Chart
+              </div>
+              
+              <!-- Key Metrics -->
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">Success Rate</span>
+                  <span :class="selectedBot.success_rate >= 90 ? 'text-emerald-400' : 'text-yellow-400'"
+                        class="font-semibold" x-text="selectedBot.success_rate.toFixed(1) + '%'"></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">24h Performance</span>
+                  <span :class="parseFloat(selectedBot.performance_24h) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                        class="font-semibold" 
+                        x-text="(parseFloat(selectedBot.performance_24h) >= 0 ? '+' : '') + selectedBot.performance_24h + '%'"></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">7d Performance</span>
+                  <span :class="parseFloat(selectedBot.performance_7d) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                        class="font-semibold" 
+                        x-text="(parseFloat(selectedBot.performance_7d) >= 0 ? '+' : '') + selectedBot.performance_7d + '%'"></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">Rating</span>
+                  <span class="text-yellow-400 font-semibold" x-text="selectedBot.rating + ' ⭐ (' + selectedBot.reviews + ')'"></span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">Latency</span>
+                  <span class="text-cyan-400 font-semibold" x-text="selectedBot.avg_latency + 'ms'"></span>
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="pt-4 border-t border-gray-800 space-y-2">
+                <button @click="openTradeModal(selectedBot)"
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 text-sm font-semibold transition-colors">
+                  Trade Bot
+                </button>
+                <button @click="openRentModal(selectedBot)"
+                        class="w-full bg-cyan-600 hover:bg-cyan-700 rounded-lg px-4 py-2 text-sm font-semibold transition-colors">
+                  Rent Bot
+                </button>
+              </div>
+            </div>
+          </template>
+          
+          <template x-if="!selectedBot">
+            <div class="text-center text-gray-500 text-xs py-8">
+              Select a bot to view details
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Trade Modal -->
+  <div x-show="showTradeModal" 
+       @click.away="showTradeModal = false"
+       x-transition
+       class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+       style="display: none;">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
+         @click.stop>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-200">Trade Bot</h3>
+        <button @click="showTradeModal = false" class="text-gray-400 hover:text-gray-300 text-xl">×</button>
+      </div>
+      
+      <template x-if="selectedBot">
+        <div>
+          <div class="bg-gray-800 rounded-lg p-4 mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
+              <span class="text-xs text-gray-500" x-text="selectedBot.symbol"></span>
+            </div>
+            <div class="text-xs text-gray-400" x-text="selectedBot.description"></div>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">Trade Type</label>
+              <select x-model="tradeType"
+                      class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                <option value="buy">Buy Bot Shares</option>
+                <option value="sell">Sell Bot Shares</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">Amount</label>
+              <input type="number" x-model="tradeAmount" min="0" step="0.01"
+                     class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+            </div>
+            
+            <div class="bg-gray-800 rounded-lg p-3">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-500">Price per Share</span>
+                <span class="text-cyan-400 font-semibold" x-text="formatPrice(selectedBot.rentalPrice * 100)"></span>
+              </div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-500">Total Cost</span>
+                <span class="text-emerald-400 font-semibold" 
+                      x-text="formatPrice((selectedBot.rentalPrice * 100) * (tradeAmount || 0))"></span>
+              </div>
+            </div>
+            
+            <button @click="executeTrade()"
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Execute Trade
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Rent Modal (from previous implementation) -->
+  <div x-show="showRentModal" 
+       @click.away="showRentModal = false"
+       x-transition
+       class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+       style="display: none;">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
+         @click.stop>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-200">Rent Bot</h3>
+        <button @click="showRentModal = false" class="text-gray-400 hover:text-gray-300 text-xl">×</button>
+      </div>
+      
+      <template x-if="selectedBot">
+        <div>
+          <div class="bg-gray-800 rounded-lg p-4 mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
+              <div class="text-right">
+                <div :class="getStatusColor(selectedBot.status)" class="text-xs" x-text="selectedBot.status"></div>
+                <div class="text-xs text-gray-500" x-text="selectedBot.success_rate.toFixed(1) + '% success'"></div>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2" x-text="selectedBot.description"></p>
+          </div>
+          
+          <div class="space-y-2 mb-4">
+            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Hourly</div>
+                  <div class="text-xs text-gray-500">Pay as you go</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPrice)"></div>
+                  <div class="text-xs text-gray-500">per hour</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Daily</div>
+                  <div class="text-xs text-gray-500">Best for short-term</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPriceDaily)"></div>
+                  <div class="text-xs text-gray-500">per day</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="border border-cyan-500/50 rounded-lg p-3 bg-cyan-500/10 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Monthly</div>
+                  <div class="text-xs text-gray-500">Best value - Save 20%</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPriceMonthly)"></div>
+                  <div class="text-xs text-gray-500">per month</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-xs text-gray-400 mb-2">Payment Method</label>
+            <select x-model="selectedPaymentMethod" 
+                    class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+              <option>Credit Card</option>
+              <option>Crypto (ETH/USDC)</option>
+              <option>PayPal</option>
+            </select>
+          </div>
+          
+          <div class="flex gap-3">
+            <button @click="rentBot(selectedBot, 'hourly', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Hourly
+            </button>
+            <button @click="rentBot(selectedBot, 'daily', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Daily
+            </button>
+            <button @click="rentBot(selectedBot, 'monthly', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Monthly
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Add Bot Modal -->
+  <div x-show="showAddBotModal" 
+       @click.away="showAddBotModal = false"
+       x-transition
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+       style="display: none;">
+    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-xl"
+         @click.stop>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-200">Add New Bot</h3>
+        <button @click="showAddBotModal = false" class="text-gray-400 hover:text-gray-300">×</button>
+      </div>
+      <form @submit.prevent="addBot()" class="space-y-4">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Bot Name</label>
+          <input type="text" x-model="newBot.name" required
+                 class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Address</label>
+          <input type="text" x-model="newBot.address" 
+                 placeholder="0x..."
+                 class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Strategy</label>
+          <select x-model="newBot.strategy"
+                  class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+            <option value="arbitrage">Arbitrage</option>
+            <option value="mev">MEV</option>
+            <option value="trading">Trading</option>
+            <option value="monitoring">Monitoring</option>
+          </select>
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" 
+                  class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm transition-colors shadow-sm">
+            Add Bot
+          </button>
+          <button type="button" @click="showAddBotModal = false"
+                  class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md px-4 py-2 text-sm transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Command Palette Modal -->
+  <div x-show="showCommandPalette" 
+       @click.away="showCommandPalette = false"
+       x-transition
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+       style="display: none;">
+    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl shadow-xl"
+         @click.stop>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-200">Command Palette</h3>
+        <button @click="showCommandPalette = false" class="text-gray-400 hover:text-gray-300">×</button>
+      </div>
+      <input type="text" 
+             x-model="commandInput"
+             @keydown.enter="executeCommand()"
+             @keydown.escape="showCommandPalette = false"
+             placeholder="Type a command... (e.g., filter arbitrage, clear)"
+             class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-sm text-gray-100 mb-4"
+             autofocus>
+      <div class="text-xs text-gray-400 space-y-1">
+        <div><code class="text-cyan-400">filter &lt;term&gt;</code> - Filter bots by term</div>
+        <div><code class="text-cyan-400">clear</code> - Clear filters</div>
+        <div><code class="text-cyan-400">export</code> - Export data</div>
+        <div><code class="text-cyan-400">theme</code> - Toggle theme</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="/static/js/bot-explorer.js"></script>
+<script>
+// Extended state for the explorer page
+function botExplorerPageState() {
+  const baseState = botExplorerState();
+  
+  return {
+    ...baseState,
+    // Add dashboard state properties
+    theme: localStorage.getItem('phoenix:theme') || 'dark',
+    kpis: { avg_latency_ms: 0, success_rate_pct: 0, throughput_1m: 0 },
+    healthSummary: { ok: 0, slow: 0, error: 0 },
+    showCommandPalette: false,
+    showAddBotModal: false,
+    commandInput: '',
+    connectionStatus: 'connected',
+    lastUpdated: new Date().toLocaleTimeString(),
+    newBot: { name: '', address: '', strategy: 'arbitrage', apiKey: '' },
+    
+    selectedBot: null,
+    showTradeModal: false,
+    showRentModal: false,
+    tradeType: 'buy',
+    tradeAmount: 0,
+    performanceFilter: 'all',
+    
+    init() {
+      baseState.init.call(this);
+      this.loadKPIs();
+      this.loadHealthSummary();
+      this.setupEventStream();
+      this.applyTheme();
+      
+      setInterval(() => {
+        this.loadKPIs();
+        this.loadHealthSummary();
+        this.lastUpdated = new Date().toLocaleTimeString();
+      }, 5000);
+    },
+    
+    async loadKPIs() {
+      try {
+        const response = await fetch('/api/charts/data');
+        const data = await response.json();
+        if (data.kpis) {
+          this.kpis = data.kpis;
+        }
+      } catch (e) {
+        console.error('Failed to load KPIs', e);
+      }
+    },
+    
+    async loadHealthSummary() {
+      try {
+        const response = await fetch('/api/bots/status');
+        const data = await response.json();
+        const bots = data.bots || [];
+        
+        this.healthSummary = {
+          ok: bots.filter(b => (b.success_ratio || 0) >= 90 && (b.latency_ms || 0) < 200).length,
+          slow: bots.filter(b => (b.latency_ms || 0) >= 200 && (b.latency_ms || 0) < 500).length,
+          error: bots.filter(b => (b.success_ratio || 0) < 80 || (b.latency_ms || 0) >= 500).length
+        };
+      } catch (e) {
+        console.error('Failed to load health summary', e);
+      }
+    },
+    
+    setupEventStream() {
+      const eventStream = document.getElementById('event-stream');
+      if (!eventStream) return;
+      
+      fetch('/events')
+        .then(response => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          
+          function readStream() {
+            reader.read().then(({ done, value }) => {
+              if (done) return;
+              const chunk = decoder.decode(value);
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = chunk;
+              const newEvents = tempDiv.querySelectorAll('.event-item, .log-line');
+              newEvents.forEach(event => {
+                eventStream.insertBefore(event, eventStream.firstChild);
+              });
+              while (eventStream.children.length > 50) {
+                eventStream.removeChild(eventStream.lastChild);
+              }
+              readStream();
+            });
+          }
+          readStream();
+        })
+        .catch(e => console.error('Event stream error', e));
+    },
+    
+    toggleTheme() {
+      this.theme = this.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('phoenix:theme', this.theme);
+      this.applyTheme();
+    },
+    
+    applyTheme() {
+      document.documentElement.classList.toggle('light-theme', this.theme === 'light');
+    },
+    
+    exportData() {
+      const data = {
+        bots: this.filteredBots,
+        timestamp: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bot-explorer-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    
+    executeCommand() {
+      const cmd = this.commandInput.toLowerCase().trim();
+      if (cmd.startsWith('filter ')) {
+        const filter = cmd.replace('filter ', '');
+        this.searchQuery = filter;
+        this.applyFilters();
+      } else if (cmd === 'clear') {
+        this.searchQuery = '';
+        this.statusFilter = 'all';
+        this.strategyFilter = 'all';
+        this.performanceFilter = 'all';
+        this.selectedCategory = 'all';
+        this.applyFilters();
+      } else if (cmd === 'export') {
+        this.exportData();
+      } else if (cmd === 'theme') {
+        this.toggleTheme();
+      }
+      this.showCommandPalette = false;
+      this.commandInput = '';
+    },
+    
+    addBot() {
+      const bot = {
+        id: this.newBot.name.toLowerCase().replace(/\s+/g, '-'),
+        name: this.newBot.name,
+        address: this.newBot.address,
+        strategy: this.newBot.strategy,
+        apiKey: this.newBot.apiKey,
+        enabled: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      const stored = JSON.parse(localStorage.getItem('phoenix:registeredBots') || '[]');
+      stored.push(bot);
+      localStorage.setItem('phoenix:registeredBots', JSON.stringify(stored));
+      
+      this.newBot = { name: '', address: '', strategy: 'arbitrage', apiKey: '' };
+      this.showAddBotModal = false;
+      this.loadBots();
+      
+      alert(`Bot "${bot.name}" added successfully!`);
+    },
+    
+    selectBot(bot) {
+      this.selectedBot = bot;
+    },
+    
+    viewBotDetails(botId) {
+      window.location.href = `/bots/${botId}`;
+    },
+    
+    openTradeModal(bot) {
+      this.selectedBot = bot;
+      this.showTradeModal = true;
+    },
+    
+    openRentModal(bot) {
+      this.selectedBot = bot;
+      this.showRentModal = true;
+    },
+    
+    async executeTrade() {
+      if (!this.selectedBot || !this.tradeAmount || this.tradeAmount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+      
+      try {
+        const trade = {
+          bot_id: this.selectedBot.id,
+          bot_name: this.selectedBot.name,
+          type: this.tradeType,
+          amount: this.tradeAmount,
+          price: this.selectedBot.rentalPrice * 100,
+          total: (this.selectedBot.rentalPrice * 100) * this.tradeAmount
+        };
+        
+        const response = await fetch('/api/bots/trade', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(trade)
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+          alert(`Trade ${this.tradeType === 'buy' ? 'purchase' : 'sale'} of ${this.tradeAmount} shares of ${this.selectedBot.name} executed!`);
+          this.showTradeModal = false;
+          this.tradeAmount = 0;
+        } else {
+          throw new Error(data.message || 'Trade failed');
+        }
+      } catch (e) {
+        console.error('Failed to execute trade', e);
+        alert('Failed to execute trade. Please try again.');
+      }
+    },
+    
+    applyFilters() {
+      baseState.applyFilters.call(this);
+      
+      // Additional performance filter
+      if (this.performanceFilter === 'high') {
+        this.filteredBots = this.filteredBots.filter(bot => bot.success_rate >= 90);
+      } else if (this.performanceFilter === 'medium') {
+        this.filteredBots = this.filteredBots.filter(bot => bot.success_rate >= 80 && bot.success_rate < 90);
+      } else if (this.performanceFilter === 'low') {
+        this.filteredBots = this.filteredBots.filter(bot => bot.success_rate < 80);
+      }
+    }
+  };
+}
+</script>
+{% endblock %}
+

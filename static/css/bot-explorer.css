@@ -1,0 +1,183 @@
+/* Bot Explorer Page Styles - Etherscan + Stock Research */
+
+.bot-explorer-page {
+  min-height: 100vh;
+  background: #030712;
+}
+
+/* Search bar styling */
+.bot-explorer-page input[type="text"]:focus {
+  outline: none;
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Bot card hover effects */
+.bot-explorer-page .bot-card {
+  transition: all 0.2s ease;
+}
+
+.bot-explorer-page .bot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(6, 182, 212, 0.1);
+}
+
+/* Status badges */
+.bot-explorer-page .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Performance indicators */
+.bot-explorer-page .performance-positive {
+  color: rgb(16, 185, 129);
+}
+
+.bot-explorer-page .performance-negative {
+  color: rgb(239, 68, 68);
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Modal backdrop */
+.bot-explorer-page .modal-backdrop {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Trading interface */
+.bot-explorer-page .trade-input {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  transition: all 0.2s ease;
+}
+
+.bot-explorer-page .trade-input:focus {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+/* Category pills */
+.bot-explorer-page .category-pill {
+  transition: all 0.2s ease;
+}
+
+.bot-explorer-page .category-pill:hover {
+  transform: scale(1.05);
+}
+
+/* Sticky sidebar */
+.bot-explorer-page .sticky-sidebar {
+  position: sticky;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* Scrollbar for sidebar */
+.bot-explorer-page .sticky-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bot-explorer-page .sticky-sidebar::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.5);
+  border-radius: 3px;
+}
+
+.bot-explorer-page .sticky-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 3px;
+}
+
+.bot-explorer-page .sticky-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.5);
+}
+
+/* Grid view cards */
+.bot-explorer-page .grid-card {
+  transition: all 0.2s ease;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+.bot-explorer-page .grid-card:hover {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.1);
+}
+
+/* List view rows */
+.bot-explorer-page .list-row {
+  transition: all 0.2s ease;
+}
+
+.bot-explorer-page .list-row:hover {
+  background: rgba(31, 41, 55, 0.5);
+}
+
+/* Performance chart placeholder */
+.bot-explorer-page .chart-placeholder {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border: 1px dashed rgba(6, 182, 212, 0.3);
+}
+
+/* Action buttons */
+.bot-explorer-page .action-btn {
+  transition: all 0.2s ease;
+}
+
+.bot-explorer-page .action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .bot-explorer-page .sticky-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}
+
+/* Loading states */
+.bot-explorer-page .loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Empty state */
+.bot-explorer-page .empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: rgba(156, 163, 175, 1);
+}
+
+/* Filter badges */
+.bot-explorer-page .filter-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* High performer badge */
+.bot-explorer-page .high-performer {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: rgb(16, 185, 129);
+}
+

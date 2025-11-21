@@ -1,0 +1,343 @@
+<!-- Bot Explorer Component - Yahoo Finance / Fidelity Style -->
+<div class="bot-explorer" x-data="botExplorerState()" x-init="init()">
+  
+  <!-- Explorer Header -->
+  <div class="p-4 border-b border-gray-800">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-gray-200">Bot Explorer</h2>
+      <div class="flex items-center gap-1">
+        <button @click="viewMode = 'list'" 
+                :class="viewMode === 'list' ? 'text-cyan-400' : 'text-gray-500'"
+                class="p-1 hover:bg-gray-800 rounded text-xs" title="List View">☰</button>
+        <button @click="viewMode = 'grid'" 
+                :class="viewMode === 'grid' ? 'text-cyan-400' : 'text-gray-500'"
+                class="p-1 hover:bg-gray-800 rounded text-xs" title="Grid View">⊞</button>
+        <button @click="viewMode = 'compact'" 
+                :class="viewMode === 'compact' ? 'text-cyan-400' : 'text-gray-500'"
+                class="p-1 hover:bg-gray-800 rounded text-xs" title="Compact View">≡</button>
+      </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="relative">
+      <input type="text" 
+             x-model="searchQuery"
+             @input="applyFilters()"
+             placeholder="Search bots..."
+             class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 pl-8 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-500/50">
+      <span class="absolute left-2 top-2.5 text-gray-500 text-xs">🔍</span>
+    </div>
+  </div>
+  
+  <!-- Category Filters -->
+  <div class="px-4 py-2 border-b border-gray-800 overflow-x-auto">
+    <div class="flex gap-1.5">
+      <template x-for="(label, key) in categories" :key="key">
+        <button @click="selectedCategory = key; applyFilters()"
+                :class="selectedCategory === key ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-gray-800 text-gray-400 border-gray-700'"
+                class="px-2 py-1 rounded text-xs border whitespace-nowrap"
+                x-text="label"></button>
+      </template>
+    </div>
+  </div>
+  
+  <!-- Quick Filters -->
+  <div class="px-4 py-2 border-b border-gray-800 flex items-center gap-2 flex-wrap">
+    <select x-model="statusFilter" @change="applyFilters()"
+            class="bg-gray-800 border border-gray-700 rounded text-xs px-2 py-1 text-gray-300">
+      <option value="all">All Status</option>
+      <option value="active">Active</option>
+      <option value="warning">Warning</option>
+      <option value="error">Error</option>
+      <option value="idle">Idle</option>
+    </select>
+    <select x-model="strategyFilter" @change="applyFilters()"
+            class="bg-gray-800 border border-gray-700 rounded text-xs px-2 py-1 text-gray-300">
+      <option value="all">All Strategies</option>
+      <option value="arbitrage">Arbitrage</option>
+      <option value="mev">MEV</option>
+      <option value="trading">Trading</option>
+      <option value="monitoring">Monitoring</option>
+    </select>
+  </div>
+  
+  <!-- Bot List/Table -->
+  <div class="flex-1 overflow-y-auto">
+    <template x-if="viewMode === 'list'">
+      <div class="p-2">
+        <!-- Table Header (Sticky) -->
+        <div class="sticky top-0 bg-gray-900/95 backdrop-blur z-10 border-b border-gray-800 mb-1">
+          <div class="grid grid-cols-12 gap-1 text-xs text-gray-500 px-2 py-1.5">
+            <div class="col-span-3 cursor-pointer hover:text-cyan-400" @click="sort('name')">
+              Name <span x-show="sortBy === 'name'" x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </div>
+            <div class="col-span-2 cursor-pointer hover:text-cyan-400" @click="sort('status')">
+              Status <span x-show="sortBy === 'status'" x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </div>
+            <div class="col-span-2 text-right cursor-pointer hover:text-cyan-400" @click="sort('success_rate')">
+              Success <span x-show="sortBy === 'success_rate'" x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </div>
+            <div class="col-span-2 text-right cursor-pointer hover:text-cyan-400" @click="sort('performance_24h')">
+              24h <span x-show="sortBy === 'performance_24h'" x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </div>
+            <div class="col-span-2 text-right cursor-pointer hover:text-cyan-400" @click="sort('rentalPrice')">
+              Price <span x-show="sortBy === 'rentalPrice'" x-text="sortOrder === 'asc' ? '↑' : '↓'"></span>
+            </div>
+            <div class="col-span-1 text-center">Actions</div>
+          </div>
+        </div>
+        
+        <!-- Bot Rows -->
+        <template x-for="bot in filteredBots.slice(0, itemsPerPage)" :key="bot.id">
+          <div class="grid grid-cols-12 gap-1 px-2 py-1.5 hover:bg-gray-800/50 rounded text-xs border-b border-gray-800/50">
+            <!-- Name & Symbol -->
+            <div class="col-span-3 flex items-center gap-1.5">
+              <button @click="toggleFavorite(bot.id)"
+                      :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                      class="hover:text-yellow-400 text-xs">⭐</button>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-cyan-400 truncate" x-text="bot.name"></div>
+                <div class="text-gray-500 text-[10px]" x-text="bot.symbol"></div>
+              </div>
+            </div>
+            
+            <!-- Status -->
+            <div class="col-span-2 flex items-center gap-1">
+              <span x-text="getStatusIcon(bot.status)"></span>
+              <span :class="getStatusColor(bot.status)" x-text="bot.status"></span>
+            </div>
+            
+            <!-- Success Rate -->
+            <div class="col-span-2 text-right flex items-center justify-end">
+              <span :class="bot.success_rate >= 90 ? 'text-emerald-400' : bot.success_rate >= 80 ? 'text-yellow-400' : 'text-red-400'"
+                    x-text="bot.success_rate.toFixed(1) + '%'"></span>
+            </div>
+            
+            <!-- 24h Performance -->
+            <div class="col-span-2 text-right">
+              <span :class="parseFloat(bot.performance_24h) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                    x-text="(parseFloat(bot.performance_24h) >= 0 ? '+' : '') + bot.performance_24h + '%'"></span>
+            </div>
+            
+            <!-- Rental Price -->
+            <div class="col-span-2 text-right">
+              <template x-if="bot.isRented">
+                <div class="text-emerald-400 text-[10px]">Rented</div>
+              </template>
+              <template x-if="!bot.isRented">
+                <div class="text-cyan-400 font-semibold" x-text="formatPrice(bot.rentalPrice) + '/hr'"></div>
+              </template>
+            </div>
+            
+            <!-- Actions -->
+            <div class="col-span-1 flex items-center justify-center gap-1">
+              <button @click="openRentModal(bot)"
+                      :class="bot.isRented ? 'text-emerald-400' : 'text-cyan-400'"
+                      class="hover:opacity-80 text-xs"
+                      :title="bot.isRented ? 'Manage Rental' : 'Rent Bot'">
+                <template x-if="bot.isRented">✓</template>
+                <template x-if="!bot.isRented">💰</template>
+              </button>
+            </div>
+          </div>
+        </template>
+        
+        <div x-show="filteredBots.length === 0" class="text-center text-gray-500 text-xs py-8">
+          No bots found
+        </div>
+      </div>
+    </template>
+    
+    <!-- Compact View -->
+    <template x-if="viewMode === 'compact'">
+      <div class="p-2 space-y-1">
+        <template x-for="bot in filteredBots.slice(0, itemsPerPage)" :key="bot.id">
+          <div class="flex items-center justify-between px-2 py-1 hover:bg-gray-800/50 rounded text-xs border-b border-gray-800/30">
+            <div class="flex items-center gap-1.5 flex-1 min-w-0">
+              <button @click="toggleFavorite(bot.id)"
+                      :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                      class="hover:text-yellow-400 text-[10px]">⭐</button>
+              <span class="font-semibold text-cyan-400 truncate" x-text="bot.name"></span>
+              <span x-text="getStatusIcon(bot.status)" class="text-xs"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span :class="getStatusColor(bot.status)" 
+                    x-text="bot.success_rate.toFixed(0) + '%'"
+                    class="text-[10px]"></span>
+              <button @click="openRentModal(bot)"
+                      :class="bot.isRented ? 'text-emerald-400' : 'text-cyan-400'"
+                      class="hover:opacity-80 text-xs">
+                <template x-if="bot.isRented">✓</template>
+                <template x-if="!bot.isRented">💰</template>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+    
+    <!-- Grid View -->
+    <template x-if="viewMode === 'grid'">
+      <div class="p-2 grid grid-cols-1 gap-2">
+        <template x-for="bot in filteredBots.slice(0, itemsPerPage)" :key="bot.id">
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-2 hover:border-cyan-500/50 transition-colors">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-1">
+                  <button @click="toggleFavorite(bot.id)"
+                          :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                          class="hover:text-yellow-400 text-xs">⭐</button>
+                  <span class="font-semibold text-cyan-400 text-xs truncate" x-text="bot.name"></span>
+                  <span class="text-gray-500 text-[10px]" x-text="bot.symbol"></span>
+                </div>
+                <div class="flex items-center gap-2 text-[10px] text-gray-500">
+                  <span x-text="bot.strategy"></span>
+                  <span x-text="getStatusIcon(bot.status)"></span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div :class="getStatusColor(bot.status)" class="text-xs font-semibold" x-text="bot.status"></div>
+                <div class="text-[10px] text-gray-500" x-text="bot.success_rate.toFixed(1) + '%'"></div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] mb-2">
+              <div>
+                <div class="text-gray-500">24h</div>
+                <div :class="parseFloat(bot.performance_24h) >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                     x-text="(parseFloat(bot.performance_24h) >= 0 ? '+' : '') + bot.performance_24h + '%'"></div>
+              </div>
+              <div>
+                <div class="text-gray-500">Rating</div>
+                <div class="text-yellow-400" x-text="bot.rating + ' ⭐'"></div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="text-[10px]">
+                <template x-if="bot.isRented">
+                  <span class="text-emerald-400">✓ Rented</span>
+                </template>
+                <template x-if="!bot.isRented">
+                  <span class="text-cyan-400" x-text="formatPrice(bot.rentalPrice) + '/hr'"></span>
+                </template>
+              </div>
+              <button @click="openRentModal(bot)"
+                      :class="bot.isRented ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-cyan-600 hover:bg-cyan-700'"
+                      class="px-2 py-0.5 rounded text-[10px] text-white transition-colors">
+                <template x-if="bot.isRented">Manage</template>
+                <template x-if="!bot.isRented">Rent</template>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+  
+  <!-- Rental Modal -->
+  <div x-show="showRentModal" 
+       @click.away="showRentModal = false"
+       x-transition
+       class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+       style="display: none;">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
+         @click.stop>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-200">Rent Bot</h3>
+        <button @click="showRentModal = false" class="text-gray-400 hover:text-gray-300 text-xl">×</button>
+      </div>
+      
+      <template x-if="selectedBot">
+        <div>
+          <!-- Bot Info -->
+          <div class="bg-gray-800 rounded-lg p-4 mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
+                <p class="text-xs text-gray-500" x-text="selectedBot.symbol"></p>
+              </div>
+              <div class="text-right">
+                <div :class="getStatusColor(selectedBot.status)" class="text-xs" x-text="selectedBot.status"></div>
+                <div class="text-xs text-gray-500" x-text="selectedBot.success_rate.toFixed(1) + '% success'"></div>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2" x-text="selectedBot.description"></p>
+          </div>
+          
+          <!-- Pricing Options -->
+          <div class="space-y-2 mb-4">
+            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Hourly</div>
+                  <div class="text-xs text-gray-500">Pay as you go</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPrice)"></div>
+                  <div class="text-xs text-gray-500">per hour</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Daily</div>
+                  <div class="text-xs text-gray-500">Best for short-term</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPriceDaily)"></div>
+                  <div class="text-xs text-gray-500">per day</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="border border-cyan-500/50 rounded-lg p-3 bg-cyan-500/10 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-sm text-gray-200">Monthly</div>
+                  <div class="text-xs text-gray-500">Best value - Save 20%</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-cyan-400" x-text="formatPrice(selectedBot.rentalPriceMonthly)"></div>
+                  <div class="text-xs text-gray-500">per month</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Payment Method -->
+          <div class="mb-4">
+            <label class="block text-xs text-gray-400 mb-2">Payment Method</label>
+            <select x-model="selectedPaymentMethod" 
+                    class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+              <option>Credit Card</option>
+              <option>Crypto (ETH/USDC)</option>
+              <option>PayPal</option>
+            </select>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <button @click="rentBot(selectedBot, 'hourly', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Hourly
+            </button>
+            <button @click="rentBot(selectedBot, 'daily', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Daily
+            </button>
+            <button @click="rentBot(selectedBot, 'monthly', selectedPaymentMethod || 'Credit Card')"
+                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+              Rent Monthly
+            </button>
+          </div>
+          
+          <p class="text-xs text-gray-500 mt-3 text-center">
+            You can cancel anytime. No long-term commitment.
+          </p>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+

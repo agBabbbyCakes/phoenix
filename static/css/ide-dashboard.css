@@ -46,8 +46,8 @@ aside::before {
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -388,5 +388,83 @@ main {
   aside.open {
     transform: translateX(0);
   }
+}
+
+/* Bot Explorer Styles */
+.bot-explorer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bot-explorer .grid {
+  display: grid;
+}
+
+.bot-explorer input[type="text"]:focus {
+  outline: none;
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+.bot-explorer button {
+  transition: all 0.2s ease;
+}
+
+.bot-explorer button:hover {
+  transform: translateY(-1px);
+}
+
+.bot-explorer .sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Smooth transitions for bot rows */
+.bot-explorer [x-show] {
+  transition: opacity 0.2s ease;
+}
+
+/* Rental modal backdrop */
+.bot-explorer .fixed {
+  backdrop-filter: blur(4px);
+}
+
+/* Status indicators */
+.bot-explorer .status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+/* Performance indicators */
+.bot-explorer .performance-positive {
+  color: rgb(16, 185, 129);
+}
+
+.bot-explorer .performance-negative {
+  color: rgb(239, 68, 68);
+}
+
+/* Compact view optimizations */
+.bot-explorer .compact-view .bot-row {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* Grid view cards */
+.bot-explorer .grid-view-card {
+  transition: all 0.2s ease;
+  border: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+.bot-explorer .grid-view-card:hover {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.1);
+  transform: translateY(-2px);
 }
 
