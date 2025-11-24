@@ -54,7 +54,7 @@
 
 <!-- Chart Containers -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
-  <div class="card bg-base-100 shadow glass-card p-2"
+  <div class="card bg-base-100 shadow glass-card"
     data-latency-labels='{{ labels | tojson }}'
     data-latency-values='{{ values | tojson }}'
     data-throughput-labels='{{ throughput_series | map(attribute=0) | list | tojson }}'
@@ -66,9 +66,9 @@
     data-sensor-labels='[]'
     data-sensor-temp-values='[]'
     data-sensor-humidity-values='[]'>
-    <div class="card-body">
+    <div class="card-body p-0">
       <!-- Chart toolbar -->
-      <div class="flex flex-wrap items-center gap-2 mb-2" id="chartToolbar">
+      <div class="flex flex-wrap items-center gap-2 p-2" id="chartToolbar">
         <button class="btn btn-xs" id="btnResetZoom"
           title="Reset zoom (Z)">Reset Zoom</button>
         <label class="label cursor-pointer gap-2">
@@ -85,8 +85,8 @@
         </label>
         <button class="btn btn-xs" id="btnSavePrefs">Save</button>
       </div>
-      <div class="h-48 min-h-32">
-        <canvas id="chartPrimary"></canvas>
+      <div class="w-full" style="height: calc(100% - 60px); min-height: 192px;">
+        <canvas id="chartPrimary" class="w-full h-full"></canvas>
       </div>
     </div>
   </div>

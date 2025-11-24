@@ -139,8 +139,50 @@
   (function setupLiveChartsPolling() {
     const POLL_MS = 5000;
     let timer = null;
+    let initializationAttempts = 0;
+    const MAX_INIT_ATTEMPTS = 20; // Wait up to 20 polling cycles (100s) for chart to initialize
+    
+    // Function to ensure chart is initialized before updating
+    function ensureChartInitialized() {
+      const canvas = document.querySelector('#chartPrimary');
+      if (!canvas) return false;
+      
+      // Check if chart is initialized
+      if (window.__chartPrimary && window.__chartPrimary.value) {
+        return true;
+      }
+      
+      // Try to initialize chart if canvas exists but chart doesn't
+      if (canvas && !window.__chartPrimary?.value) {
+        // Check if we're in a metrics panel context
+        const metricsPanel = document.getElementById('metrics-panel');
+        if (metricsPanel) {
+          // Try to trigger chart initialization
+          buildOrUpdateChartsFromPartial(metricsPanel);
+        }
+      }
+      
+      return window.__chartPrimary && window.__chartPrimary.value;
+    }
+    
     async function loadChart() {
       try {
+        // Wait for chart initialization (with timeout)
+        if (!ensureChartInitialized()) {
+          initializationAttempts++;
+          if (initializationAttempts < MAX_INIT_ATTEMPTS) {
+            console.log('[LiveCharts] Waiting for chart initialization...', initializationAttempts);
+            return;
+          } else {
+            console.warn('[LiveCharts] Chart initialization timeout - stopping polling');
+            if (timer) clearInterval(timer);
+            return;
+          }
+        }
+        
+        // Reset attempts counter once chart is initialized
+        initializationAttempts = 0;
+        
         const selector = document.getElementById('viewSelector');
         const currentMetric = selector ? selector.value : 'latency';
         const endpoint = `/api/live/${currentMetric}`;
