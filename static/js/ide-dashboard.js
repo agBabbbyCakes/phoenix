@@ -25,6 +25,7 @@ function ideDashboardState() {
     // Command Palette
     showCommandPalette: false,
     commandInput: '',
+    showMiscMenu: false,
     
     // Connection Status
     connectionStatus: 'disconnected',

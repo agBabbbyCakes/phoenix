@@ -174,6 +174,20 @@ async def bot_explorer_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("bot-explorer.html", {"request": request, "version": version})
 
 
+@app.get("/logic-builder", response_class=HTMLResponse)
+async def logic_builder_page(request: Request) -> HTMLResponse:
+    """Visual conditional logic builder page."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("logic-builder.html", {"request": request, "version": version})
+
+
+@app.get("/chart-annotations", response_class=HTMLResponse)
+async def chart_annotations_page(request: Request) -> HTMLResponse:
+    """Chart annotations and event triggers page."""
+    version = os.getenv("APP_VERSION", "0.1.0")
+    return templates.TemplateResponse("chart-annotations.html", {"request": request, "version": version})
+
+
 @app.get("/bots", response_class=HTMLResponse)
 async def bots_page(request: Request) -> HTMLResponse:
     """Bots management page."""

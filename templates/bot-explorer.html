@@ -4,6 +4,7 @@
 
 {% block content %}
 <link rel="stylesheet" href="/static/css/bot-explorer.css">
+<link rel="stylesheet" href="/static/css/glassmorphism.css">
 <div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden bot-explorer-page"
      x-data="botExplorerPageState()" 
      x-init="init()">
@@ -30,7 +31,6 @@
         <a href="/bots" class="sidebar-nav-link">Bots</a>
         <a href="/logs" class="sidebar-nav-link">Logs</a>
         <a href="/report" class="sidebar-nav-link">Reports</a>
-        <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
       </nav>
     </div>
 
@@ -39,9 +39,26 @@
       <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Tools</div>
       <nav class="space-y-1">
         <button @click="showCommandPalette = !showCommandPalette" class="sidebar-nav-link w-full text-left">Command Palette</button>
+        <a href="/chart-annotations" class="sidebar-nav-link w-full text-left">Chart Annotations</a>
+        <a href="/logic-builder" class="sidebar-nav-link w-full text-left">Logic Builder</a>
         <button @click="showAddBotModal = true" class="sidebar-nav-link w-full text-left">Add Bot</button>
         <button @click="exportData()" class="sidebar-nav-link w-full text-left">Export Data</button>
         <button @click="toggleTheme()" class="sidebar-nav-link w-full text-left">Theme</button>
+        
+        <!-- Misc Submenu -->
+        <div class="mt-2">
+          <button @click="showMiscMenu = !showMiscMenu" 
+                  class="sidebar-nav-link w-full text-left flex items-center justify-between">
+            <span>Misc</span>
+            <span class="text-xs" x-text="showMiscMenu ? '▼' : '▶'"></span>
+          </button>
+          <div x-show="showMiscMenu" 
+               x-transition
+               class="ml-4 mt-1 space-y-1"
+               style="display: none;">
+            <a href="/pointcloud" class="sidebar-nav-link w-full text-left text-xs">3D View</a>
+          </div>
+        </div>
       </nav>
     </div>
 
@@ -169,7 +186,7 @@
   <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950 p-6">
     
     <!-- Search and Filter Bar (Etherscan Style) -->
-    <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+    <div class="glass-card rounded-lg p-4 mb-6">
       <div class="flex flex-col md:flex-row gap-4">
         <!-- Search -->
         <div class="flex-1 relative">
@@ -177,14 +194,14 @@
                  x-model="searchQuery"
                  @input="applyFilters()"
                  placeholder="Search by bot name, symbol, strategy, or address..."
-                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 pl-10 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-500/50">
+                 class="w-full glass rounded-lg px-4 py-2.5 pl-10 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-glass">
           <span class="absolute left-3 top-3 text-gray-500 text-sm">🔍</span>
         </div>
         
         <!-- Filters -->
         <div class="flex gap-2">
           <select x-model="statusFilter" @change="applyFilters()"
-                  class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50">
+                  class="glass rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-cyan-500/50 transition-glass">
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="warning">Warning</option>
@@ -318,19 +335,32 @@
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-800">
+                  <button @click.stop="toggleWatchlist(bot.id)"
+                          :class="bot.isInWatchlist ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400' : 'glass-btn text-gray-400'"
+                          class="px-3 py-1.5 rounded-lg border text-xs font-semibold transition-glass"
+                          :title="bot.isInWatchlist ? 'Remove from watchlist' : 'Add to watchlist'">
+                    <template x-if="bot.isInWatchlist">👁️ Watching</template>
+                    <template x-if="!bot.isInWatchlist">👁️ Watch</template>
+                  </button>
+                  <button @click.stop="saveBot(bot)"
+                          :class="bot.isSaved ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400' : 'glass-btn text-gray-400 hover:text-cyan-400'"
+                          class="px-3 py-1.5 rounded-lg border text-xs font-semibold transition-glass"
+                          :title="bot.isSaved ? 'Bot saved' : 'Save bot'">
+                    <template x-if="bot.isSaved">💾 Saved</template>
+                    <template x-if="!bot.isSaved">💾 Save</template>
+                  </button>
                   <button @click.stop="openTradeModal(bot)"
-                          class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 text-xs font-semibold transition-colors">
+                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-4 py-2 text-xs font-semibold transition-glass">
                     Trade
                   </button>
                   <button @click.stop="openRentModal(bot)"
-                          :class="bot.isRented ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-cyan-600 hover:bg-cyan-700'"
-                          class="flex-1 rounded-lg px-4 py-2 text-xs font-semibold transition-colors">
-                    <template x-if="bot.isRented">Manage Rental</template>
+                          class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-4 py-2 text-xs font-semibold transition-glass">
+                    <template x-if="bot.isRented">Manage</template>
                     <template x-if="!bot.isRented">Rent</template>
                   </button>
                   <button @click.stop="viewBotDetails(bot.id)"
-                          class="px-4 py-2 border border-gray-700 hover:bg-gray-800 rounded-lg text-xs text-gray-400 hover:text-cyan-400 transition-colors">
-                    View Details
+                          class="px-4 py-2 glass-btn rounded-lg text-xs text-gray-400 hover:text-cyan-400 transition-glass">
+                    Details
                   </button>
                 </div>
               </div>
@@ -347,7 +377,7 @@
         <template x-if="viewMode === 'grid'">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <template x-for="bot in filteredBots" :key="bot.id">
-              <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-cyan-500/50 transition-all cursor-pointer"
+              <div class="glass-card rounded-lg p-4 transition-glass cursor-pointer"
                    @click="selectBot(bot)">
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2">
@@ -359,9 +389,17 @@
                       <span class="text-xs text-gray-500 font-mono" x-text="bot.symbol"></span>
                     </div>
                   </div>
-                  <button @click.stop="toggleFavorite(bot.id)"
-                          :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
-                          class="hover:text-yellow-400">⭐</button>
+                  <div class="flex items-center gap-1">
+                    <button @click.stop="toggleFavorite(bot.id)"
+                            :class="bot.isFavorite ? 'text-yellow-400' : 'text-gray-500'"
+                            class="hover:text-yellow-400 text-xs">⭐</button>
+                    <button @click.stop="toggleWatchlist(bot.id)"
+                            :class="bot.isInWatchlist ? 'text-cyan-400' : 'text-gray-500'"
+                            class="hover:text-cyan-400 text-xs">👁️</button>
+                    <button @click.stop="saveBot(bot)"
+                            :class="bot.isSaved ? 'text-cyan-400' : 'text-gray-500'"
+                            class="hover:text-cyan-400 text-xs">💾</button>
+                  </div>
                 </div>
                 
                 <div class="space-y-2 mb-3">
@@ -383,12 +421,26 @@
                 </div>
                 
                 <div class="flex gap-2">
+                  <button @click.stop="toggleWatchlist(bot.id)"
+                          :class="bot.isInWatchlist ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400' : 'glass-btn text-gray-400'"
+                          class="px-2 py-1 rounded-lg border text-xs transition-glass"
+                          title="Watchlist">
+                    <template x-if="bot.isInWatchlist">👁️</template>
+                    <template x-if="!bot.isInWatchlist">👁️</template>
+                  </button>
+                  <button @click.stop="saveBot(bot)"
+                          :class="bot.isSaved ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400' : 'glass-btn text-gray-400'"
+                          class="px-2 py-1 rounded-lg border text-xs transition-glass"
+                          title="Save">
+                    <template x-if="bot.isSaved">💾</template>
+                    <template x-if="!bot.isSaved">💾</template>
+                  </button>
                   <button @click.stop="openTradeModal(bot)"
-                          class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-3 py-1.5 text-xs font-semibold transition-glass">
                     Trade
                   </button>
                   <button @click.stop="openRentModal(bot)"
-                          class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors">
+                          class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-3 py-1.5 text-xs font-semibold transition-glass">
                     Rent
                   </button>
                 </div>
@@ -400,7 +452,7 @@
       
       <!-- Sidebar - Selected Bot Details (Etherscan Style) -->
       <div class="lg:col-span-1">
-        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 sticky top-24">
+        <div class="glass-card rounded-lg p-4 sticky top-24">
           <h3 class="text-sm font-semibold mb-4 text-gray-300">Bot Details</h3>
           
           <template x-if="selectedBot">
@@ -421,7 +473,7 @@
               </div>
               
               <!-- Performance Chart Placeholder -->
-              <div class="h-32 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center text-xs text-gray-500">
+              <div class="h-32 glass-card rounded-lg flex items-center justify-center text-xs text-gray-500">
                 Performance Chart
               </div>
               
@@ -456,14 +508,16 @@
               
               <!-- Action Buttons -->
               <div class="pt-4 border-t border-gray-800 space-y-2">
-                <button @click="openTradeModal(selectedBot)"
-                        class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 text-sm font-semibold transition-colors">
-                  Trade Bot
-                </button>
-                <button @click="openRentModal(selectedBot)"
-                        class="w-full bg-cyan-600 hover:bg-cyan-700 rounded-lg px-4 py-2 text-sm font-semibold transition-colors">
-                  Rent Bot
-                </button>
+                <div class="flex gap-2">
+                  <button @click="openTradeModal(selectedBot)"
+                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-4 py-2 text-sm font-semibold transition-glass">
+                    Trade
+                  </button>
+                  <button @click="openRentModal(selectedBot)"
+                          class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-4 py-2 text-sm font-semibold transition-glass">
+                    Rent
+                  </button>
+                </div>
               </div>
             </div>
           </template>
@@ -482,9 +536,9 @@
   <div x-show="showTradeModal" 
        @click.away="showTradeModal = false"
        x-transition
-       class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
        style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
+    <div class="modal-glass rounded-xl p-6 w-full max-w-md"
          @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Trade Bot</h3>
@@ -493,7 +547,7 @@
       
       <template x-if="selectedBot">
         <div>
-          <div class="bg-gray-800 rounded-lg p-4 mb-4">
+          <div class="glass-card rounded-lg p-4 mb-4">
             <div class="flex items-center justify-between mb-2">
               <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
               <span class="text-xs text-gray-500" x-text="selectedBot.symbol"></span>
@@ -505,7 +559,7 @@
             <div>
               <label class="block text-xs text-gray-400 mb-2">Trade Type</label>
               <select x-model="tradeType"
-                      class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                      class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
                 <option value="buy">Buy Bot Shares</option>
                 <option value="sell">Sell Bot Shares</option>
               </select>
@@ -514,10 +568,10 @@
             <div>
               <label class="block text-xs text-gray-400 mb-2">Amount</label>
               <input type="number" x-model="tradeAmount" min="0" step="0.01"
-                     class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                     class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
             </div>
             
-            <div class="bg-gray-800 rounded-lg p-3">
+            <div class="glass-card rounded-lg p-3">
               <div class="flex justify-between text-xs mb-1">
                 <span class="text-gray-500">Price per Share</span>
                 <span class="text-cyan-400 font-semibold" x-text="formatPrice(selectedBot.rentalPrice * 100)"></span>
@@ -530,7 +584,7 @@
             </div>
             
             <button @click="executeTrade()"
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+                    class="w-full glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-md px-4 py-2 text-sm font-semibold transition-glass">
               Execute Trade
             </button>
           </div>
@@ -539,13 +593,13 @@
     </div>
   </div>
 
-  <!-- Rent Modal (from previous implementation) -->
+  <!-- Rent Modal -->
   <div x-show="showRentModal" 
        @click.away="showRentModal = false"
        x-transition
-       class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
        style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl"
+    <div class="modal-glass rounded-xl p-6 w-full max-w-md"
          @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Rent Bot</h3>
@@ -554,7 +608,7 @@
       
       <template x-if="selectedBot">
         <div>
-          <div class="bg-gray-800 rounded-lg p-4 mb-4">
+          <div class="glass-card rounded-lg p-4 mb-4">
             <div class="flex items-center justify-between mb-2">
               <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
               <div class="text-right">
@@ -566,7 +620,7 @@
           </div>
           
           <div class="space-y-2 mb-4">
-            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+            <div class="glass-card rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-glass">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-semibold text-sm text-gray-200">Hourly</div>
@@ -579,7 +633,7 @@
               </div>
             </div>
             
-            <div class="border border-gray-700 rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-colors">
+            <div class="glass-card rounded-lg p-3 hover:border-cyan-500/50 cursor-pointer transition-glass">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-semibold text-sm text-gray-200">Daily</div>
@@ -592,7 +646,7 @@
               </div>
             </div>
             
-            <div class="border border-cyan-500/50 rounded-lg p-3 bg-cyan-500/10 cursor-pointer transition-colors">
+            <div class="glass-card border-cyan-500/50 rounded-lg p-3 bg-cyan-500/10 cursor-pointer transition-glass">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-semibold text-sm text-gray-200">Monthly</div>
@@ -609,7 +663,7 @@
           <div class="mb-4">
             <label class="block text-xs text-gray-400 mb-2">Payment Method</label>
             <select x-model="selectedPaymentMethod" 
-                    class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                    class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
               <option>Credit Card</option>
               <option>Crypto (ETH/USDC)</option>
               <option>PayPal</option>
@@ -618,15 +672,15 @@
           
           <div class="flex gap-3">
             <button @click="rentBot(selectedBot, 'hourly', selectedPaymentMethod || 'Credit Card')"
-                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+                    class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-md px-4 py-2 text-sm font-semibold transition-glass">
               Rent Hourly
             </button>
             <button @click="rentBot(selectedBot, 'daily', selectedPaymentMethod || 'Credit Card')"
-                    class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+                    class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-md px-4 py-2 text-sm font-semibold transition-glass">
               Rent Daily
             </button>
             <button @click="rentBot(selectedBot, 'monthly', selectedPaymentMethod || 'Credit Card')"
-                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-md px-4 py-2 text-sm font-semibold transition-colors">
+                    class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-md px-4 py-2 text-sm font-semibold transition-glass">
               Rent Monthly
             </button>
           </div>
@@ -641,7 +695,7 @@
        x-transition
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
        style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-xl"
+    <div class="modal-glass rounded-2xl p-6 w-full max-w-md"
          @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Add New Bot</h3>
@@ -651,18 +705,18 @@
         <div>
           <label class="block text-xs text-gray-400 mb-1">Bot Name</label>
           <input type="text" x-model="newBot.name" required
-                 class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                 class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Address</label>
           <input type="text" x-model="newBot.address" 
                  placeholder="0x..."
-                 class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
+                 class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 font-mono transition-glass">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Strategy</label>
           <select x-model="newBot.strategy"
-                  class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+                  class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
             <option value="arbitrage">Arbitrage</option>
             <option value="mev">MEV</option>
             <option value="trading">Trading</option>
@@ -671,11 +725,11 @@
         </div>
         <div class="flex gap-3">
           <button type="submit" 
-                  class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm transition-colors shadow-sm">
+                  class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-md px-4 py-2 text-sm transition-glass">
             Add Bot
           </button>
           <button type="button" @click="showAddBotModal = false"
-                  class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md px-4 py-2 text-sm transition-colors">
+                  class="flex-1 glass-btn rounded-md px-4 py-2 text-sm transition-glass">
             Cancel
           </button>
         </div>
@@ -689,7 +743,7 @@
        x-transition
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
        style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl shadow-xl"
+    <div class="modal-glass rounded-2xl p-6 w-full max-w-2xl"
          @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Command Palette</h3>
@@ -700,7 +754,7 @@
              @keydown.enter="executeCommand()"
              @keydown.escape="showCommandPalette = false"
              placeholder="Type a command... (e.g., filter arbitrage, clear)"
-             class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-sm text-gray-100 mb-4"
+             class="w-full glass rounded-md px-4 py-3 text-sm text-gray-100 mb-4 transition-glass"
              autofocus>
       <div class="text-xs text-gray-400 space-y-1">
         <div><code class="text-cyan-400">filter &lt;term&gt;</code> - Filter bots by term</div>

@@ -28,7 +28,6 @@
         <a href="/bots" class="sidebar-nav-link">Bots</a>
         <a href="/logs" class="sidebar-nav-link">Logs</a>
         <a href="/report" class="sidebar-nav-link">Reports</a>
-        <a href="/pointcloud" class="sidebar-nav-link">3D View</a>
       </nav>
     </div>
 
@@ -39,6 +38,21 @@
         <button @click="showCommandPalette = !showCommandPalette" class="sidebar-nav-link w-full text-left">Command Palette</button>
         <button @click="exportData()" class="sidebar-nav-link w-full text-left">Export Data</button>
         <button @click="toggleTheme()" class="sidebar-nav-link w-full text-left active">Theme</button>
+        
+        <!-- Misc Submenu -->
+        <div class="mt-2">
+          <button @click="showMiscMenu = !showMiscMenu" 
+                  class="sidebar-nav-link w-full text-left flex items-center justify-between">
+            <span>Misc</span>
+            <span class="text-xs" x-text="showMiscMenu ? '▼' : '▶'"></span>
+          </button>
+          <div x-show="showMiscMenu" 
+               x-transition
+               class="ml-4 mt-1 space-y-1"
+               style="display: none;">
+            <a href="/pointcloud" class="sidebar-nav-link w-full text-left text-xs">3D View</a>
+          </div>
+        </div>
       </nav>
     </div>
   </aside>

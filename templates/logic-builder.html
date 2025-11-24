@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+
+{% block title %}Silverback — Logic Builder{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/bot-explorer.css">
+<div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
+     x-data="logicBuilderState()" 
+     x-init="init()">
+  
+  <!-- LEFT SIDEBAR (Fixed) -->
+  <aside class="w-64 border-r border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
+         style="scrollbar-width: thin; scrollbar-color: rgba(6, 182, 212, 0.3) transparent;">
+    
+    <!-- Logo & Title -->
+    <div class="p-4 border-b border-gray-800/50">
+      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        🦍 Silverback
+      </h1>
+      <p class="text-xs text-gray-500 mt-1">Logic Builder</p>
+    </div>
+
+    <!-- Navigation Section -->
+    <div class="p-4">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Navigation</div>
+      <nav class="space-y-1">
+        <a href="/" class="sidebar-nav-link">Dashboard</a>
+        <a href="/explorer" class="sidebar-nav-link">Bot Explorer</a>
+        <a href="/bots" class="sidebar-nav-link">Bots</a>
+        <a href="/logs" class="sidebar-nav-link">Logs</a>
+        <a href="/report" class="sidebar-nav-link">Reports</a>
+        <a href="/logic-builder" class="sidebar-nav-link active">Logic Builder</a>
+      </nav>
+    </div>
+
+    <!-- Tools Palette -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Components</div>
+      <div class="space-y-2">
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="trigger">
+          <div class="text-xs font-semibold text-cyan-400">⚡ Trigger</div>
+          <div class="text-[10px] text-gray-500">Event condition</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="action">
+          <div class="text-xs font-semibold text-emerald-400">▶️ Action</div>
+          <div class="text-[10px] text-gray-500">Bot function</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="condition">
+          <div class="text-xs font-semibold text-yellow-400">🔀 Condition</div>
+          <div class="text-[10px] text-gray-500">If/else logic</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="delay">
+          <div class="text-xs font-semibold text-purple-400">⏱️ Delay</div>
+          <div class="text-[10px] text-gray-500">Wait timer</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Workflows -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Saved</div>
+      <div class="space-y-1">
+        <template x-for="workflow in savedWorkflows" :key="workflow.id">
+          <button @click="loadWorkflow(workflow.id)"
+                  class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+            <div class="font-semibold" x-text="workflow.name"></div>
+            <div class="text-[10px] text-gray-500" x-text="workflow.updatedAt"></div>
+          </button>
+        </template>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOP BAR -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/40 backdrop-blur-xl border-b border-gray-800/50 z-30 flex items-center justify-between px-6">
+    <div class="flex items-center gap-8 ml-64">
+      <nav class="flex items-center gap-6">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/explorer" class="nav-link">Bot Explorer</a>
+        <a href="/logic-builder" class="nav-link active">Logic Builder</a>
+        <a href="/bots" class="nav-link">Bots</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4 text-xs mr-6">
+      <button @click="saveWorkflow()"
+              class="px-3 py-1.5 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all backdrop-blur-sm">
+        💾 Save
+      </button>
+      <button @click="clearCanvas()"
+              class="px-3 py-1.5 rounded border border-gray-700/50 bg-gray-800/30 text-gray-400 hover:text-red-400 transition-all backdrop-blur-sm">
+        🗑️ Clear
+      </button>
+      <button @click="exportWorkflow()"
+              class="px-3 py-1.5 rounded border border-gray-700/50 bg-gray-800/30 text-gray-400 hover:text-cyan-400 transition-all backdrop-blur-sm">
+        📤 Export
+      </button>
+    </div>
+  </header>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="w-80 border-l border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto">
+    <div class="p-4 border-b border-gray-800/50">
+      <h2 class="text-sm font-semibold text-gray-300">Properties</h2>
+    </div>
+    <div class="p-4" x-show="selectedNode">
+      <template x-if="selectedNode">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs text-gray-400 mb-2">Node Type</label>
+            <div class="text-sm font-semibold text-cyan-400" x-text="selectedNode.type"></div>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-2">Label</label>
+            <input type="text" x-model="selectedNode.label"
+                   class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+          </div>
+          <template x-if="selectedNode.type === 'trigger'">
+            <div class="space-y-2">
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Event Type</label>
+                <select x-model="selectedNode.eventType"
+                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                  <option value="latency">Latency Threshold</option>
+                  <option value="success">Success Rate</option>
+                  <option value="error">Error Detected</option>
+                  <option value="volume">Volume Spike</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Threshold</label>
+                <input type="number" x-model="selectedNode.threshold"
+                       class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+              </div>
+            </div>
+          </template>
+          <template x-if="selectedNode.type === 'action'">
+            <div class="space-y-2">
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Action Type</label>
+                <select x-model="selectedNode.actionType"
+                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                  <option value="restart">Restart Bot</option>
+                  <option value="stop">Stop Bot</option>
+                  <option value="alert">Send Alert</option>
+                  <option value="trade">Execute Trade</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Target Bot</label>
+                <select x-model="selectedNode.targetBot"
+                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                  <option value="">Select bot...</option>
+                  <template x-for="bot in availableBots" :key="bot">
+                    <option :value="bot" x-text="bot"></option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </template>
+          <template x-if="selectedNode.type === 'condition'">
+            <div class="space-y-2">
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Condition</label>
+                <select x-model="selectedNode.condition"
+                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                  <option value="gt">Greater Than</option>
+                  <option value="lt">Less Than</option>
+                  <option value="eq">Equals</option>
+                  <option value="ne">Not Equals</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-2">Value</label>
+                <input type="number" x-model="selectedNode.value"
+                       class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+              </div>
+            </div>
+          </template>
+          <button @click="deleteNode(selectedNode.id)"
+                  class="w-full px-3 py-2 rounded border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all backdrop-blur-sm text-xs">
+            Delete Node
+          </button>
+        </div>
+      </template>
+      <div x-show="!selectedNode" class="text-xs text-gray-500 text-center py-8">
+        Select a node to edit
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Canvas -->
+  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950/50 p-6">
+    <div class="max-w-full">
+      <div class="mb-4 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-200">Visual Logic Builder</h1>
+        <div class="text-xs text-gray-500">
+          Drag components from sidebar • Connect nodes • Configure in properties
+        </div>
+      </div>
+      
+      <!-- Canvas Area -->
+      <div id="logic-canvas" 
+           class="min-h-[600px] bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg relative overflow-hidden"
+           @drop="handleDrop($event)"
+           @dragover.prevent="handleDragOver($event)">
+        
+        <!-- Grid Background -->
+        <div class="absolute inset-0 opacity-20"
+             style="background-image: linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px); background-size: 20px 20px;"></div>
+        
+        <!-- Nodes -->
+        <template x-for="node in nodes" :key="node.id">
+          <div class="absolute cursor-move"
+               :style="`left: ${node.x}px; top: ${node.y}px;`"
+               @mousedown="startDrag(node.id, $event)"
+               @click="selectNode(node.id)">
+            <div class="node-container bg-gray-800/40 border border-gray-700/50 backdrop-blur-xl rounded-lg p-3 min-w-[150px]"
+                 :class="{
+                   'border-cyan-500/50': selectedNode && selectedNode.id === node.id,
+                   'border-emerald-500/50': node.type === 'action',
+                   'border-yellow-500/50': node.type === 'condition',
+                   'border-purple-500/50': node.type === 'delay'
+                 }">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-lg">
+                  <template x-if="node.type === 'trigger'">⚡</template>
+                  <template x-if="node.type === 'action'">▶️</template>
+                  <template x-if="node.type === 'condition'">🔀</template>
+                  <template x-if="node.type === 'delay'">⏱️</template>
+                </span>
+                <div class="text-xs font-semibold text-gray-200" x-text="node.label || node.type"></div>
+              </div>
+              <div class="text-[10px] text-gray-500" x-text="getNodeDescription(node)"></div>
+            </div>
+          </div>
+        </template>
+        
+        <!-- Connections (SVG overlay) -->
+        <svg class="absolute inset-0 pointer-events-none" style="z-index: 1;">
+          <template x-for="connection in connections" :key="connection.id">
+            <line :x1="getNodeX(connection.from)" 
+                  :y1="getNodeY(connection.from)"
+                  :x2="getNodeX(connection.to)"
+                  :y2="getNodeY(connection.to)"
+                  stroke="rgba(6, 182, 212, 0.5)"
+                  stroke-width="2"
+                  marker-end="url(#arrowhead)"/>
+          </template>
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <polygon points="0 0, 10 3, 0 6" fill="rgba(6, 182, 212, 0.5)"/>
+            </marker>
+          </defs>
+        </svg>
+        
+        <div x-show="nodes.length === 0" class="absolute inset-0 flex items-center justify-center">
+          <div class="text-center text-gray-500">
+            <div class="text-4xl mb-4">🎨</div>
+            <div class="text-sm">Drag components from the sidebar to start building</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM BAR -->
+  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/40 backdrop-blur-xl border-t border-gray-800/50 z-20">
+    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div class="text-xs text-gray-500">
+          Nodes: <span class="text-cyan-400 font-semibold" x-text="nodes.length"></span>
+        </div>
+        <div class="text-xs text-gray-500">
+          Connections: <span class="text-cyan-400 font-semibold" x-text="connections.length"></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button @click="testWorkflow()"
+                class="px-3 py-1.5 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all backdrop-blur-sm text-xs">
+          ▶️ Test
+        </button>
+        <button @click="deployWorkflow()"
+                class="px-3 py-1.5 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all backdrop-blur-sm text-xs">
+          🚀 Deploy
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+function logicBuilderState() {
+  return {
+    nodes: [],
+    connections: [],
+    selectedNode: null,
+    draggingNode: null,
+    dragOffset: { x: 0, y: 0 },
+    availableBots: [],
+    savedWorkflows: JSON.parse(localStorage.getItem('phoenix:savedWorkflows') || '[]'),
+    nodeIdCounter: 0,
+    
+    init() {
+      this.loadBots();
+      this.loadSavedWorkflows();
+      this.setupDragAndDrop();
+    },
+    
+    async loadBots() {
+      try {
+        const response = await fetch('/api/bots/status');
+        const data = await response.json();
+        this.availableBots = (data.bots || []).map(b => b.bot_name || b.name);
+      } catch (e) {
+        console.error('Failed to load bots', e);
+      }
+    },
+    
+    loadSavedWorkflows() {
+      this.savedWorkflows = JSON.parse(localStorage.getItem('phoenix:savedWorkflows') || '[]');
+    },
+    
+    setupDragAndDrop() {
+      document.querySelectorAll('.component-drag').forEach(el => {
+        el.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('type', el.dataset.type);
+        });
+      });
+    },
+    
+    handleDragOver(e) {
+      e.preventDefault();
+    },
+    
+    handleDrop(e) {
+      e.preventDefault();
+      const type = e.dataTransfer.getData('type');
+      if (type) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        this.addNode(type, x, y);
+      }
+    },
+    
+    addNode(type, x, y) {
+      const node = {
+        id: `node_${this.nodeIdCounter++}`,
+        type: type,
+        label: type.charAt(0).toUpperCase() + type.slice(1),
+        x: x,
+        y: y,
+        eventType: 'latency',
+        threshold: 200,
+        actionType: 'restart',
+        targetBot: '',
+        condition: 'gt',
+        value: 0
+      };
+      this.nodes.push(node);
+    },
+    
+    startDrag(nodeId, e) {
+      const node = this.nodes.find(n => n.id === nodeId);
+      if (node) {
+        this.draggingNode = node;
+        const rect = e.currentTarget.getBoundingClientRect();
+        this.dragOffset = {
+          x: e.clientX - rect.left - node.x,
+          y: e.clientY - rect.top - node.y
+        };
+        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+      }
+    },
+    
+    handleMouseMove(e) {
+      if (this.draggingNode) {
+        const canvas = document.getElementById('logic-canvas');
+        const rect = canvas.getBoundingClientRect();
+        this.draggingNode.x = e.clientX - rect.left - this.dragOffset.x;
+        this.draggingNode.y = e.clientY - rect.top - this.dragOffset.y;
+      }
+    },
+    
+    handleMouseUp() {
+      this.draggingNode = null;
+      document.removeEventListener('mousemove', this.handleMouseMove);
+      document.removeEventListener('mouseup', this.handleMouseUp);
+    },
+    
+    selectNode(nodeId) {
+      this.selectedNode = this.nodes.find(n => n.id === nodeId);
+    },
+    
+    deleteNode(nodeId) {
+      this.nodes = this.nodes.filter(n => n.id !== nodeId);
+      this.connections = this.connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+      if (this.selectedNode && this.selectedNode.id === nodeId) {
+        this.selectedNode = null;
+      }
+    },
+    
+    getNodeDescription(node) {
+      if (node.type === 'trigger') return `When ${node.eventType} > ${node.threshold}`;
+      if (node.type === 'action') return `${node.actionType} ${node.targetBot || 'bot'}`;
+      if (node.type === 'condition') return `${node.condition} ${node.value}`;
+      return 'Configure in properties';
+    },
+    
+    getNodeX(nodeId) {
+      const node = this.nodes.find(n => n.id === nodeId);
+      return node ? node.x + 75 : 0;
+    },
+    
+    getNodeY(nodeId) {
+      const node = this.nodes.find(n => n.id === nodeId);
+      return node ? node.y + 40 : 0;
+    },
+    
+    saveWorkflow() {
+      const name = prompt('Workflow name:');
+      if (!name) return;
+      
+      const workflow = {
+        id: Date.now().toString(),
+        name: name,
+        nodes: this.nodes,
+        connections: this.connections,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toLocaleDateString()
+      };
+      
+      const existingIndex = this.savedWorkflows.findIndex(w => w.id === workflow.id);
+      if (existingIndex > -1) {
+        this.savedWorkflows[existingIndex] = workflow;
+      } else {
+        this.savedWorkflows.push(workflow);
+      }
+      
+      localStorage.setItem('phoenix:savedWorkflows', JSON.stringify(this.savedWorkflows));
+      alert('Workflow saved!');
+    },
+    
+    loadWorkflow(workflowId) {
+      const workflow = this.savedWorkflows.find(w => w.id === workflowId);
+      if (workflow) {
+        this.nodes = workflow.nodes || [];
+        this.connections = workflow.connections || [];
+        this.nodeIdCounter = Math.max(...this.nodes.map(n => parseInt(n.id.split('_')[1]) || 0), 0) + 1;
+      }
+    },
+    
+    clearCanvas() {
+      if (confirm('Clear all nodes and connections?')) {
+        this.nodes = [];
+        this.connections = [];
+        this.selectedNode = null;
+      }
+    },
+    
+    exportWorkflow() {
+      const data = {
+        nodes: this.nodes,
+        connections: this.connections,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `workflow-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    
+    testWorkflow() {
+      alert('Testing workflow... (This would validate the logic in production)');
+    },
+    
+    deployWorkflow() {
+      if (confirm('Deploy this workflow? It will start executing automatically.')) {
+        alert('Workflow deployed! (This would activate the logic in production)');
+      }
+    }
+  };
+}
+</script>
+{% endblock %}
+

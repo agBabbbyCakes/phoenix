@@ -13,6 +13,7 @@ function botExplorerState() {
     selectedPaymentMethod: 'Credit Card',
     favorites: JSON.parse(localStorage.getItem('phoenix:botFavorites') || '[]'),
     watchlist: JSON.parse(localStorage.getItem('phoenix:botWatchlist') || '[]'),
+    savedBots: JSON.parse(localStorage.getItem('phoenix:savedBots') || '[]'),
     rentedBots: JSON.parse(localStorage.getItem('phoenix:rentedBots') || '[]'),
     
     // View modes
@@ -94,6 +95,7 @@ function botExplorerState() {
             // Social metrics
             isFavorite: this.favorites.includes(botId),
             isInWatchlist: this.watchlist.includes(botId),
+            isSaved: this.savedBots.some(s => s.id === botId || s.name === apiBot.bot_name),
             rating: stored?.rating || this.calculateRating(apiBot),
             reviews: stored?.reviews || Math.floor(Math.random() * 50) + 5,
             
@@ -136,6 +138,7 @@ function botExplorerState() {
               rentalExpiresAt: isRented ? rental.expiresAt : null,
               isFavorite: this.favorites.includes(botId),
               isInWatchlist: this.watchlist.includes(botId),
+              isSaved: this.savedBots.some(s => s.id === botId || s.name === stored.name),
               rating: stored?.rating || 4.0,
               reviews: stored?.reviews || 0,
               description: stored?.description || '',
@@ -380,6 +383,60 @@ function botExplorerState() {
       }
       localStorage.setItem('phoenix:botWatchlist', JSON.stringify(this.watchlist));
       this.loadBots();
+    },
+    
+    saveBot(bot) {
+      const savedBot = {
+        id: bot.id,
+        name: bot.name,
+        symbol: bot.symbol,
+        strategy: bot.strategy,
+        savedAt: new Date().toISOString(),
+        notes: ''
+      };
+      
+      const existingIndex = this.savedBots.findIndex(s => s.id === bot.id);
+      if (existingIndex > -1) {
+        this.savedBots[existingIndex] = savedBot;
+      } else {
+        this.savedBots.push(savedBot);
+      }
+      
+      localStorage.setItem('phoenix:savedBots', JSON.stringify(this.savedBots));
+      this.loadBots();
+      
+      // Show notification
+      this.showNotification(`Bot "${bot.name}" saved!`);
+    },
+    
+    showNotification(message) {
+      // Simple notification - can be enhanced
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-20 right-6 bg-cyan-500/20 border border-cyan-500/50 backdrop-blur-xl rounded-lg px-4 py-2 text-sm text-cyan-400 z-50';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    },
+    
+    saveBot(bot) {
+      const savedBots = JSON.parse(localStorage.getItem('phoenix:savedBots') || '[]');
+      const existingIndex = savedBots.findIndex(b => b.id === bot.id);
+      
+      if (existingIndex > -1) {
+        savedBots.splice(existingIndex, 1);
+        alert(`${bot.name} removed from saved bots`);
+      } else {
+        savedBots.push({
+          id: bot.id,
+          name: bot.name,
+          symbol: bot.symbol,
+          strategy: bot.strategy,
+          savedAt: new Date().toISOString()
+        });
+        alert(`${bot.name} saved!`);
+      }
+      
+      localStorage.setItem('phoenix:savedBots', JSON.stringify(savedBots));
     },
     
     openRentModal(bot) {

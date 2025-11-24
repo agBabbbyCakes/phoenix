@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Silverback — Chart Annotations{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/bot-explorer.css">
+<link rel="stylesheet" href="/static/css/glassmorphism.css">
+<div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
+     x-data="chartAnnotationsState()" 
+     x-init="init()">
+  
+  <!-- LEFT SIDEBAR -->
+  <aside class="w-64 border-r border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto">
+    <div class="p-4 border-b border-gray-800/50">
+      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        🦍 Silverback
+      </h1>
+      <p class="text-xs text-gray-500 mt-1">Chart Annotations</p>
+    </div>
+
+    <div class="p-4">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Navigation</div>
+      <nav class="space-y-1">
+        <a href="/" class="sidebar-nav-link">Dashboard</a>
+        <a href="/explorer" class="sidebar-nav-link">Bot Explorer</a>
+        <a href="/chart-annotations" class="sidebar-nav-link active">Annotations</a>
+        <a href="/logic-builder" class="sidebar-nav-link">Logic Builder</a>
+      </nav>
+    </div>
+
+    <!-- Annotation Tools -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Tools</div>
+      <div class="space-y-2">
+        <button @click="annotationMode = 'marker'"
+                :class="annotationMode === 'marker' ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-gray-800/30 border-gray-700/50'"
+                class="w-full text-left px-3 py-2 rounded border backdrop-blur-sm text-xs transition-all">
+          📍 Marker
+        </button>
+        <button @click="annotationMode = 'line'"
+                :class="annotationMode === 'line' ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-gray-800/30 border-gray-700/50'"
+                class="w-full text-left px-3 py-2 rounded border backdrop-blur-sm text-xs transition-all">
+          ➖ Line
+        </button>
+        <button @click="annotationMode = 'region'"
+                :class="annotationMode === 'region' ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-gray-800/30 border-gray-700/50'"
+                class="w-full text-left px-3 py-2 rounded border backdrop-blur-sm text-xs transition-all">
+          ▭ Region
+        </button>
+        <button @click="annotationMode = 'text'"
+                :class="annotationMode === 'text' ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-gray-800/30 border-gray-700/50'"
+                class="w-full text-left px-3 py-2 rounded border backdrop-blur-sm text-xs transition-all">
+          📝 Text Note
+        </button>
+      </div>
+    </div>
+
+    <!-- Event Triggers -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Triggers</div>
+      <div class="space-y-2">
+        <button @click="addTrigger('latency')"
+                class="w-full text-left px-3 py-2 rounded border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm text-xs hover:border-cyan-500/50 transition-all">
+          ⚡ Latency Spike
+        </button>
+        <button @click="addTrigger('error')"
+                class="w-full text-left px-3 py-2 rounded border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm text-xs hover:border-red-500/50 transition-all">
+          🔴 Error Event
+        </button>
+        <button @click="addTrigger('success')"
+                class="w-full text-left px-3 py-2 rounded border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm text-xs hover:border-emerald-500/50 transition-all">
+          ✅ Success Milestone
+        </button>
+      </div>
+    </div>
+
+    <!-- Saved Annotations -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Saved</div>
+      <div class="space-y-1">
+        <template x-for="annotation in savedAnnotations" :key="annotation.id">
+          <button @click="loadAnnotation(annotation.id)"
+                  class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+            <div class="font-semibold" x-text="annotation.label"></div>
+            <div class="text-[10px] text-gray-500" x-text="annotation.type"></div>
+          </button>
+        </template>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOP BAR -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/40 backdrop-blur-xl border-b border-gray-800/50 z-30 flex items-center justify-between px-6">
+    <div class="flex items-center gap-8 ml-64">
+      <nav class="flex items-center gap-6">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/chart-annotations" class="nav-link active">Annotations</a>
+        <a href="/logic-builder" class="nav-link">Logic Builder</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4 text-xs mr-6">
+      <button @click="saveAnnotations()"
+              class="px-3 py-1.5 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all backdrop-blur-sm">
+        💾 Save
+      </button>
+      <button @click="exportAnnotations()"
+              class="px-3 py-1.5 rounded border border-gray-700/50 bg-gray-800/30 text-gray-400 hover:text-cyan-400 transition-all backdrop-blur-sm">
+        📤 Export
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-64 mt-14 mb-16 overflow-auto bg-gray-950/50 p-6">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-2xl font-bold text-gray-200 mb-6">Chart Annotations & Event Triggers</h1>
+      
+      <!-- Chart Container -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-4 mb-6">
+        <div class="h-96 relative" id="chart-container">
+          <canvas id="annotation-chart"></canvas>
+          
+          <!-- Annotations Overlay -->
+          <div class="absolute inset-0 pointer-events-none" id="annotations-overlay">
+            <template x-for="annotation in annotations" :key="annotation.id">
+              <div class="absolute pointer-events-auto"
+                   :style="`left: ${annotation.x}%; top: ${annotation.y}%;`"
+                   @click="selectAnnotation(annotation.id)">
+                <template x-if="annotation.type === 'marker'">
+                  <div class="w-3 h-3 rounded-full border-2 border-cyan-400 bg-cyan-400/20 backdrop-blur-sm"
+                       :class="annotation.selected ? 'ring-2 ring-cyan-400' : ''"></div>
+                </template>
+                <template x-if="annotation.type === 'text'">
+                  <div class="px-2 py-1 rounded border border-cyan-500/50 bg-cyan-500/10 backdrop-blur-sm text-xs text-cyan-400"
+                       :class="annotation.selected ? 'ring-2 ring-cyan-400' : ''"
+                       x-text="annotation.label"></div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annotations List -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-4">
+        <h2 class="text-sm font-semibold mb-4">Annotations</h2>
+        <div class="space-y-2">
+          <template x-for="annotation in annotations" :key="annotation.id">
+            <div class="flex items-center justify-between p-3 rounded border border-gray-700/50 bg-gray-800/30 backdrop-blur-sm hover:border-cyan-500/50 transition-all"
+                 :class="annotation.selected ? 'border-cyan-500/50 bg-cyan-500/10' : ''"
+                 @click="selectAnnotation(annotation.id)">
+              <div class="flex items-center gap-3">
+                <span class="text-lg">
+                  <template x-if="annotation.type === 'marker'">📍</template>
+                  <template x-if="annotation.type === 'line'">➖</template>
+                  <template x-if="annotation.type === 'region'">▭</template>
+                  <template x-if="annotation.type === 'text'">📝</template>
+                </span>
+                <div>
+                  <div class="text-sm font-semibold text-gray-200" x-text="annotation.label"></div>
+                  <div class="text-xs text-gray-500" x-text="annotation.description"></div>
+                </div>
+              </div>
+              <button @click.stop="deleteAnnotation(annotation.id)"
+                      class="px-2 py-1 rounded border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs transition-all backdrop-blur-sm">
+                Delete
+              </button>
+            </div>
+          </template>
+          <div x-show="annotations.length === 0" class="text-center text-gray-500 py-8 text-sm">
+            No annotations yet. Click on the chart or use tools to add annotations.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM BAR -->
+  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/40 backdrop-blur-xl border-t border-gray-800/50 z-20">
+    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
+      <div class="text-xs text-gray-500">
+        Annotations: <span class="text-cyan-400 font-semibold" x-text="annotations.length"></span>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+function chartAnnotationsState() {
+  return {
+    annotationMode: 'marker',
+    annotations: [],
+    selectedAnnotation: null,
+    savedAnnotations: JSON.parse(localStorage.getItem('phoenix:chartAnnotations') || '[]'),
+    chart: null,
+    
+    init() {
+      this.initChart();
+      this.setupChartClick();
+      this.loadSavedAnnotations();
+    },
+    
+    initChart() {
+      const ctx = document.getElementById('annotation-chart');
+      if (!ctx) return;
+      
+      this.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: 50}, (_, i) => `T${i}`),
+          datasets: [{
+            label: 'Latency',
+            data: Array.from({length: 50}, () => Math.random() * 500),
+            borderColor: 'rgba(6, 182, 212, 0.8)',
+            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    },
+    
+    setupChartClick() {
+      const container = document.getElementById('chart-container');
+      if (!container) return;
+      
+      container.addEventListener('click', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        if (this.annotationMode === 'marker') {
+          this.addAnnotation('marker', x, y);
+        } else if (this.annotationMode === 'text') {
+          const label = prompt('Annotation label:');
+          if (label) {
+            this.addAnnotation('text', x, y, label);
+          }
+        }
+      });
+    },
+    
+    addAnnotation(type, x, y, label = '') {
+      const annotation = {
+        id: Date.now().toString(),
+        type: type,
+        label: label || `${type} at ${Math.round(x)}%`,
+        description: `Added at ${new Date().toLocaleTimeString()}`,
+        x: x,
+        y: y,
+        timestamp: new Date().toISOString(),
+        selected: false
+      };
+      this.annotations.push(annotation);
+    },
+    
+    addTrigger(type) {
+      const triggers = {
+        latency: { label: 'Latency Spike', description: 'Triggered when latency exceeds threshold' },
+        error: { label: 'Error Event', description: 'Triggered on error detection' },
+        success: { label: 'Success Milestone', description: 'Triggered on success milestone' }
+      };
+      
+      const trigger = triggers[type];
+      if (trigger) {
+        this.addAnnotation('marker', 50, 50, trigger.label);
+        this.annotations[this.annotations.length - 1].description = trigger.description;
+        this.annotations[this.annotations.length - 1].trigger = type;
+      }
+    },
+    
+    selectAnnotation(id) {
+      this.annotations.forEach(a => a.selected = a.id === id);
+      this.selectedAnnotation = this.annotations.find(a => a.id === id);
+    },
+    
+    deleteAnnotation(id) {
+      this.annotations = this.annotations.filter(a => a.id !== id);
+      if (this.selectedAnnotation && this.selectedAnnotation.id === id) {
+        this.selectedAnnotation = null;
+      }
+    },
+    
+    saveAnnotations() {
+      const name = prompt('Annotation set name:');
+      if (!name) return;
+      
+      const annotationSet = {
+        id: Date.now().toString(),
+        name: name,
+        annotations: this.annotations,
+        createdAt: new Date().toISOString()
+      };
+      
+      this.savedAnnotations.push(annotationSet);
+      localStorage.setItem('phoenix:chartAnnotations', JSON.stringify(this.savedAnnotations));
+      alert('Annotations saved!');
+    },
+    
+    loadAnnotation(id) {
+      const annotationSet = this.savedAnnotations.find(a => a.id === id);
+      if (annotationSet) {
+        this.annotations = annotationSet.annotations || [];
+      }
+    },
+    
+    exportAnnotations() {
+      const data = {
+        annotations: this.annotations,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `annotations-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    
+    loadSavedAnnotations() {
+      this.savedAnnotations = JSON.parse(localStorage.getItem('phoenix:chartAnnotations') || '[]');
+    }
+  };
+}
+</script>
+{% endblock %}

@@ -6,6 +6,7 @@ function botsPageState() {
     bots: [],
     filterStatus: 'all',
     showAddBotModal: false,
+    showMiscMenu: false,
     newBot: { name: '', address: '', strategy: 'arbitrage', apiKey: '' },
     lastUpdated: new Date().toLocaleTimeString(),
     

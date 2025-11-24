@@ -1,0 +1,135 @@
+/* Glassmorphism Styles - Lightweight, No Drop Shadows */
+
+/* Glass Background Base */
+.glass {
+  background: rgba(17, 24, 39, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+.glass-light {
+  background: rgba(17, 24, 39, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(55, 65, 81, 0.2);
+}
+
+.glass-medium {
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(55, 65, 81, 0.4);
+}
+
+/* Sidebar Glass */
+aside {
+  background: rgba(17, 24, 39, 0.4) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(55, 65, 81, 0.3) !important;
+}
+
+/* Header/Footer Glass */
+header, footer {
+  background: rgba(17, 24, 39, 0.4) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(55, 65, 81, 0.3) !important;
+}
+
+/* Card Glass */
+.glass-card {
+  background: rgba(17, 24, 39, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+.glass-card:hover {
+  background: rgba(17, 24, 39, 0.4);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+/* Button Glass */
+.glass-btn {
+  background: rgba(31, 41, 55, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+  transition: all 0.2s ease;
+}
+
+.glass-btn:hover {
+  background: rgba(31, 41, 55, 0.5);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+/* Input Glass */
+input, select, textarea {
+  background: rgba(31, 41, 55, 0.3) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(55, 65, 81, 0.3) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  background: rgba(31, 41, 55, 0.4) !important;
+  border-color: rgba(6, 182, 212, 0.5) !important;
+}
+
+/* Modal Glass */
+.modal-glass {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(55, 65, 81, 0.4);
+}
+
+/* Remove all box shadows - lightweight design */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Override any existing shadows */
+.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+  box-shadow: none !important;
+}
+
+/* Lightweight transitions */
+.transition-glass {
+  transition: background 0.2s ease, border-color 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+/* Node/Component Glass */
+.node-glass {
+  background: rgba(31, 41, 55, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(55, 65, 81, 0.3);
+}
+
+/* Annotation Glass */
+.annotation-glass {
+  background: rgba(6, 182, 212, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* Performance optimizations */
+.glass-card, .glass-btn, .node-glass {
+  will-change: background, border-color;
+  transform: translateZ(0);
+}
+
+/* Lightweight hover effects */
+.glass-card:hover {
+  transform: translateY(-1px);
+}
+
+.glass-btn:active {
+  transform: scale(0.98);
+}
+
