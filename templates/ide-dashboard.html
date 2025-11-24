@@ -106,17 +106,17 @@
   </aside>
 
   <!-- MAIN CONTENT AREA (Scrollable) -->
-  <main class="flex-1 ml-64 mr-80 pr-80 mt-11 mb-16 overflow-auto bg-gray-950 p-6">
+  <main class="flex-1 ml-64 mr-80 pr-80 mt-11 mb-16 overflow-auto bg-gray-950">
     <!-- Always-visible basic chart at the top -->
-    <div class="chart-frame-premium rounded-lg p-4 mb-3">
-      <div class="flex items-center justify-between mb-2">
+    <div class="chart-frame-premium rounded-lg mb-3">
+      <div class="flex items-center justify-between mb-2 px-4 pt-4">
         <h2 class="text-sm font-semibold">Live Latency</h2>
         <div class="text-xs text-gray-500">Last 100 events</div>
       </div>
-      <div class="h-[70vh] md:h-[65vh] lg:h-[70vh]">
-        <canvas id="basicDashboardChart"></canvas>
+      <div class="h-[70vh] md:h-[65vh] lg:h-[70vh] p-4">
+        <canvas id="basicDashboardChart" class="w-full h-full"></canvas>
       </div>
-      <div class="mt-3 flex items-center justify-end">
+      <div class="px-4 pb-4 flex items-center justify-end">
         <div class="chart-nav">
           <button class="chart-nav-btn" id="topChartPrev" title="Previous">‹</button>
           <button class="chart-pill active" data-topchart="latency">Latency</button>

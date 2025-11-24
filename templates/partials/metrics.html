@@ -7,37 +7,37 @@
 <!-- KPI Cards with Live Transitions -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
   <div
-    class="stat glass-card shadow-xl rounded-box border border-primary/30 hover:border-primary transition-all enhanced-card">
-    <div class="stat-title">
+    class="stat glass-card shadow-xl rounded-box border border-primary/30 hover:border-primary transition-all enhanced-card p-0">
+    <div class="stat-title px-4 pt-4">
       <span class="tooltip-definition" data-definition="Average response time for bot operations">Avg Latency</span>
     </div>
-    <div class="stat-value" 
+    <div class="stat-value px-4" 
          data-status="{{ 'error' if kpis.avg_latency_ms > 300 else 'warning' if kpis.avg_latency_ms > 200 else 'ok' }}"
          id="kpi-latency-value">{{ kpis.avg_latency_ms }}ms</div>
-    <div class="stat-desc">Last 60s</div>
+    <div class="stat-desc px-4 pb-4">Last 60s</div>
   </div>
   <div
-    class="stat glass-card shadow-xl rounded-box border border-secondary/30 hover:border-secondary transition-all enhanced-card">
-    <div class="stat-title">
+    class="stat glass-card shadow-xl rounded-box border border-secondary/30 hover:border-secondary transition-all enhanced-card p-0">
+    <div class="stat-title px-4 pt-4">
       <span class="tooltip-definition" data-definition="Percentage of successful operations">Success Rate</span>
     </div>
-    <div class="stat-value" 
+    <div class="stat-value px-4" 
          data-status="{{ 'error' if kpis.success_rate_pct < 80 else 'warning' if kpis.success_rate_pct < 90 else 'ok' }}"
          id="kpi-success-value">{{ kpis.success_rate_pct }}%</div>
-    <div class="stat-desc">Last 60s</div>
+    <div class="stat-desc px-4 pb-4">Last 60s</div>
   </div>
   <div
-    class="stat glass-card shadow-xl rounded-box border border-accent/30 hover:border-accent transition-all enhanced-card">
-    <div class="stat-title">
+    class="stat glass-card shadow-xl rounded-box border border-accent/30 hover:border-accent transition-all enhanced-card p-0">
+    <div class="stat-title px-4 pt-4">
       <span class="tooltip-definition" data-definition="Number of events processed per minute">Throughput</span>
     </div>
-    <div class="stat-value" id="kpi-throughput-value">{{ kpis.throughput_1m }}/min</div>
-    <div class="stat-desc">Events</div>
+    <div class="stat-value px-4" id="kpi-throughput-value">{{ kpis.throughput_1m }}/min</div>
+    <div class="stat-desc px-4 pb-4">Events</div>
   </div>
 </div>
 
 <!-- View Selector -->
-<div id="charts" class="flex items-center justify-between mt-4">
+<div id="charts" class="flex items-center justify-between mt-4 px-0">
   <h2 class="text-lg font-semibold">Live Charts</h2>
   <select id="viewSelector"
     class="select select-bordered bg-base-100 hover-glow">
@@ -104,12 +104,12 @@
 
 <!-- Bot Health (Compact Premium) -->
 <div id="health" class="card bg-base-100 shadow mt-4 glass-event-table card-premium table-compact-premium">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-2">
+  <div class="card-body p-0">
+    <div class="flex justify-between items-center mb-2 p-4 pb-2">
       <h2 class="card-title">Bot Health</h2>
       <div class="text-sm text-gray-500">Auto-refresh 5s</div>
     </div>
-    <div class="flex items-center gap-3 mb-2">
+    <div class="flex items-center gap-3 mb-2 px-4">
       <div class="stat-chip text-emerald-300">OK</div>
       <div class="stat-chip text-yellow-300">Slow</div>
       <div class="stat-chip text-red-300">Errors</div>
@@ -117,11 +117,12 @@
         {% include 'components/css_status_ring.html' %}
       </div>
     </div>
-    <div class="divider-lux"></div>
+    <div class="divider-lux mx-4"></div>
     <div id="bot-health-table-container"
          data-bot-health-table
          data-refresh-interval="5000"
-         data-api-endpoint="/api/bots/status">
+         data-api-endpoint="/api/bots/status"
+         class="px-4 pb-4">
       <!-- Compact BotHealthTable renders here -->
     </div>
   </div>
@@ -129,8 +130,8 @@
 
 <!-- Recent Events Table with Enhanced Interactions -->
 <div id="events" class="card bg-base-100 shadow mt-4 glass-event-table enhanced-card card-premium table-compact-premium">
-  <div class="card-body">
-    <div class="flex justify-between items-center">
+  <div class="card-body p-0">
+    <div class="flex justify-between items-center p-4 pb-2">
       <h2 class="card-title">Recent Events</h2>
       <div class="flex gap-2">
         <button class="btn btn-sm btn-ghost" onclick="window.dashboardUI.showCommandPalette()" title="Command Palette (⌘K)">
@@ -140,7 +141,7 @@
         <a href="/logs" class="btn btn-sm btn-outline">📋 View All Logs</a>
       </div>
     </div>
-    <div class="overflow-x-auto max-h-80 overflow-y-auto neon-scroll">
+    <div class="overflow-x-auto max-h-80 overflow-y-auto neon-scroll px-4 pb-4">
       <table class="table table-compact" id="recent-events-table">
         <thead>
           <tr>

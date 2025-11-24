@@ -13,7 +13,7 @@
   let throughputChart;
   const maxPoints = 30;
   const eventTimes = [];
-  let userPrefs = { enableMA: false, enableTrend: false, alertLatencyMs: null };
+  let userPrefs = { enableMA: true, enableTrend: false, alertLatencyMs: null };
 
   function initCharts() {
     const ctx = document.getElementById("latencyChart");
@@ -729,21 +729,51 @@
         const rgbaColor = color.replace('1)', '0.15)');
         
         if (!instanceRef.value){
+          // Calculate initial moving average if enabled
+          let maData = [];
+          if (userPrefs.enableMA && data.length > 0) {
+            const windowN = 5;
+            for (let i = 0; i < data.length; i++) {
+              const start = Math.max(0, i - windowN + 1);
+              const slice = data.slice(start, i + 1);
+              const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+              maData.push(Number.isFinite(mean) ? Number(mean.toFixed(1)) : null);
+            }
+          }
+          
+          const datasets = [{ 
+            label, 
+            data, 
+            borderColor: color, 
+            backgroundColor: rgbaColor, 
+            borderWidth: 3, 
+            tension: 0.25, 
+            pointRadius: 4, 
+            pointHoverRadius: 8,
+            fill: true
+          }];
+          
+          // Add moving average dataset if enabled
+          if (userPrefs.enableMA) {
+            const maColor = color === colors.primary ? colors.secondary : colors.primary;
+            datasets.push({
+              label: 'MA(5)',
+              data: maData,
+              borderColor: maColor,
+              backgroundColor: maColor.replace('1)', '0.1)'),
+              borderWidth: 1,
+              tension: 0.25,
+              pointRadius: 0,
+              fill: false,
+              hidden: false
+            });
+          }
+          
           instanceRef.value = new Chart(ctx, {
             type: 'line',
             data: { 
               labels, 
-              datasets: [{ 
-                label, 
-                data, 
-                borderColor: color, 
-                backgroundColor: rgbaColor, 
-                borderWidth: 3, 
-                tension: 0.25, 
-                pointRadius: 4, 
-                pointHoverRadius: 8,
-                fill: true
-              }] 
+              datasets: datasets
             },
             options: { 
               responsive: true, 
@@ -847,7 +877,17 @@
       // Re-bind toolbar states on new partial
       const toggle = document.getElementById('toggleMA');
       const alertI = document.getElementById('alertLatency');
-      if (toggle) toggle.checked = !!userPrefs.enableMA;
+      if (toggle) {
+        toggle.checked = !!userPrefs.enableMA;
+        // Ensure MA dataset is visible if enabled
+        if (userPrefs.enableMA && window.__chartPrimary?.value) {
+          const chart = window.__chartPrimary.value;
+          if (chart.data.datasets[1]) {
+            chart.data.datasets[1].hidden = false;
+            chart.update('none');
+          }
+        }
+      }
       if (alertI && userPrefs.alertLatencyMs != null) alertI.value = String(userPrefs.alertLatencyMs);
       
       // Add view selector handler
