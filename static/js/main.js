@@ -187,7 +187,12 @@
           return;
         }
         if (!data || !Array.isArray(data.timestamps) || !Array.isArray(data.values)) {
-          console.warn('[LiveCharts] Unexpected payload; expected {timestamps, values}');
+          console.warn('[LiveCharts] Unexpected payload; expected {timestamps, values}', data);
+          return;
+        }
+        // Safety check for chart instance
+        if (!chartRef.data || !chartRef.data.datasets) {
+          console.warn('[LiveCharts] Chart instance is not properly initialized');
           return;
         }
         // Normalize labels

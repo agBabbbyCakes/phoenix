@@ -1086,6 +1086,59 @@ async def trade_bot(request: Request) -> JSONResponse:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    """Return 204 No Content for favicon requests to prevent 404 errors."""
+    from fastapi.responses import Response
+    return Response(status_code=204)
+
+
+@app.get("/api/live/{metric}")
+async def get_live_metric(metric: str) -> JSONResponse:
+    """Get live metric data for charts.
+    
+    Supported metrics: latency, throughput, profit, success_rate
+    Returns: { timestamps: [...], values: [...] }
+    """
+    # Get recent events
+    events = store.last_events(60)  # Last 60 events
+    
+    if not events:
+        # Return empty data if no events
+        return JSONResponse({
+            "timestamps": [],
+            "values": []
+        })
+    
+    # Extract data based on metric
+    timestamps = []
+    values = []
+    
+    for event in events:
+        # Convert timestamp to milliseconds since epoch
+        ts_ms = int(event.timestamp.timestamp() * 1000)
+        timestamps.append(ts_ms)
+        
+        if metric == "latency":
+            values.append(event.latency_ms)
+        elif metric == "throughput":
+            # Count events per time window (simplified - just use 1 per event)
+            values.append(1)
+        elif metric == "profit":
+            values.append(event.profit if event.profit is not None else 0.0)
+        elif metric == "success_rate":
+            # Calculate success rate (1 if no error, 0 if error)
+            values.append(100.0 if event.error is None else 0.0)
+        else:
+            # Default to latency
+            values.append(event.latency_ms)
+    
+    return JSONResponse({
+        "timestamps": timestamps,
+        "values": values
+    })
+
+
 @app.get("/api/bots/{bot_id}/trading-info")
 async def get_bot_trading_info(bot_id: str) -> JSONResponse:
     """Get trading information for a bot (price, volume, market data).
