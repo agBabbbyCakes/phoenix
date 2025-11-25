@@ -764,6 +764,34 @@
       </div>
     </div>
   </div>
+
+  <!-- BOTTOM BAR -->
+  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/40 backdrop-blur-xl border-t border-gray-800/50 z-20">
+    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div class="text-xs text-gray-500">
+          Bots: <span class="text-cyan-400 font-semibold" x-text="filteredBots.length"></span>
+        </div>
+        <div class="text-xs text-gray-500">
+          Last updated: <span x-text="lastUpdated"></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors px-3 py-1 rounded">
+          Dashboard
+        </a>
+        <a href="/explorer" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors px-3 py-1 rounded">
+          Explorer
+        </a>
+        <a href="/bots" class="text-sm text-gray-400 hover:text-purple-400 transition-colors px-3 py-1 rounded">
+          Bots
+        </a>
+        <a href="/logs" class="text-sm text-gray-400 hover:text-purple-400 transition-colors px-3 py-1 rounded">
+          Logs
+        </a>
+      </div>
+    </div>
+  </footer>
 </div>
 {% endblock %}
 
