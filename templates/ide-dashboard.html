@@ -8,181 +8,82 @@
      x-init="init()">
   
   <!-- LEFT SIDEBAR (Fixed) -->
-  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
+  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-12 z-20 overflow-y-auto"
          style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5); scrollbar-width: thin; scrollbar-color: rgba(6, 182, 212, 0.3) transparent;">
     
     <!-- Logo & Title -->
-    <div class="p-4 border-b border-gray-800">
-      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+    <div class="p-3 border-b border-gray-800">
+      <h1 class="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
         🦍 Silverback
       </h1>
-      <p class="text-xs text-gray-500 mt-1">Blockchain Bot Positions</p>
+      <p class="text-xs text-gray-500 mt-0.5">Bot Exchange</p>
     </div>
 
     <!-- Navigation Section -->
-    <div class="p-4">
-      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Navigation</div>
-      <nav class="space-y-1">
-        <a href="/" class="sidebar-nav-link active">Dashboard</a>
-        <a href="/" class="sidebar-nav-link">Live Charts</a>
-        <a href="/explorer" class="sidebar-nav-link">Bot Explorer</a>
-        <a href="/bots" class="sidebar-nav-link">Bots</a>
-        <a href="/logs" class="sidebar-nav-link">Logs</a>
-        <a href="/report" class="sidebar-nav-link">Reports</a>
+    <div class="p-3">
+      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Navigation</div>
+      <nav class="space-y-0.5">
+        <a href="/" class="sidebar-nav-link active text-sm py-1.5">Dashboard</a>
+        <a href="/explorer" class="sidebar-nav-link text-sm py-1.5">Explorer</a>
+        <a href="/bots" class="sidebar-nav-link text-sm py-1.5">Bots</a>
+        <a href="/logs" class="sidebar-nav-link text-sm py-1.5">Logs</a>
+        <a href="/report" class="sidebar-nav-link text-sm py-1.5">Reports</a>
       </nav>
     </div>
 
-    <!-- Tools Section -->
-    <div class="p-4 border-t border-gray-800">
-      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Tools</div>
-      <nav class="space-y-1">
-        <button @click="showCommandPalette = !showCommandPalette" class="sidebar-nav-link w-full text-left">Command Palette</button>
-        <a href="/chart-annotations" class="sidebar-nav-link w-full text-left">Chart Annotations</a>
-        <a href="/logic-builder" class="sidebar-nav-link w-full text-left">Logic Builder</a>
-        <button @click="showAddBotModal = true" class="sidebar-nav-link w-full text-left">Add Bot</button>
-        <button @click="exportData()" class="sidebar-nav-link w-full text-left">Export Data</button>
-        <button @click="toggleTheme()" class="sidebar-nav-link w-full text-left">Theme</button>
-        
-        <!-- Misc Submenu -->
-        <div class="mt-2">
-          <button @click="showMiscMenu = !showMiscMenu" 
-                  class="sidebar-nav-link w-full text-left flex items-center justify-between">
-            <span>Misc</span>
-            <span class="text-xs" x-text="showMiscMenu ? '▼' : '▶'"></span>
-          </button>
-          <div x-show="showMiscMenu" 
-               x-transition
-               class="ml-4 mt-1 space-y-1"
-               style="display: none;">
-            <a href="/pointcloud" class="sidebar-nav-link w-full text-left text-xs">3D View</a>
-          </div>
+    <!-- Quick Stats -->
+    <div class="p-3 border-t border-gray-800">
+      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Live Stats</div>
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400">Latency</span>
+          <span class="text-xs font-semibold text-cyan-400" x-text="kpis.avg_latency_ms + 'ms'"></span>
         </div>
-      </nav>
-    </div>
-
-    <!-- Quick Stats (Collapsed) -->
-    <div class="p-4 border-t border-gray-800 space-y-2">
-      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Quick Stats</div>
-      <div class="grid grid-cols-3 gap-2">
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Latency</div>
-          <div class="text-xs font-semibold text-cyan-400" 
-               x-text="kpis.avg_latency_ms + 'ms'"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400">Success</span>
+          <span class="text-xs font-semibold text-green-400" x-text="kpis.success_rate_pct + '%'"></span>
         </div>
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Success</div>
-          <div class="text-xs font-semibold text-green-400" 
-               x-text="kpis.success_rate_pct + '%'"></div>
-        </div>
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Throughput</div>
-          <div class="text-xs font-semibold text-yellow-400" 
-               x-text="kpis.throughput_1m"></div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Quick Stats (Collapsed) -->
-    <div class="p-4 border-t border-gray-800 space-y-2">
-      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Quick Stats</div>
-      <div class="grid grid-cols-3 gap-2">
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Latency</div>
-          <div class="text-xs font-semibold text-cyan-400" 
-               x-text="kpis.avg_latency_ms + 'ms'"></div>
-        </div>
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Success</div>
-          <div class="text-xs font-semibold text-green-400" 
-               x-text="kpis.success_rate_pct + '%'"></div>
-        </div>
-        <div class="text-center">
-          <div class="text-xs text-gray-400">Throughput</div>
-          <div class="text-xs font-semibold text-yellow-400" 
-               x-text="kpis.throughput_1m"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400">Throughput</span>
+          <span class="text-xs font-semibold text-yellow-400" x-text="kpis.throughput_1m"></span>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT AREA (Scrollable) -->
-  <main class="flex-1 ml-64 mr-80 pr-80 mt-11 mb-16 overflow-auto bg-gray-950">
-    <!-- Always-visible basic chart at the top -->
-    <div class="chart-frame-premium rounded-lg mb-3">
-      <div class="flex items-center justify-between mb-2 px-4 pt-4">
-        <h2 class="text-sm font-semibold">Live Latency</h2>
-        <div class="text-xs text-gray-500">Last 100 events</div>
-      </div>
-      <div class="h-[70vh] md:h-[65vh] lg:h-[70vh] p-4">
-        <canvas id="basicDashboardChart" class="w-full h-full"></canvas>
-      </div>
-      <div class="px-4 pb-4 flex items-center justify-end">
-        <div class="chart-nav">
-          <button class="chart-nav-btn" id="topChartPrev" title="Previous">‹</button>
-          <button class="chart-pill active" data-topchart="latency">Latency</button>
-          <button class="chart-pill" data-topchart="throughput">Throughput</button>
-          <button class="chart-pill" data-topchart="profit">Profit</button>
-          <button class="chart-nav-btn" id="topChartNext" title="Next">›</button>
-        </div>
-      </div>
-    </div>
-    <!-- Premium subnav for quick in-page navigation -->
-    <nav class="premium-subnav mb-6" aria-label="Section navigation">
-      <a class="premium-pill" href="#overview">Overview</a>
-      <a class="premium-pill" href="#health">Bot Health</a>
-      <a class="premium-pill" href="#events">Events</a>
-      <a class="premium-pill" href="#charts">Charts</a>
-    </nav>
-    <div hx-ext="sse" sse-connect="/stream">
-      <div id="metrics-panel" sse-swap="metrics_update" hx-swap="innerHTML" class="h-full">
-        {{ initial_metrics_html | safe }}
-      </div>
-    </div>
-  </main>
-
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="header-compact fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
+  <header class="header-compact fixed top-0 left-0 right-0 h-11 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-4"
           style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
     
     <!-- Left: Navigation -->
-    <div class="flex items-center gap-8 ml-64">
-      <nav class="flex items-center gap-6">
-        <a href="/" class="nav-link active">Dashboard</a>
-        <a href="/bots" class="nav-link">Bots</a>
-        <a href="/logs" class="nav-link">Logs</a>
-        <a href="/report" class="nav-link">Reports</a>
-        <a href="/settings" class="nav-link">Settings</a>
+    <div class="flex items-center gap-6 ml-64">
+      <nav class="flex items-center gap-4 text-sm">
+        <a href="/" class="nav-link active text-xs">Dashboard</a>
+        <a href="/explorer" class="nav-link text-xs">Explorer</a>
+        <a href="/bots" class="nav-link text-xs">Bots</a>
+        <a href="/logs" class="nav-link text-xs">Logs</a>
+        <a href="/report" class="nav-link text-xs">Reports</a>
       </nav>
     </div>
 
-    <!-- Right: Live Info & Controls -->
-    <div class="flex items-center gap-6 text-xs mr-80">
+    <!-- Right: Live Ticker -->
+    <div class="flex items-center gap-4 text-xs mr-80">
       <div class="flex items-center gap-2">
-        <span class="text-gray-500">Latency:</span>
-        <span class="text-cyan-400 font-semibold" x-text="kpis.avg_latency_ms + 'ms'"></span>
+        <span class="text-gray-500">LAT:</span>
+        <span class="text-cyan-400 font-mono font-semibold" x-text="kpis.avg_latency_ms + 'ms'"></span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-gray-500">Success:</span>
-        <span class="text-green-400 font-semibold" x-text="kpis.success_rate_pct + '%'"></span>
+        <span class="text-gray-500">SUC:</span>
+        <span class="text-green-400 font-mono font-semibold" x-text="kpis.success_rate_pct + '%'"></span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-gray-500">Auto-refresh:</span>
-        <span class="text-gray-400">5s</span>
+        <div class="w-1.5 h-1.5 rounded-full"
+             :class="connectionStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'"></div>
+        <span class="text-gray-400 font-mono" 
+              x-text="connectionStatus === 'connected' ? 'LIVE' : 'OFF'"></span>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full"
-             :class="connectionStatus === 'connected' ? 'bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50' : 'bg-red-400'"></div>
-        <span class="text-gray-400" 
-              x-text="connectionStatus === 'connected' ? 'Connected' : 'Disconnected'"></span>
-      </div>
-      <button @click="toggleTheme()" 
-              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
-              title="Toggle theme">
-        <span x-show="theme === 'dark'">☀️</span>
-        <span x-show="theme === 'light'">🌙</span>
-      </button>
       <button @click="showCommandPalette = !showCommandPalette" 
-              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
+              class="px-2 py-1 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
               title="Command Palette (⌘K)">
         ⌘K
       </button>
@@ -190,159 +91,217 @@
   </header>
 
   <!-- RIGHT SIDEBAR (Event Stream) -->
-  <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto"
+  <aside class="w-72 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-12 z-20 overflow-y-auto"
          style="box-shadow: -2px 0 20px rgba(0, 0, 0, 0.5);">
     
-    <!-- Context-aware informational panel -->
-    <div class="p-4 border-b border-gray-800">
-      <h2 class="text-sm font-semibold text-gray-300">Context & Insights</h2>
-      <div id="contextPanel" class="mt-2 space-y-2">
-        <div class="text-xs text-gray-400">Loading insights…</div>
-      </div>
+    <div class="p-3 border-b border-gray-800">
+      <h2 class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Live Feed</h2>
     </div>
 
-    <div class="p-4 border-b border-gray-800">
-      <h2 class="text-sm font-semibold text-gray-300">Recent Events</h2>
-      <p class="text-xs text-gray-500">Live activity stream</p>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-4 space-y-2" id="event-stream">
+    <div class="flex-1 overflow-y-auto p-2 space-y-1" id="event-stream">
       {% for e in last_events %}
-      <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-cyan-500/50 transition-colors cursor-pointer"
+      <div class="p-2 rounded border border-gray-800/50 bg-gray-800/30 hover:border-cyan-500/50 transition-colors cursor-pointer text-xs"
            @click="highlightEvent($el)"
            data-bot-name="{{ e.bot_name }}">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-gray-300">{{ e.bot_name }}</span>
-          </div>
-          <span class="text-xs text-gray-500 font-mono">{{ e.timestamp.strftime('%H:%M:%S') }}</span>
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-mono font-semibold text-gray-300">{{ e.bot_name }}</span>
+          <span class="text-gray-500 font-mono">{{ e.timestamp.strftime('%H:%M:%S') }}</span>
         </div>
-        <div class="flex items-center gap-3 text-xs">
+        <div class="flex items-center gap-2 text-xs">
           <span class="font-mono"
                 :class="getLatencyColor({{ e.latency_ms }})"
                 x-text="{{ e.latency_ms }} + 'ms'"></span>
           {% if e.error %}
-          <span class="text-red-400">Error</span>
+          <span class="text-red-400">ERR</span>
           {% else %}
           <span class="text-emerald-400">OK</span>
           {% endif %}
         </div>
-        {% if e.tx_hash %}
-        <div class="mt-2">
-          <a href="https://etherscan.io/tx/{{ e.tx_hash }}" 
-             target="_blank"
-             class="text-xs text-cyan-400 hover:text-cyan-300 font-mono hover:underline">
-            {{ e.tx_hash[:16] }}...
-          </a>
-        </div>
-        {% endif %}
       </div>
       {% endfor %}
     </div>
-
-    <!-- Bot Filter -->
-    <div class="p-4 border-t border-gray-800">
-      <div class="text-xs text-gray-500 mb-2">Bot Filter</div>
-      <div class="flex flex-wrap gap-2">
-        <button @click="selectedBots = []" 
-                :class="selectedBots.length === 0 ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400'"
-                class="px-2 py-1 rounded text-xs border border-gray-700 hover:border-cyan-500/50 transition-colors">
-          All
-        </button>
-        <template x-for="bot in availableBots" :key="bot">
-          <button @click="toggleBot(bot)"
-                  :class="selectedBots.includes(bot) ? 'bg-cyan-600 text-white' : 'bg-gray-800 text-gray-400'"
-                  class="px-2 py-1 rounded text-xs border border-gray-700 hover:border-cyan-500/50 transition-colors"
-                  x-text="bot"></button>
-        </template>
-      </div>
-    </div>
   </aside>
 
-  <!-- BOTTOM BAR (Fixed) -->
-  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 z-20"
-          style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5), 0 -2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
-    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
-      <div class="flex items-center gap-6">
+  <!-- MAIN CONTENT AREA (Scrollable) -->
+  <main class="flex-1 ml-64 mr-72 mt-11 mb-12 overflow-auto bg-gray-950 p-4">
+    
+    <!-- Compact Header -->
+    <div class="mb-4">
+      <h1 class="text-xl font-bold text-gray-100 mb-1">Dashboard</h1>
+      <p class="text-xs text-gray-500">Real-time bot performance & analytics</p>
+    </div>
+
+    <!-- Compact KPI Cards Row -->
+    <div class="grid grid-cols-4 gap-2 mb-4">
+      <div class="glass-card rounded border border-gray-800/50 p-3 hover:border-cyan-500/50 transition-colors">
+        <div class="text-[10px] uppercase text-gray-500 mb-1 tracking-wider">Latency</div>
+        <div class="text-lg font-bold text-cyan-400 font-mono" 
+             x-text="kpis.avg_latency_ms + 'ms'"></div>
+        <div class="text-[10px] text-gray-500 mt-0.5">60s avg</div>
+      </div>
+      <div class="glass-card rounded border border-gray-800/50 p-3 hover:border-green-500/50 transition-colors">
+        <div class="text-[10px] uppercase text-gray-500 mb-1 tracking-wider">Success</div>
+        <div class="text-lg font-bold text-green-400 font-mono" 
+             x-text="kpis.success_rate_pct + '%'"></div>
+        <div class="text-[10px] text-gray-500 mt-0.5">60s avg</div>
+      </div>
+      <div class="glass-card rounded border border-gray-800/50 p-3 hover:border-yellow-500/50 transition-colors">
+        <div class="text-[10px] uppercase text-gray-500 mb-1 tracking-wider">Throughput</div>
+        <div class="text-lg font-bold text-yellow-400 font-mono" 
+             x-text="kpis.throughput_1m + '/min'"></div>
+        <div class="text-[10px] text-gray-500 mt-0.5">Events/min</div>
+      </div>
+      <div class="glass-card rounded border border-gray-800/50 p-3 hover:border-purple-500/50 transition-colors">
+        <div class="text-[10px] uppercase text-gray-500 mb-1 tracking-wider">Bots</div>
+        <div class="text-lg font-bold text-purple-400 font-mono" 
+             x-text="availableBots.length"></div>
+        <div class="text-[10px] text-gray-500 mt-0.5">Active</div>
+      </div>
+    </div>
+
+    <!-- Compact Feature Grid -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wider">Features</h2>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <a href="/explorer" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">🔍</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Explorer</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">Browse bots</p>
+        </a>
+        <a href="/bots" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">🤖</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Bots</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">Manage</p>
+        </a>
+        <a href="/logs" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">📋</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Logs</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">View logs</p>
+        </a>
+        <a href="/chart-annotations" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">📊</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Annotate</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">Chart tools</p>
+        </a>
+        <a href="/logic-builder" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">🎨</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Logic</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">Workflows</p>
+        </a>
+        <a href="/report" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">📈</span>
+            <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Reports</h3>
+          </div>
+          <p class="text-[10px] text-gray-500">Analytics</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Charts Section - Compact -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold text-gray-200 uppercase tracking-wider">Charts</h2>
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50"></div>
-          <span class="text-sm text-gray-400">Silverback v{{ version }}</span>
-        </div>
-        <div class="text-xs text-gray-500">
-          Last updated: <span x-text="lastUpdated"></span>
-        </div>
-        <div class="text-xs text-gray-500">
-          Build v{{ version }}
+          <button id="chartPrev" class="px-2 py-1 rounded border border-gray-700 hover:bg-gray-800 text-xs text-gray-400 hover:text-cyan-400 transition-colors" title="Previous">‹</button>
+          <select id="viewSelector" 
+                  class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-100 focus:outline-none focus:border-cyan-500/50">
+            <option value="latency">Latency</option>
+            <option value="throughput">Throughput</option>
+            <option value="profit">Profit</option>
+            <option value="heatmap">Heatmap</option>
+            <option value="graph3d">3D Network</option>
+            <option value="financial3d">3D Financial</option>
+            <option value="pointcloud">Point Cloud</option>
+            <option value="sensors">Sensors</option>
+          </select>
+          <button id="chartNext" class="px-2 py-1 rounded border border-gray-700 hover:bg-gray-800 text-xs text-gray-400 hover:text-cyan-400 transition-colors" title="Next">›</button>
         </div>
       </div>
-      <div class="flex items-center gap-4">
-        <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
-          Dashboard
-        </a>
-        <a href="/bots" class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
-          Bots
-        </a>
-        <a href="/logs" class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
-          Logs
-        </a>
-        <a href="/report" class="text-sm text-gray-400 hover:text-green-400 transition-colors hover:shadow-lg hover:shadow-green-400/20 px-3 py-1 rounded">
-          Reports
-        </a>
+      
+      <!-- Full Width Chart Container -->
+      <div class="glass-card rounded border border-gray-800/50 w-full p-3">
+        <div class="flex flex-wrap items-center gap-2 mb-2" id="chartToolbar">
+          <button class="px-2 py-1 rounded border border-gray-700 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300" 
+                  id="btnResetZoom" title="Reset zoom (Z)">Reset</button>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <span class="text-xs text-gray-400">MA</span>
+            <input type="checkbox" id="toggleMA" class="accent-cyan-500 w-3 h-3" />
+          </label>
+          <div class="w-px h-3 bg-gray-700"></div>
+          <label class="flex items-center gap-1.5">
+            <span class="text-xs text-gray-400">Alert ≥</span>
+            <input id="alertLatency" type="number" 
+                   class="w-16 bg-gray-800 border border-gray-700 rounded px-1.5 py-0.5 text-xs text-gray-100" 
+                   placeholder="ms" min="1" />
+          </label>
+          <button class="px-2 py-1 rounded border border-gray-700 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300" 
+                  id="btnSavePrefs">Save</button>
+        </div>
+        <div class="w-full" style="height: 300px; min-height: 300px;">
+          <canvas id="chartPrimary" class="w-full h-full"></canvas>
+          <canvas id="chartSecondary" class="w-full h-full" style="display: none;"></canvas>
+          <canvas id="graph3dCanvas" class="w-full h-full" style="display: none;"></canvas>
+          <canvas id="financial3dCanvas" class="w-full h-full" style="display: none;"></canvas>
+          <div id="pointcloudContainer" style="display: none; width: 100%; height: 100%; position: relative;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Panel - Full Width -->
+    <div hx-ext="sse" sse-connect="/stream" class="mb-4">
+      <div id="metrics-panel" sse-swap="metrics_update" hx-swap="innerHTML" class="w-full">
+        {{ initial_metrics_html | safe }}
+      </div>
+    </div>
+
+    <!-- Bot Health Table - Compact -->
+    <div class="mb-4">
+      <h2 class="text-sm font-semibold text-gray-200 mb-2 uppercase tracking-wider">Bot Health</h2>
+      <div class="glass-card rounded border border-gray-800/50 w-full p-3">
+        <div id="bot-health-table-container"
+             data-bot-health-table
+             data-refresh-interval="5000"
+             data-api-endpoint="/api/bots/status"
+             class="w-full">
+          <!-- BotHealthTable renders here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM BAR (Fixed) -->
+  <footer class="fixed bottom-0 left-0 right-0 h-12 bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 z-20"
+          style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);">
+    <div class="max-w-full mx-auto px-4 h-full flex items-center justify-between">
+      <div class="flex items-center gap-4 text-xs">
+        <div class="flex items-center gap-1.5">
+          <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+          <span class="text-gray-400 font-mono">v{{ version }}</span>
+        </div>
+        <span class="text-gray-500">Updated: <span x-text="lastUpdated" class="font-mono"></span></span>
+      </div>
+      <div class="flex items-center gap-3 text-xs">
+        <a href="/" class="text-gray-400 hover:text-cyan-400 transition-colors font-mono">DASH</a>
+        <a href="/explorer" class="text-gray-400 hover:text-cyan-400 transition-colors font-mono">EXP</a>
+        <a href="/bots" class="text-gray-400 hover:text-purple-400 transition-colors font-mono">BOTS</a>
+        <a href="/logs" class="text-gray-400 hover:text-purple-400 transition-colors font-mono">LOGS</a>
+        <a href="/report" class="text-gray-400 hover:text-green-400 transition-colors font-mono">RPT</a>
       </div>
     </div>
   </footer>
-
-  <!-- Add Bot Modal -->
-  <div x-show="showAddBotModal" 
-       @click.away="showAddBotModal = false"
-       x-transition
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-       style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 w-full max-w-md"
-         @click.stop>
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-200">Add New Bot</h3>
-        <button @click="showAddBotModal = false" class="text-gray-400 hover:text-gray-300">×</button>
-      </div>
-      <form @submit.prevent="addBot()" class="space-y-4">
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Bot Name</label>
-          <input type="text" x-model="newBot.name" required
-                 class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100">
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Address</label>
-          <input type="text" x-model="newBot.address" 
-                 class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100 font-mono">
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Strategy</label>
-          <select x-model="newBot.strategy"
-                  class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100">
-            <option value="arbitrage">Arbitrage</option>
-            <option value="mev">MEV</option>
-            <option value="trading">Trading</option>
-            <option value="monitoring">Monitoring</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">API Key (optional)</label>
-          <input type="password" x-model="newBot.apiKey"
-                 class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-100 font-mono">
-        </div>
-        <div class="flex gap-3">
-          <button type="submit" 
-                  class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded px-4 py-2 text-sm transition-colors">
-            Add Bot
-          </button>
-          <button type="button" @click="showAddBotModal = false"
-                  class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded px-4 py-2 text-sm transition-colors">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Command Palette Modal -->
   <div x-show="showCommandPalette" 
@@ -350,22 +309,21 @@
        x-transition
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
        style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 w-full max-w-2xl"
+    <div class="bg-gray-900 border border-gray-700 rounded-lg p-4 w-full max-w-xl"
          @click.stop>
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-200">Command Palette</h3>
-        <button @click="showCommandPalette = false" class="text-gray-400 hover:text-gray-300">×</button>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-sm font-semibold text-gray-200">Command Palette</h3>
+        <button @click="showCommandPalette = false" class="text-gray-400 hover:text-gray-300 text-lg">×</button>
       </div>
       <input type="text" 
              x-model="commandInput"
              @keydown.enter="executeCommand()"
              @keydown.escape="showCommandPalette = false"
-             placeholder="Type a command... (e.g., restart arb-scout, inspect tx-relay)"
-             class="w-full bg-gray-800 border border-gray-700 rounded-md p-3 text-sm text-gray-100 mb-4"
+             placeholder="Type a command... (e.g., restart arb-scout)"
+             class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-100 mb-3"
              autofocus>
-      <div class="text-xs text-gray-400 space-y-1">
+      <div class="text-xs text-gray-400 space-y-0.5">
         <div><code class="text-cyan-400">restart &lt;bot&gt;</code> - Restart a bot</div>
-        <div><code class="text-cyan-400">inspect &lt;bot&gt; &lt;time&gt;</code> - Inspect bot at time</div>
         <div><code class="text-cyan-400">filter &lt;bot&gt;</code> - Filter by bot</div>
         <div><code class="text-cyan-400">clear</code> - Clear filters</div>
         <div><code class="text-cyan-400">export</code> - Export data</div>
@@ -385,147 +343,51 @@
 <script src="/static/js/bot-explorer.js"></script>
 <script src="/static/js/ide-dashboard.js"></script>
 <script>
-  // Render a basic Chart.js line chart with real data from /api/charts/data
-  (function () {
-    try {
-      var el = document.getElementById('basicDashboardChart');
-      if (!el || !window.Chart) return;
-      var ctx = el.getContext('2d');
-      var ctxPanel = document.getElementById('contextPanel');
-      function fmt(ts) {
-        try { return new Date(ts).toLocaleTimeString('en-US', { hour12: false }); } catch { return ts; }
-      }
-      async function loadData() {
-        const res = await fetch('/api/charts/data', { headers: { 'Accept': 'application/json' } });
-        const json = await res.json();
-        const events = Array.isArray(json?.events) ? json.events : [];
-        // Sort by timestamp ascending
-        events.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
-        return { events, kpis: json?.kpis || {} };
-      }
-      function toLatencySeries(events) {
-        return {
-          labels: events.map(e => fmt(e.timestamp)),
-          values: events.map(e => Number(e.latency_ms || e.latency || 0)),
-          label: 'Latency (ms)'
-        };
-      }
-      function toThroughputSeries(events) {
-        const buckets = new Map(); // minute -> count
-        events.forEach(e => {
-          const d = new Date(e.timestamp);
-          const key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
-          buckets.set(key, (buckets.get(key)||0)+1);
-        });
-        const keys = Array.from(buckets.keys()).sort();
-        return { labels: keys, values: keys.map(k => buckets.get(k)), label: 'Throughput (/min)' };
-      }
-      function toProfitSeries(events) {
-        let acc = 0;
-        const labels = [], values = [];
-        events.forEach(e => {
-          const p = Number(e.profit ?? 0);
-          acc += p;
-          labels.push(fmt(e.timestamp));
-          values.push(Number(acc.toFixed(4)));
-        });
-        return { labels, values, label: 'Cumulative Profit' };
-      }
-      function renderSeries(series) {
-        if (el._basicChartInstance) { el._basicChartInstance.destroy(); }
-        el._basicChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: { labels: series.labels, datasets: [{
-            label: series.label,
-            data: series.values,
-            borderColor: '#22d3ee',
-            backgroundColor: 'rgba(34, 211, 238, 0.2)',
-            borderWidth: 2,
-            pointRadius: 0,
-            tension: 0.25
-          }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-        });
-      }
-      function summarize(values) {
-        if (!values || !values.length) return { min: 0, max: 0, avg: 0, last: 0, first: 0, change: 0 };
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const sum = values.reduce((a,b)=>a+b,0);
-        const avg = sum / values.length;
-        const first = values[0];
-        const last = values[values.length-1];
-        const change = last - first;
-        return { min, max, avg, last, first, change };
-      }
-      function insightBadge(text, colorClass) {
-        return '<span class="stat-chip '+colorClass+'">'+text+'</span>';
-      }
-      function updateContextPanel(type, series, kpis) {
-        if (!ctxPanel) return;
-        const s = summarize(series.values);
-        const lines = [];
-        if (type === 'latency') {
-          lines.push(insightBadge('Avg '+Math.round(s.avg)+'ms','text-emerald-300'));
-          lines.push(insightBadge('Peak '+Math.round(s.max)+'ms','text-yellow-300'));
-          lines.push(insightBadge((s.change>=0?'+':'')+Math.round(s.change)+'ms vs start','text-blue-300'));
-          if (s.last > 300) lines.push(insightBadge('High latency','text-red-300'));
-        } else if (type === 'throughput') {
-          lines.push(insightBadge('Buckets '+series.values.length,'text-emerald-300'));
-          lines.push(insightBadge('Peak '+Math.max(...series.values||[0])+'/min','text-yellow-300'));
-        } else if (type === 'profit') {
-          lines.push(insightBadge('Cum '+(series.values.slice(-1)[0]||0),'text-emerald-300'));
-          if ((series.values.slice(-1)[0]||0) < 0) lines.push(insightBadge('Negative trend','text-red-300'));
-        }
-        const tips = [];
-        if (type === 'latency' && s.last > 250) tips.push('Consider raising alert threshold or investigating RPC performance.');
-        if (type === 'throughput' && (Math.max(...series.values||[0]) < 2)) tips.push('Low activity: verify bots are connected.');
-        if (type === 'profit' && (series.values.slice(-1)[0]||0) <= 0) tips.push('Profit flat/negative: review strategy parameters.');
-        ctxPanel.innerHTML = ''
-          + '<div class="flex flex-wrap gap-2 mb-2">'+lines.join('')+'</div>'
-          + (tips.length ? '<ul class="list-disc list-inside text-xs text-gray-400">'+tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>' : '<div class="text-xs text-gray-500">All systems nominal.</div>');
-      }
-      async function renderTopChart(type) {
-        try {
-          const { events, kpis } = await loadData();
-          let series;
-          if (type === 'throughput') series = toThroughputSeries(events);
-          else if (type === 'profit') series = toProfitSeries(events);
-          else series = toLatencySeries(events);
-          renderSeries(series);
-          updateContextPanel(type, series, kpis);
-        } catch {}
-      }
-      // initial render and periodic refresh (latency default)
-      renderTopChart('latency');
-      setInterval(() => renderTopChart(document.querySelector('.chart-pill.active')?.dataset.topchart || 'latency'), 5000);
-      // nav bindings
-      document.querySelectorAll('.chart-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.chart-pill').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          renderTopChart(btn.dataset.topchart);
-        });
+  // Chart Navigation - Make charts browsable
+  (function() {
+    const viewSelector = document.getElementById('viewSelector');
+    const chartPrev = document.getElementById('chartPrev');
+    const chartNext = document.getElementById('chartNext');
+    
+    if (!viewSelector) return;
+    
+    const views = ['latency', 'throughput', 'profit', 'heatmap', 'graph3d', 'financial3d', 'pointcloud', 'sensors'];
+    
+    function setView(index) {
+      if (index < 0) index = views.length - 1;
+      if (index >= views.length) index = 0;
+      viewSelector.value = views[index];
+      viewSelector.dispatchEvent(new Event('change'));
+    }
+    
+    function getCurrentIndex() {
+      return views.indexOf(viewSelector.value);
+    }
+    
+    if (chartPrev) {
+      chartPrev.addEventListener('click', () => {
+        setView(getCurrentIndex() - 1);
       });
-      // prev/next controls
-      const order = ['latency','throughput','profit'];
-      function setActive(type) {
-        document.querySelectorAll('.chart-pill').forEach(b => b.classList.remove('active'));
-        const target = document.querySelector(`.chart-pill[data-topchart="${type}"]`);
-        if (target) target.classList.add('active');
-        renderTopChart(type);
+    }
+    
+    if (chartNext) {
+      chartNext.addEventListener('click', () => {
+        setView(getCurrentIndex() + 1);
+      });
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setView(getCurrentIndex() - 1);
+      } else if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setView(getCurrentIndex() + 1);
       }
-      function step(dir) {
-        const current = document.querySelector('.chart-pill.active')?.dataset.topchart || 'latency';
-        const idx = Math.max(0, order.indexOf(current));
-        const next = order[(idx + dir + order.length) % order.length];
-        setActive(next);
-      }
-      const prevBtn = document.getElementById('topChartPrev');
-      const nextBtn = document.getElementById('topChartNext');
-      if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
-      if (nextBtn) nextBtn.addEventListener('click', () => step(1));
-    } catch (e) { /* no-op */ }
+    });
   })();
 </script>
 {% endblock %}
