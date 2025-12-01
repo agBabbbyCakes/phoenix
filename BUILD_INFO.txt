@@ -1,8 +1,8 @@
 Phoenix Dashboard - Build Information
 =====================================
 Version: 0.1.0
-Build Number: 3
-Build Timestamp: 20251201143348
-Build Date: 2025-12-01 14:33:48 UTC
-Version String: 0.1.0.3
-Full Version: 0.1.0.3.20251201143348
+Build Number: 8
+Build Timestamp: 20251201155640
+Build Date: 2025-12-01 15:56:40 UTC
+Version String: 0.1.0.8
+Full Version: 0.1.0.8.20251201155640
