@@ -31,9 +31,9 @@ python3 version.py
 echo "Cleaning previous builds..."
 rm -rf build dist
 
-# Build the executable
+# Build the executable (suppress warnings for optional modules)
 echo "Building executable..."
-python3 -m PyInstaller --clean phoenix_macos.spec
+python3 -m PyInstaller --clean --noconfirm --log-level=WARN phoenix_macos.spec
 
 # Check if build was successful
 if [ ! -d "dist/PhoenixDashboard.app" ]; then

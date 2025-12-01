@@ -32,9 +32,9 @@ REM Update build info
 echo Updating build information...
 python version.py
 
-REM Build the executable
+REM Build the executable (suppress warnings for optional modules)
 echo Building executable...
-python -m PyInstaller --clean phoenix_windows.spec
+python -m PyInstaller --clean --noconfirm --log-level=WARN phoenix_windows.spec
 
 REM Check if build was successful
 if not exist "dist\PhoenixDashboard.exe" (

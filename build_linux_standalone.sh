@@ -35,9 +35,9 @@ rm -rf build dist
 ARCH=$(uname -m)
 echo "Detected architecture: $ARCH"
 
-# Build the executable
+# Build the executable (suppress warnings for optional modules)
 echo "Building executable..."
-python3 -m PyInstaller --clean phoenix_linux.spec
+python3 -m PyInstaller --clean --noconfirm --log-level=WARN phoenix_linux.spec
 
 # Check if build was successful
 if [ ! -f "dist/PhoenixDashboard" ]; then
