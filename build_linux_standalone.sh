@@ -10,7 +10,28 @@ echo "============================================================"
 # Check if Python is available
 if ! command -v python3 &> /dev/null; then
     echo "ERROR: Python 3 is not installed"
+    echo "Install with: sudo apt install python3 python3-pip"
     exit 1
+fi
+
+# Check for WebKitGTK (required for pywebview)
+echo "Checking for WebKitGTK..."
+if ! pkg-config --exists webkit2gtk-4.0 2>/dev/null && ! pkg-config --exists webkit2gtk-4.1 2>/dev/null; then
+    echo "WARNING: WebKitGTK not found via pkg-config"
+    echo "The app may not work properly without it."
+    echo ""
+    echo "To install WebKitGTK:"
+    echo "  Ubuntu/Debian: sudo apt install webkit2gtk-4.0 libwebkit2gtk-4.0-dev"
+    echo "  Fedora: sudo dnf install webkit2gtk4.0-devel"
+    echo "  Arch: sudo pacman -S webkit2gtk"
+    echo ""
+    read -p "Continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+else
+    echo "✅ WebKitGTK found"
 fi
 
 # Install PyInstaller and pywebview if not present
@@ -70,16 +91,22 @@ Installation:
 1. Extract this archive to any location
 2. Make executable: chmod +x PhoenixDashboard
 3. Run: ./PhoenixDashboard
-4. Your browser will automatically open to the dashboard
+4. A native desktop window will open (no browser needed!)
 
 Usage:
 - The dashboard runs on http://127.0.0.1:8000 by default
-- Press Ctrl+C to stop
+- Close the window to exit
 - You can access it from other devices using your computer's IP address
 
 System Requirements:
 - Linux x86_64
+- WebKitGTK 4.0+ (usually pre-installed on modern Linux)
 - No Python installation required
+
+WebKitGTK Installation (if needed):
+  Ubuntu/Debian: sudo apt install webkit2gtk-4.0
+  Fedora: sudo dnf install webkit2gtk4.0-devel
+  Arch: sudo pacman -S webkit2gtk
 
 For support, visit: https://github.com/agBabbbyCakes/phoenix
 EOF
@@ -109,6 +136,19 @@ cp "dist/PhoenixDashboard-Linux-${ARCH}.zip" "downloads/linux/"
 # Copy standalone executable
 cp "dist/PhoenixDashboard" "downloads/PhoenixDashboard-Linux-${ARCH}"
 chmod +x "downloads/PhoenixDashboard-Linux-${ARCH}"
+
+# Create desktop entry file
+cat > "$RELEASE_DIR/PhoenixDashboard.desktop" << 'EOF'
+[Desktop Entry]
+Name=Phoenix Dashboard
+Comment=Ethereum Bot Monitoring Dashboard
+Exec=PhoenixDashboard
+Icon=phoenix-dashboard
+Terminal=false
+Type=Application
+Categories=Network;Monitoring;Development;
+MimeType=
+EOF
 
 # Try to create AppImage if appimagetool is available
 if command -v appimagetool &> /dev/null || [ -f "appimagetool-x86_64.AppImage" ]; then

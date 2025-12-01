@@ -45,6 +45,11 @@ hiddenimports = [
     'src.realtime.eth_feed',
     'webview',
     'webview.platforms',
+    'webview.platforms.gtk',
+    'gi',
+    'gi.repository',
+    'gi.repository.Gtk',
+    'gi.repository.WebKit2',
 ]
 
 a = Analysis(

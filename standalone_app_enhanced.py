@@ -199,7 +199,24 @@ if __name__ == "__main__":
     except ImportError:
         print("ERROR: pywebview is not installed!")
         print("Please install it with: pip install pywebview")
+        if sys.platform == "linux":
+            print("\nFor Linux, you may also need:")
+            print("  Ubuntu/Debian: sudo apt install webkit2gtk-4.0 libwebkit2gtk-4.0-dev")
+            print("  Fedora: sudo dnf install webkit2gtk4.0-devel")
+            print("  Arch: sudo pacman -S webkit2gtk")
         sys.exit(1)
+    
+    # Check for WebKitGTK on Linux
+    if sys.platform == "linux":
+        try:
+            import gi
+            gi.require_version('WebKit2', '4.0')
+            from gi.repository import WebKit2
+        except (ImportError, ValueError) as e:
+            print("WARNING: WebKitGTK may not be properly installed")
+            print("The app may fall back to opening a browser")
+            print("Install: sudo apt install webkit2gtk-4.0 libwebkit2gtk-4.0-dev")
+            # Continue anyway - pywebview will handle fallback
     
     # Set environment defaults
     host = os.environ.get("HOST", "127.0.0.1")
