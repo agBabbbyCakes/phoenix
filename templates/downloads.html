@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Phoenix Dashboard — Downloads{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-950 text-gray-100">
+  <!-- Header -->
+  <header class="bg-gray-900/40 backdrop-blur-xl border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-6 py-6">
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        🦍 Phoenix Dashboard — Downloads
+      </h1>
+      <p class="text-gray-400 mt-2">Standalone applications for Windows, macOS, Linux, and Raspberry Pi</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Info Section -->
+    <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold text-gray-200 mb-4">📦 Standalone Applications</h2>
+      <p class="text-gray-400 mb-4">
+        Download the standalone version of Phoenix Dashboard for your platform. These are self-contained executables
+        that include everything needed to run the dashboard - no Python installation required!
+      </p>
+      <div class="bg-cyan-500/10 border border-cyan-500/30 rounded p-4 mt-4">
+        <p class="text-sm text-cyan-300">
+          <strong>✨ Features:</strong> The standalone app automatically opens your browser when started and runs the
+          dashboard on a local server. Perfect for running on your Raspberry Pi or any local machine.
+        </p>
+      </div>
+    </div>
+
+    <!-- Downloads Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Windows -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🪟</div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200">Windows</h3>
+            <p class="text-xs text-gray-500">x64 (64-bit)</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 mb-4">
+          Run Phoenix Dashboard on Windows 10/11. Double-click to launch.
+        </p>
+        <div class="space-y-2">
+          <a href="/downloads/windows/PhoenixDashboard-Windows-x64.zip" 
+             class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
+            📥 Download ZIP
+          </a>
+          <a href="/downloads/windows/PhoenixDashboard-Setup-x64.exe" 
+             class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
+            🔧 Download Installer
+          </a>
+          <p class="text-xs text-gray-500 text-center mt-2">
+            PhoenixDashboard-Windows-x64.zip<br>
+            PhoenixDashboard-Setup-x64.exe
+          </p>
+        </div>
+      </div>
+
+      <!-- macOS -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🍎</div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200">macOS</h3>
+            <p class="text-xs text-gray-500">Intel & Apple Silicon</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 mb-4">
+          Native macOS application. Extract and run from Applications folder.
+        </p>
+        <div class="space-y-2">
+          <a href="/downloads/macos/PhoenixDashboard-macOS.zip" 
+             class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
+            📥 Download ZIP
+          </a>
+          <a href="/downloads/macos/PhoenixDashboard-macOS.dmg" 
+             class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
+            🔧 Download DMG Installer
+          </a>
+          <p class="text-xs text-gray-500 text-center mt-2">
+            PhoenixDashboard-macOS.zip<br>
+            PhoenixDashboard-macOS.dmg
+          </p>
+        </div>
+      </div>
+
+      <!-- Linux -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🐧</div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200">Linux</h3>
+            <p class="text-xs text-gray-500">x86_64 (64-bit)</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 mb-4">
+          Standalone executable for Linux distributions. Make executable and run.
+        </p>
+        <div class="space-y-2">
+          <a href="/downloads/linux/PhoenixDashboard-Linux-x86_64.zip" 
+             class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
+            📥 Download ZIP
+          </a>
+          <a href="/downloads/linux/PhoenixDashboard-Linux-x86_64.AppImage" 
+             class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
+            🔧 Download AppImage
+          </a>
+          <p class="text-xs text-gray-500 text-center mt-2">
+            PhoenixDashboard-Linux-x86_64.zip<br>
+            PhoenixDashboard-Linux-x86_64.AppImage
+          </p>
+        </div>
+      </div>
+
+      <!-- Raspberry Pi -->
+      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all md:col-span-2 lg:col-span-1">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🍓</div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-200">Raspberry Pi</h3>
+            <p class="text-xs text-gray-500">ARM (32-bit & 64-bit)</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 mb-4">
+          Optimized build for Raspberry Pi. Perfect for running as a local dashboard server.
+        </p>
+        <div class="space-y-2">
+          <a href="/downloads/PhoenixDashboard-RaspberryPi-armv7l" 
+             class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold">
+            📥 Download for Raspberry Pi
+          </a>
+          <p class="text-xs text-gray-500 text-center">
+            PhoenixDashboard-RaspberryPi-armv7l
+          </p>
+          <p class="text-xs text-gray-600 text-center mt-2">
+            <code class="bg-gray-800/50 px-2 py-1 rounded">chmod +x PhoenixDashboard-RaspberryPi-armv7l</code>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Build Instructions -->
+    <div class="mt-12 bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6">
+      <h2 class="text-xl font-semibold text-gray-200 mb-4">🔨 Building from Source</h2>
+      <p class="text-gray-400 mb-4">
+        If you want to build the standalone applications yourself, use the provided build scripts:
+      </p>
+      
+      <div class="space-y-4">
+        <div class="bg-gray-800/30 rounded p-4">
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Windows</h3>
+          <code class="text-xs text-gray-300 block">build_windows_standalone.bat</code>
+        </div>
+        
+        <div class="bg-gray-800/30 rounded p-4">
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">macOS</h3>
+          <code class="text-xs text-gray-300 block">chmod +x build_macos_standalone.sh<br>./build_macos_standalone.sh</code>
+        </div>
+        
+        <div class="bg-gray-800/30 rounded p-4">
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Linux</h3>
+          <code class="text-xs text-gray-300 block">chmod +x build_linux_standalone.sh<br>./build_linux_standalone.sh</code>
+        </div>
+        
+        <div class="bg-gray-800/30 rounded p-4">
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Raspberry Pi</h3>
+          <code class="text-xs text-gray-300 block">chmod +x build_raspberrypi_standalone.sh<br>./build_raspberrypi_standalone.sh</code>
+          <p class="text-xs text-gray-500 mt-2">
+            Note: Build this directly on your Raspberry Pi for best compatibility.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Instructions -->
+    <div class="mt-8 bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6">
+      <h2 class="text-xl font-semibold text-gray-200 mb-4">📖 Usage Instructions</h2>
+      <div class="space-y-4 text-gray-400">
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Windows</h3>
+          <ol class="list-decimal list-inside space-y-1 text-sm">
+            <li>Download <code class="bg-gray-800/50 px-1 rounded">PhoenixDashboard-Windows-x64.exe</code></li>
+            <li>Double-click the executable to launch</li>
+            <li>Your browser will automatically open to the dashboard</li>
+            <li>Press Ctrl+C in the console window to stop the server</li>
+          </ol>
+        </div>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">macOS</h3>
+          <ol class="list-decimal list-inside space-y-1 text-sm">
+            <li>Download and extract <code class="bg-gray-800/50 px-1 rounded">PhoenixDashboard-macOS.zip</code></li>
+            <li>Move <code class="bg-gray-800/50 px-1 rounded">PhoenixDashboard.app</code> to your Applications folder</li>
+            <li>Double-click to launch (you may need to allow it in Security settings)</li>
+            <li>Your browser will automatically open to the dashboard</li>
+          </ol>
+        </div>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Linux / Raspberry Pi</h3>
+          <ol class="list-decimal list-inside space-y-1 text-sm">
+            <li>Download the executable</li>
+            <li>Make it executable: <code class="bg-gray-800/50 px-1 rounded">chmod +x PhoenixDashboard-Linux-*</code></li>
+            <li>Run: <code class="bg-gray-800/50 px-1 rounded">./PhoenixDashboard-Linux-*</code></li>
+            <li>Your browser will automatically open to the dashboard</li>
+            <li>For Raspberry Pi, you can access it from other devices on your network by using the Pi's IP address</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+

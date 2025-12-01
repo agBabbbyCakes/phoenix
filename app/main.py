@@ -24,6 +24,17 @@ from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, p
 from .models import BotRental, RentalRequest, RentalDuration, PaymentMethod, RentalStatus
 import random
 
+# Import version info
+try:
+    import sys
+    project_root = Path(__file__).resolve().parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from version import get_build_info
+    BUILD_INFO = get_build_info()
+except Exception:
+    BUILD_INFO = {"version": "0.1.0", "build_number": 0, "version_string": "0.1.0"}
+
 # Optional import for Ethereum realtime feed (only if src directory exists)
 try:
     import sys
@@ -62,6 +73,11 @@ app.add_middleware(
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+# Mount downloads directory for standalone executables
+DOWNLOADS_DIR = BASE_DIR / "downloads"
+if DOWNLOADS_DIR.exists():
+    app.mount("/downloads", StaticFiles(directory=str(DOWNLOADS_DIR)), name="downloads")
+
 # Templates
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
@@ -76,14 +92,14 @@ eth_rt = None
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
     """Home page with feature overview / start menu."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("home.html", {"request": request, "version": version})
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     """IDE Dashboard - Unified interface. Default entry point."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     sample_mode = getattr(request.app.state, "sample_mode", False)
     # Build initial metrics HTML so charts render before first SSE update
     kpis = store.kpis()
@@ -110,14 +126,14 @@ async def index(request: Request) -> HTMLResponse:
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
     """Home page with feature overview / start menu."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("home.html", {"request": request, "version": version})
 
 
 @app.get("/tv", response_class=HTMLResponse)
 async def tv_dashboard(request: Request) -> HTMLResponse:
     """TV-style dashboard (original view)."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     sample_mode = getattr(request.app.state, "sample_mode", False)
     # Build initial metrics HTML so charts render before first SSE update
     kpis = store.kpis()
@@ -170,43 +186,50 @@ async def dashboard(request: Request) -> HTMLResponse:
 @app.get("/explorer", response_class=HTMLResponse)
 async def bot_explorer_page(request: Request) -> HTMLResponse:
     """Bot Explorer page - Etherscan meets stock research."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("bot-explorer.html", {"request": request, "version": version})
 
 
 @app.get("/logic-builder", response_class=HTMLResponse)
 async def logic_builder_page(request: Request) -> HTMLResponse:
     """Visual conditional logic builder page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("logic-builder.html", {"request": request, "version": version})
 
 
 @app.get("/chart-annotations", response_class=HTMLResponse)
 async def chart_annotations_page(request: Request) -> HTMLResponse:
     """Chart annotations and event triggers page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("chart-annotations.html", {"request": request, "version": version})
 
 
 @app.get("/bots", response_class=HTMLResponse)
 async def bots_page(request: Request) -> HTMLResponse:
     """Bots management page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("bots.html", {"request": request, "version": version})
 
 
 @app.get("/bots/{bot_id}", response_class=HTMLResponse)
 async def bot_profile(request: Request, bot_id: str) -> HTMLResponse:
     """Individual bot profile page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("bot-profile.html", {"request": request, "bot_id": bot_id, "version": version})
 
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request) -> HTMLResponse:
     """Settings page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("settings.html", {"request": request, "version": version})
+
+
+@app.get("/downloads", response_class=HTMLResponse)
+async def downloads_page(request: Request) -> HTMLResponse:
+    """Downloads page for standalone applications."""
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
+    return templates.TemplateResponse("downloads.html", {"request": request, "version": version})
 
 
 @app.get("/report", response_class=HTMLResponse)
@@ -713,7 +736,7 @@ async def logs_viewer(request: Request) -> HTMLResponse:
 @app.get("/pointcloud", response_class=HTMLResponse)
 async def pointcloud_viewer(request: Request) -> HTMLResponse:
     """Standalone 3D point cloud visualization page."""
-    version = os.getenv("APP_VERSION", "0.1.0")
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
     return templates.TemplateResponse("pointcloud.html", {"request": request, "version": version})
 
 
