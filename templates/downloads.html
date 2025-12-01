@@ -36,7 +36,7 @@
       <!-- Windows -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
         <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl">🪟</div>
+          <div class="text-4xl liquid-glass-icon">🪟</div>
           <div>
             <h3 class="text-lg font-semibold text-gray-200">Windows</h3>
             <p class="text-xs text-gray-500">x64 (64-bit)</p>
@@ -69,7 +69,7 @@
       <!-- macOS -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
         <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl">🍎</div>
+          <div class="text-4xl liquid-glass-icon">🍎</div>
           <div>
             <h3 class="text-lg font-semibold text-gray-200">macOS</h3>
             <p class="text-xs text-gray-500">Intel & Apple Silicon</p>
@@ -96,7 +96,7 @@
       <!-- Linux -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
         <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl">🐧</div>
+          <div class="text-4xl liquid-glass-icon">🐧</div>
           <div>
             <h3 class="text-lg font-semibold text-gray-200">Linux</h3>
             <p class="text-xs text-gray-500">x86_64 (64-bit)</p>
@@ -123,7 +123,7 @@
       <!-- Raspberry Pi -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all md:col-span-2 lg:col-span-1">
         <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl">🍓</div>
+          <div class="text-4xl liquid-glass-icon">🍓</div>
           <div>
             <h3 class="text-lg font-semibold text-gray-200">Raspberry Pi</h3>
             <p class="text-xs text-gray-500">ARM (32-bit & 64-bit)</p>
@@ -220,6 +220,52 @@
     </div>
   </main>
 </div>
+
+<style>
+/* Liquid Glass Icons */
+.liquid-glass-icon {
+  background: rgba(6, 182, 212, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 12px;
+  padding: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 8px 32px rgba(6, 182, 212, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.liquid-glass-icon:hover {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: rgba(6, 182, 212, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(6, 182, 212, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Remove emoji icons, use liquid glass effect only */
+.liquid-glass-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.liquid-glass-icon:hover::before {
+  opacity: 1;
+}
+</style>
 
 <script>
 // Check if file exists and show appropriate message
