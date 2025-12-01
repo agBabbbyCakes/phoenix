@@ -11,6 +11,15 @@ import time
 import socket
 from pathlib import Path
 
+# Fix Windows console encoding
+if sys.platform == "win32":
+    try:
+        import codecs
+        sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+        sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
+    except Exception:
+        pass
+
 # Add project root to Python path
 project_root = Path(__file__).resolve().parent
 if str(project_root) not in sys.path:
@@ -36,11 +45,17 @@ def open_browser(port, delay=2):
     """Open browser after a short delay."""
     time.sleep(delay)
     url = f"http://127.0.0.1:{port}"
-    print(f"\n🌐 Opening browser at {url}")
+    try:
+        print(f"\n🌐 Opening browser at {url}")
+    except UnicodeEncodeError:
+        print(f"\nOpening browser at {url}")
     try:
         webbrowser.open(url)
     except Exception as e:
-        print(f"⚠️  Could not open browser automatically: {e}")
+        try:
+            print(f"⚠️  Could not open browser automatically: {e}")
+        except UnicodeEncodeError:
+            print(f"Warning: Could not open browser automatically: {e}")
         print(f"   Please open {url} manually in your browser")
 
 if __name__ == "__main__":
@@ -50,7 +65,10 @@ if __name__ == "__main__":
     os.environ["PORT"] = str(port)
     
     print("=" * 60)
-    print("🦍 Phoenix Dashboard - Standalone App")
+    try:
+        print("🦍 Phoenix Dashboard - Standalone App")
+    except UnicodeEncodeError:
+        print("Phoenix Dashboard - Standalone App")
     print("=" * 60)
     print(f"Starting server on http://{host}:{port}")
     print("Press Ctrl+C to stop")
@@ -73,6 +91,9 @@ if __name__ == "__main__":
         print("\n\nShutting down gracefully...")
         sys.exit(0)
     except Exception as e:
-        print(f"\n❌ Error starting server: {e}")
+        try:
+            print(f"\n❌ Error starting server: {e}")
+        except UnicodeEncodeError:
+            print(f"\nError starting server: {e}")
         sys.exit(1)
 
