@@ -2,6 +2,19 @@
 
 This directory contains standalone executable builds of Phoenix Dashboard for different platforms.
 
+## Windows SmartScreen Warning
+
+**If you see "Windows protected your PC" when running the .exe:**
+
+This is normal for PyInstaller executables. The file is safe - it's your own code.
+
+**To run it:**
+1. Click **"More info"** in the warning
+2. Click **"Run anyway"**
+3. Windows will remember after the first run
+
+See `WINDOWS_SMARTScreen_FIX.md` in the project root for more details.
+
 ## Available Builds
 
 - **Windows**: `PhoenixDashboard-Windows-x64.exe` - Double-click to run
