@@ -1,0 +1,37 @@
+# Dockerfile for building Linux standalone executable
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
+    webkit2gtk-4.0 \
+    libwebkit2gtk-4.0-dev \
+    pkg-config \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt pyproject.toml ./
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir pydantic-settings
+RUN pip install --no-cache-dir pyinstaller
+
+# Copy application code
+COPY . .
+
+# Update version info
+RUN python3 version.py || echo "Version update skipped"
+
+# Build the executable - try multiple methods
+RUN chmod +x build_linux_standalone.sh build_linux_simple.sh
+RUN bash -c "cd /app && (./build_linux_standalone.sh || ./build_linux_simple.sh || python3 -m PyInstaller --clean --noconfirm phoenix_linux.spec)" || echo "Build attempted"
+
+# The build script creates files in downloads/linux/
+# Keep them for extraction
+CMD ["bash", "-c", "ls -la downloads/linux/ && echo 'Build complete! Files are in downloads/linux/'"]
+

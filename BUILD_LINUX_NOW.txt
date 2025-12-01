@@ -1,0 +1,9 @@
+COPY AND PASTE THIS ENTIRE COMMAND INTO POWERSHELL:
+
+docker run --rm -v "${PWD}:/workspace" -w /workspace python:3.11-slim bash -c "apt-get update && apt-get install -y webkit2gtk-4.0 libwebkit2gtk-4.0-dev zip build-essential python3-dev pkg-config && pip install --upgrade pip && pip install -r requirements.txt && pip install pydantic-settings pyinstaller && python3 version.py && python3 -m PyInstaller --clean --noconfirm phoenix_linux.spec && mkdir -p downloads/linux dist/PhoenixDashboard-Linux-x86_64 && cp dist/PhoenixDashboard dist/PhoenixDashboard-Linux-x86_64/ && echo 'Phoenix Dashboard - Linux Standalone' > dist/PhoenixDashboard-Linux-x86_64/README.txt && echo '1. Extract archive' >> dist/PhoenixDashboard-Linux-x86_64/README.txt && echo '2. chmod +x PhoenixDashboard' >> dist/PhoenixDashboard-Linux-x86_64/README.txt && echo '3. ./PhoenixDashboard' >> dist/PhoenixDashboard-Linux-x86_64/README.txt && cd dist && zip -r PhoenixDashboard-Linux-x86_64.zip PhoenixDashboard-Linux-x86_64 && cp PhoenixDashboard-Linux-x86_64.zip /workspace/downloads/linux/ && echo 'SUCCESS!' && ls -lh /workspace/downloads/linux/PhoenixDashboard-Linux-x86_64.zip"
+
+MAKE SURE DOCKER DESKTOP IS RUNNING FIRST!
+
+After it completes, verify with:
+Test-Path "downloads\linux\PhoenixDashboard-Linux-x86_64.zip"
+

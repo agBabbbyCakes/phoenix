@@ -23,7 +23,13 @@ from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
 from .models import BotRental, RentalRequest, RentalDuration, PaymentMethod, RentalStatus
 from .downloads import router as downloads_router
-import random
+from .config import settings
+from .logging_config import setup_logging
+from .middleware.rate_limit import RateLimitMiddleware
+from .middleware.error_handler import exception_handler_middleware
+
+# Setup logging
+setup_logging()
 
 # Import version info
 try:
@@ -59,17 +65,30 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 
 
-app = FastAPI(title="Ethereum Bot Monitoring Dashboard")
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    debug=settings.debug,
+)
 
-# CORS
+# Configure CORS with settings
+cors_origins = ["*"] if settings.cors_allow_all else settings.cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Add rate limiting middleware
+app.add_middleware(RateLimitMiddleware)
+
+# Add error handling middleware
+@app.middleware("http")
+async def error_handler_wrapper(request: Request, call_next):
+    return await exception_handler_middleware(request, call_next)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -87,7 +106,11 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 broker = SSEBroker()
-store = DataStore()
+store = DataStore(max_events=settings.max_events)
+
+# Store in app state for access in routes
+app.state.broker = broker
+app.state.store = store
 
 # ETH realtime instance (will be created on first use)
 eth_rt = None
@@ -125,13 +148,6 @@ async def index(request: Request) -> HTMLResponse:
         "ide-dashboard.html",
         {"request": request, "sample_mode": sample_mode, "initial_metrics_html": initial_metrics_html, "version": version},
     )
-
-
-@app.get("/home", response_class=HTMLResponse)
-async def home(request: Request) -> HTMLResponse:
-    """Home page with feature overview / start menu."""
-    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
-    return templates.TemplateResponse("home.html", {"request": request, "version": version})
 
 
 @app.get("/tv", response_class=HTMLResponse)
@@ -688,15 +704,12 @@ async def _on_startup() -> None:
         return template.render(**context)
 
     # Decide between sample mode (mock) and real tailing
-    import os
-    force_sample = os.getenv("FORCE_SAMPLE", "").lower() in {"1", "true", "yes"}
-    clean_ui = os.getenv("CLEAN_UI", "").lower() in {"1", "true", "yes"}
-    if clean_ui:
+    if settings.clean_ui:
         # Do not start any publishers; present a clean UI by default
         app.state.sample_mode = False
         return
-    log_path = os.getenv("SILVERBACK_LOG_PATH")
-    if log_path and not force_sample:
+    log_path = settings.silverback_log_path
+    if log_path and not settings.force_sample:
         app.state.publisher_task = asyncio.create_task(
             tail_jsonl_and_broadcast(Path(log_path), broker, store, render_html)
         )

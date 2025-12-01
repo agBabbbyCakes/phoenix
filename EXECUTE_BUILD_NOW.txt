@@ -1,0 +1,25 @@
+I've set up all the build infrastructure, but I'm having trouble executing the Docker build 
+through the automated commands (likely due to output capture issues).
+
+TO BUILD THE LINUX EXECUTABLE RIGHT NOW:
+
+1. Make sure Docker Desktop is running (check system tray)
+
+2. Open PowerShell in this directory and run:
+
+   .\FINAL_BUILD.ps1
+
+   OR copy-paste this command:
+
+   docker run --rm -v "${PWD}:/workspace" -w /workspace python:3.11-slim bash -c "apt-get update && apt-get install -y webkit2gtk-4.0 libwebkit2gtk-4.0-dev zip build-essential python3-dev pkg-config && pip install --upgrade pip && pip install -r requirements.txt && pip install pydantic-settings pyinstaller && python3 -m PyInstaller --clean --noconfirm phoenix_linux.spec && mkdir -p downloads/linux dist/PhoenixDashboard-Linux-x86_64 && cp dist/PhoenixDashboard dist/PhoenixDashboard-Linux-x86_64/ && echo 'README' > dist/PhoenixDashboard-Linux-x86_64/README.txt && cd dist && zip -r PhoenixDashboard-Linux-x86_64.zip PhoenixDashboard-Linux-x86_64 && cp PhoenixDashboard-Linux-x86_64.zip /workspace/downloads/linux/ && ls -lh /workspace/downloads/linux/PhoenixDashboard-Linux-x86_64.zip"
+
+3. Wait 5-10 minutes for the build to complete
+
+4. After it finishes, run this to commit and push:
+
+   git add downloads/linux/PhoenixDashboard-Linux-x86_64.zip
+   git commit -m "build: Add Linux standalone executable"
+   git push
+
+The build will create: downloads/linux/PhoenixDashboard-Linux-x86_64.zip
+
