@@ -48,7 +48,7 @@ hiddenimports = [
 ]
 
 a = Analysis(
-    ['standalone_app.py'],
+    ['standalone_app_enhanced.py'],
     pathex=[str(project_root)],
     binaries=[],
     datas=datas,

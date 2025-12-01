@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Standalone desktop application launcher for Phoenix Dashboard.
-Uses pywebview to create a native window instead of opening a browser.
+Uses pywebview to create a native window with desktop features.
 """
 import sys
 import os
@@ -69,6 +69,73 @@ def wait_for_server(port, timeout=10):
         time.sleep(0.1)
     return False
 
+def create_menu():
+    """Create native menu bar for the application."""
+    return [
+        {
+            'label': 'File',
+            'submenu': [
+                {
+                    'label': 'Refresh',
+                    'action': lambda: webview.windows[0].evaluate_js("window.location.reload()") if webview.windows else None
+                },
+                {'type': 'separator'},
+                {
+                    'label': 'Exit',
+                    'action': lambda: webview.destroy_window()
+                }
+            ]
+        },
+        {
+            'label': 'View',
+            'submenu': [
+                {
+                    'label': 'Reload',
+                    'action': lambda: webview.windows[0].evaluate_js("window.location.reload()") if webview.windows else None
+                },
+                {
+                    'label': 'Go Back',
+                    'action': lambda: webview.windows[0].evaluate_js("window.history.back()") if webview.windows else None
+                },
+                {
+                    'label': 'Go Forward',
+                    'action': lambda: webview.windows[0].evaluate_js("window.history.forward()") if webview.windows else None
+                },
+                {'type': 'separator'},
+                {
+                    'label': 'Developer Tools',
+                    'action': lambda: webview.windows[0].show_dev_tools() if webview.windows else None
+                }
+            ]
+        },
+        {
+            'label': 'Dashboard',
+            'submenu': [
+                {
+                    'label': 'Home',
+                    'action': lambda: webview.windows[0].load_url(f"{webview.windows[0].get_current_url().split('/')[0]}//{webview.windows[0].get_current_url().split('/')[2]}/") if webview.windows else None
+                },
+                {
+                    'label': 'Bot Explorer',
+                    'action': lambda: webview.windows[0].load_url(f"{webview.windows[0].get_current_url().split('/')[0]}//{webview.windows[0].get_current_url().split('/')[2]}/explorer") if webview.windows else None
+                },
+                {
+                    'label': 'Downloads',
+                    'action': lambda: webview.windows[0].load_url(f"{webview.windows[0].get_current_url().split('/')[0]}//{webview.windows[0].get_current_url().split('/')[2]}/downloads") if webview.windows else None
+                }
+            ]
+        },
+        {
+            'label': 'Help',
+            'submenu': [
+                {
+                    'label': 'About',
+                    'action': lambda: webview.windows[0].evaluate_js("alert('Phoenix Dashboard - Native Desktop Application\\nVersion 0.1.0')") if webview.windows else None
+                }
+            ]
+        }
+    ]
+
 if __name__ == "__main__":
     try:
         import webview
@@ -86,12 +153,12 @@ if __name__ == "__main__":
     
     print("=" * 60)
     try:
-        print("Phoenix Dashboard - Standalone Desktop App")
+        print("Phoenix Dashboard - Native Desktop Application")
     except UnicodeEncodeError:
-        print("Phoenix Dashboard - Standalone Desktop App")
+        print("Phoenix Dashboard - Native Desktop Application")
     print("=" * 60)
     print(f"Starting server on {url}")
-    print("Opening native window...")
+    print("Opening native window with desktop features...")
     print("=" * 60)
     
     # Start server in background thread
@@ -107,9 +174,11 @@ if __name__ == "__main__":
         print("ERROR: Server failed to start")
         sys.exit(1)
     
-    # Create native window
+    # Create native window with enhanced features
     try:
         window_title = "Phoenix Dashboard"
+        
+        # Create window with native features
         window = webview.create_window(
             window_title,
             url,
@@ -118,10 +187,23 @@ if __name__ == "__main__":
             min_size=(800, 600),
             resizable=True,
             fullscreen=False,
+            frameless=False,  # Show native window frame with controls
+            easy_drag=False,  # Use native window dragging
+            shadow=True,  # Window shadow
+            on_top=False,
+            text_select=True,  # Allow text selection
         )
         
-        # Start webview (this blocks until window is closed)
-        webview.start(debug=False)
+        # Add native menu (platform-specific)
+        try:
+            if sys.platform == "darwin":  # macOS
+                webview.start(debug=False, menu=create_menu())
+            else:
+                # Windows and Linux - menus handled differently
+                webview.start(debug=False)
+        except Exception:
+            # Fallback if menu creation fails
+            webview.start(debug=False)
         
     except KeyboardInterrupt:
         print("\n\nShutting down gracefully...")
@@ -131,4 +213,3 @@ if __name__ == "__main__":
         except UnicodeEncodeError:
             print(f"\nError: {e}")
         sys.exit(1)
-
