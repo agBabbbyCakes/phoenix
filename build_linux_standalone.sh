@@ -13,10 +13,15 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Install PyInstaller if not present
+# Install PyInstaller and pywebview if not present
 if ! python3 -c "import PyInstaller" 2>/dev/null; then
     echo "Installing PyInstaller..."
     python3 -m pip install pyinstaller
+fi
+
+if ! python3 -c "import webview" 2>/dev/null; then
+    echo "Installing pywebview..."
+    python3 -m pip install pywebview
 fi
 
 # Create downloads directory

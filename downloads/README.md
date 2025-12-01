@@ -35,9 +35,9 @@ To build these executables yourself, use the platform-specific build scripts:
 
 All standalone builds:
 1. Include all dependencies (no Python installation needed)
-2. Automatically open your browser when started
+2. Open in a native desktop window (no browser needed!)
 3. Run a local web server on port 8000 (or next available port)
-4. Can be stopped with Ctrl+C
+4. Close the window to exit the application
 
 ## Raspberry Pi Notes
 

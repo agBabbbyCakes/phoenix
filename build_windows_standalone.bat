@@ -12,11 +12,17 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Install PyInstaller if not present
+REM Install PyInstaller and pywebview if not present
 python -c "import PyInstaller" >nul 2>&1
 if errorlevel 1 (
     echo Installing PyInstaller...
     python -m pip install pyinstaller
+)
+
+python -c "import webview" >nul 2>&1
+if errorlevel 1 (
+    echo Installing pywebview...
+    python -m pip install pywebview
 )
 
 REM Create downloads directory

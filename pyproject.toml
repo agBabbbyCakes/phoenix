@@ -12,6 +12,7 @@ dependencies = [
   "python-multipart",
   "web3",
   "python-dotenv",
+  "pywebview>=5.0.0",
 ]
 
 [tool.uv]
@@ -45,6 +46,7 @@ requires = [
   "python-multipart",
   "web3",
   "python-dotenv",
+  "pywebview>=5.0.0",
 ]
 # Note: Removed tkinter dependency - using browser-based UI instead
 icon = "resources/phoenix"

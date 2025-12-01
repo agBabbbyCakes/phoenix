@@ -43,10 +43,12 @@ hiddenimports = [
     'app.data',
     'app.models',
     'src.realtime.eth_feed',
+    'webview',
+    'webview.platforms',
 ]
 
 a = Analysis(
-    ['standalone_launcher.py'],
+    ['standalone_app.py'],
     pathex=[str(project_root)],
     binaries=[],
     datas=datas,
