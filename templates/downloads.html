@@ -47,16 +47,19 @@
         </p>
         <div class="space-y-2">
           <a href="/downloads/windows/PhoenixDashboard-Windows-x64.zip" 
+             download="PhoenixDashboard-Windows-x64.zip"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
             📥 Download ZIP
           </a>
           <a href="/downloads/windows/PhoenixDashboard-Setup-x64.exe" 
-             class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
+             download="PhoenixDashboard-Setup-x64.exe"
+             class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold"
+             onclick="return checkFileExists(this, 'PhoenixDashboard-Setup-x64.exe');">
             🔧 Download Installer
           </a>
           <p class="text-xs text-gray-500 text-center mt-2">
             PhoenixDashboard-Windows-x64.zip<br>
-            PhoenixDashboard-Setup-x64.exe
+            <span id="installer-status">PhoenixDashboard-Setup-x64.exe</span>
           </p>
         </div>
       </div>
@@ -75,10 +78,12 @@
         </p>
         <div class="space-y-2">
           <a href="/downloads/macos/PhoenixDashboard-macOS.zip" 
+             download="PhoenixDashboard-macOS.zip"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
             📥 Download ZIP
           </a>
           <a href="/downloads/macos/PhoenixDashboard-macOS.dmg" 
+             download="PhoenixDashboard-macOS.dmg"
              class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
             🔧 Download DMG Installer
           </a>
@@ -103,10 +108,12 @@
         </p>
         <div class="space-y-2">
           <a href="/downloads/linux/PhoenixDashboard-Linux-x86_64.zip" 
+             download="PhoenixDashboard-Linux-x86_64.zip"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
             📥 Download ZIP
           </a>
           <a href="/downloads/linux/PhoenixDashboard-Linux-x86_64.AppImage" 
+             download="PhoenixDashboard-Linux-x86_64.AppImage"
              class="block w-full px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 rounded hover:bg-blue-500/30 transition-all text-center text-sm font-semibold">
             🔧 Download AppImage
           </a>
@@ -131,6 +138,7 @@
         </p>
         <div class="space-y-2">
           <a href="/downloads/PhoenixDashboard-RaspberryPi-armv7l" 
+             download="PhoenixDashboard-RaspberryPi-armv7l"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold">
             📥 Download for Raspberry Pi
           </a>
@@ -215,5 +223,46 @@
     </div>
   </main>
 </div>
+
+<script>
+// Check if file exists and show appropriate message
+async function checkFileExists(link, filename) {
+  try {
+    const response = await fetch(link.href, { method: 'HEAD' });
+    if (!response.ok) {
+      event.preventDefault();
+      alert(`The installer (${filename}) has not been built yet.\n\nTo build it, run:\nbuild_windows_installer.bat\n\n(Requires NSIS to be installed)`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    event.preventDefault();
+    alert(`The installer (${filename}) has not been built yet.\n\nTo build it, run:\nbuild_windows_installer.bat\n\n(Requires NSIS to be installed)`);
+    return false;
+  }
+}
+
+// Check file availability on page load
+document.addEventListener('DOMContentLoaded', async function() {
+  const installerLink = document.querySelector('a[href*="PhoenixDashboard-Setup-x64.exe"]');
+  if (installerLink) {
+    try {
+      const response = await fetch(installerLink.href, { method: 'HEAD' });
+      if (!response.ok) {
+        installerLink.classList.add('opacity-50', 'cursor-not-allowed');
+        installerLink.title = 'Installer not built yet. Run build_windows_installer.bat to create it.';
+        const statusEl = document.getElementById('installer-status');
+        if (statusEl) {
+          statusEl.textContent = 'Installer (not built yet)';
+          statusEl.classList.add('text-yellow-500');
+        }
+      }
+    } catch (error) {
+      installerLink.classList.add('opacity-50', 'cursor-not-allowed');
+      installerLink.title = 'Installer not built yet. Run build_windows_installer.bat to create it.';
+    }
+  }
+});
+</script>
 {% endblock %}
 

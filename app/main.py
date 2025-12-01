@@ -22,6 +22,7 @@ from typing import AsyncIterator
 from .sse import SSEBroker, client_event_stream
 from .data import mock_metrics_publisher, DataStore, tail_jsonl_and_broadcast, parse_bot_log_to_event
 from .models import BotRental, RentalRequest, RentalDuration, PaymentMethod, RentalStatus
+from .downloads import router as downloads_router
 import random
 
 # Import version info
@@ -73,10 +74,13 @@ app.add_middleware(
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-# Mount downloads directory for standalone executables
+# Include downloads router for file downloads
+app.include_router(downloads_router)
+
+# Mount downloads directory for static file serving (fallback)
 DOWNLOADS_DIR = BASE_DIR / "downloads"
 if DOWNLOADS_DIR.exists():
-    app.mount("/downloads", StaticFiles(directory=str(DOWNLOADS_DIR)), name="downloads")
+    app.mount("/downloads-static", StaticFiles(directory=str(DOWNLOADS_DIR)), name="downloads-static")
 
 # Templates
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
