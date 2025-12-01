@@ -195,3 +195,4 @@ For issues:
 2. Run `test_linux_build.sh` to verify setup
 3. Check WebKitGTK installation: `pkg-config --modversion webkit2gtk-4.0`
 
+

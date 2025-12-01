@@ -80,15 +80,30 @@ System Requirements:
 For support, visit: https://github.com/agBabbbyCakes/phoenix
 EOF
 
+# Ensure downloads/macos directory exists
+mkdir -p "downloads/macos"
+
 # Create zip file
 echo "Creating zip archive..."
 cd dist
 rm -f "PhoenixDashboard-macOS-${ARCH}.zip"
-zip -r "PhoenixDashboard-macOS-${ARCH}.zip" "PhoenixDashboard-macOS-${ARCH}"
+if command -v zip &> /dev/null; then
+    zip -r "PhoenixDashboard-macOS-${ARCH}.zip" "PhoenixDashboard-macOS-${ARCH}"
+else
+    echo "ERROR: zip command not found"
+    echo "Install with: brew install zip"
+    exit 1
+fi
 cd ..
 
 # Copy zip to downloads
-cp "dist/PhoenixDashboard-macOS-${ARCH}.zip" "downloads/macos/"
+if [ -f "dist/PhoenixDashboard-macOS-${ARCH}.zip" ]; then
+    cp "dist/PhoenixDashboard-macOS-${ARCH}.zip" "downloads/macos/"
+    echo "✅ Created: downloads/macos/PhoenixDashboard-macOS-${ARCH}.zip"
+else
+    echo "ERROR: ZIP file was not created"
+    exit 1
+fi
 
 # Create DMG installer
 echo "Creating DMG installer..."

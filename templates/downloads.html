@@ -10,7 +10,7 @@
       <h1 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
         🦍 Phoenix Dashboard — Downloads
       </h1>
-      <p class="text-gray-400 mt-2">Standalone applications for Windows, macOS, Linux, and Raspberry Pi</p>
+      <p class="text-gray-400 mt-2">Standalone applications for Windows, macOS, and Linux</p>
     </div>
   </header>
 
@@ -32,15 +32,12 @@
     </div>
 
     <!-- Downloads Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Windows -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl liquid-glass-icon">🪟</div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-200">Windows</h3>
-            <p class="text-xs text-gray-500">x64 (64-bit)</p>
-          </div>
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold text-gray-200">Windows</h3>
+          <p class="text-xs text-gray-500">x64 (64-bit)</p>
         </div>
         <p class="text-sm text-gray-400 mb-4">
           Native desktop application for Windows 10/11. Opens in its own window - no browser needed!
@@ -68,18 +65,16 @@
 
       <!-- macOS -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl liquid-glass-icon">🍎</div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-200">macOS</h3>
-            <p class="text-xs text-gray-500">Intel & Apple Silicon</p>
-          </div>
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold text-gray-200">macOS</h3>
+          <p class="text-xs text-gray-500">Intel & Apple Silicon</p>
         </div>
         <p class="text-sm text-gray-400 mb-4">
           Native macOS desktop application. Opens in its own window - no browser needed!
         </p>
         <div class="space-y-2">
-          <a href="/downloads/macos/PhoenixDashboard-macOS.zip" 
+          <a id="macos-download-link"
+             href="/downloads/macos/PhoenixDashboard-macOS.zip" 
              download="PhoenixDashboard-macOS.zip"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
             📥 Download ZIP
@@ -87,26 +82,27 @@
           <p class="text-xs text-gray-500 text-center mt-2">
             PhoenixDashboard-macOS.zip
           </p>
-          <p class="text-xs text-gray-600 text-center mt-1">
+          <p id="macos-status" class="text-xs text-gray-600 text-center mt-1">
             <em>App bundle - drag to Applications</em>
+          </p>
+          <p id="macos-not-built" class="text-xs text-yellow-400 text-center mt-1 hidden">
+            ⚠️ File not built yet. Build on macOS system using build_macos_standalone.sh
           </p>
         </div>
       </div>
 
       <!-- Linux -->
       <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl liquid-glass-icon">🐧</div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-200">Linux</h3>
-            <p class="text-xs text-gray-500">x86_64 (64-bit)</p>
-          </div>
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold text-gray-200">Linux</h3>
+          <p class="text-xs text-gray-500">x86_64 (64-bit)</p>
         </div>
         <p class="text-sm text-gray-400 mb-4">
           Native Linux desktop application. Opens in its own window - no browser needed!
         </p>
         <div class="space-y-2">
-          <a href="/downloads/linux/PhoenixDashboard-Linux-x86_64.zip" 
+          <a id="linux-download-link"
+             href="/downloads/linux/PhoenixDashboard-Linux-x86_64.zip" 
              download="PhoenixDashboard-Linux-x86_64.zip"
              class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold mb-2">
             📥 Download ZIP
@@ -114,38 +110,15 @@
           <p class="text-xs text-gray-500 text-center mt-2">
             PhoenixDashboard-Linux-x86_64.zip
           </p>
-          <p class="text-xs text-gray-600 text-center mt-1">
+          <p id="linux-status" class="text-xs text-gray-600 text-center mt-1">
             <em>Standalone executable - make executable and run</em>
+          </p>
+          <p id="linux-not-built" class="text-xs text-yellow-400 text-center mt-1 hidden">
+            ⚠️ File not built yet. Build on Linux system using build_linux_standalone.sh
           </p>
         </div>
       </div>
 
-      <!-- Raspberry Pi -->
-      <div class="bg-gray-900/20 border border-gray-800/50 backdrop-blur-sm rounded-lg p-6 hover:border-cyan-500/50 transition-all md:col-span-2 lg:col-span-1">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="text-4xl liquid-glass-icon">🍓</div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-200">Raspberry Pi</h3>
-            <p class="text-xs text-gray-500">ARM (32-bit & 64-bit)</p>
-          </div>
-        </div>
-        <p class="text-sm text-gray-400 mb-4">
-          Optimized build for Raspberry Pi. Perfect for running as a local dashboard server.
-        </p>
-        <div class="space-y-2">
-          <a href="/downloads/PhoenixDashboard-RaspberryPi-armv7l" 
-             download="PhoenixDashboard-RaspberryPi-armv7l"
-             class="block w-full px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 rounded hover:bg-cyan-500/30 transition-all text-center text-sm font-semibold">
-            📥 Download for Raspberry Pi
-          </a>
-          <p class="text-xs text-gray-500 text-center">
-            PhoenixDashboard-RaspberryPi-armv7l
-          </p>
-          <p class="text-xs text-gray-600 text-center mt-2">
-            <code class="bg-gray-800/50 px-2 py-1 rounded">chmod +x PhoenixDashboard-RaspberryPi-armv7l</code>
-          </p>
-        </div>
-      </div>
     </div>
 
     <!-- Build Instructions -->
@@ -171,13 +144,6 @@
           <code class="text-xs text-gray-300 block">chmod +x build_linux_standalone.sh<br>./build_linux_standalone.sh</code>
         </div>
         
-        <div class="bg-gray-800/30 rounded p-4">
-          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Raspberry Pi</h3>
-          <code class="text-xs text-gray-300 block">chmod +x build_raspberrypi_standalone.sh<br>./build_raspberrypi_standalone.sh</code>
-          <p class="text-xs text-gray-500 mt-2">
-            Note: Build this directly on your Raspberry Pi for best compatibility.
-          </p>
-        </div>
       </div>
     </div>
 
@@ -207,13 +173,12 @@
         </div>
         
         <div>
-          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Linux / Raspberry Pi</h3>
+          <h3 class="text-sm font-semibold text-cyan-400 mb-2">Linux</h3>
           <ol class="list-decimal list-inside space-y-1 text-sm">
-            <li>Download the executable</li>
-            <li>Make it executable: <code class="bg-gray-800/50 px-1 rounded">chmod +x PhoenixDashboard-Linux-*</code></li>
-            <li>Run: <code class="bg-gray-800/50 px-1 rounded">./PhoenixDashboard-Linux-*</code></li>
+            <li>Download and extract <code class="bg-gray-800/50 px-1 rounded">PhoenixDashboard-Linux-x86_64.zip</code></li>
+            <li>Make it executable: <code class="bg-gray-800/50 px-1 rounded">chmod +x PhoenixDashboard-Linux-x86_64/PhoenixDashboard</code></li>
+            <li>Run: <code class="bg-gray-800/50 px-1 rounded">./PhoenixDashboard-Linux-x86_64/PhoenixDashboard</code></li>
             <li>A native window will open with the dashboard (no browser needed!)</li>
-            <li>For Raspberry Pi, you can access it from other devices on your network by using the Pi's IP address</li>
           </ol>
         </div>
       </div>
@@ -221,89 +186,110 @@
   </main>
 </div>
 
-<style>
-/* Liquid Glass Icons */
-.liquid-glass-icon {
-  background: rgba(6, 182, 212, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: 12px;
-  padding: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 
-    0 8px 32px rgba(6, 182, 212, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.liquid-glass-icon:hover {
-  background: rgba(6, 182, 212, 0.2);
-  border-color: rgba(6, 182, 212, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 12px 40px rgba(6, 182, 212, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-/* Remove emoji icons, use liquid glass effect only */
-.liquid-glass-icon::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-  border-radius: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.liquid-glass-icon:hover::before {
-  opacity: 1;
-}
-</style>
 
 <script>
-// Check if file exists and show appropriate message
-async function checkFileExists(link, filename) {
+// Check if file exists and update UI accordingly
+async function checkFileExists(url, linkId, statusId, notBuiltId, platform) {
   try {
-    const response = await fetch(link.href, { method: 'HEAD' });
-    if (!response.ok) {
-      event.preventDefault();
-      alert(`The installer (${filename}) has not been built yet.\n\nTo build it, run:\nbuild_windows_installer.bat\n\n(Requires NSIS to be installed)`);
+    const response = await fetch(url, { method: 'HEAD' });
+    const link = document.getElementById(linkId);
+    const status = document.getElementById(statusId);
+    const notBuilt = document.getElementById(notBuiltId);
+    
+    if (!response.ok || response.status === 404) {
+      // File doesn't exist
+      if (link) {
+        link.classList.add('opacity-50', 'cursor-not-allowed');
+        link.onclick = function(e) {
+          e.preventDefault();
+          alert(`${platform} build not available yet.\n\nTo build:\n- Linux: Run build_linux_standalone.sh on a Linux system\n- macOS: Run build_macos_standalone.sh on a macOS system`);
+          return false;
+        };
+      }
+      if (status) status.classList.add('hidden');
+      if (notBuilt) notBuilt.classList.remove('hidden');
       return false;
+    } else {
+      // File exists
+      if (link) {
+        link.classList.remove('opacity-50', 'cursor-not-allowed');
+        link.onclick = null;
+      }
+      if (status) status.classList.remove('hidden');
+      if (notBuilt) notBuilt.classList.add('hidden');
+      return true;
     }
-    return true;
   } catch (error) {
-    event.preventDefault();
-    alert(`The installer (${filename}) has not been built yet.\n\nTo build it, run:\nbuild_windows_installer.bat\n\n(Requires NSIS to be installed)`);
+    // Network error or file doesn't exist
+    const link = document.getElementById(linkId);
+    const status = document.getElementById(statusId);
+    const notBuilt = document.getElementById(notBuiltId);
+    
+    if (link) {
+      link.classList.add('opacity-50', 'cursor-not-allowed');
+      link.onclick = function(e) {
+        e.preventDefault();
+        alert(`${platform} build not available yet.\n\nTo build:\n- Linux: Run build_linux_standalone.sh on a Linux system\n- macOS: Run build_macos_standalone.sh on a macOS system`);
+        return false;
+      };
+    }
+    if (status) status.classList.add('hidden');
+    if (notBuilt) notBuilt.classList.remove('hidden');
     return false;
   }
 }
 
 // Check file availability on page load
 document.addEventListener('DOMContentLoaded', async function() {
-  const installerLink = document.querySelector('a[href*="PhoenixDashboard-Setup-x64.exe"]');
-  if (installerLink) {
+  // Check Linux ZIP
+  await checkFileExists(
+    '/downloads/linux/PhoenixDashboard-Linux-x86_64.zip',
+    'linux-download-link',
+    'linux-status',
+    'linux-not-built',
+    'Linux'
+  );
+  
+  // Check macOS ZIP (try both possible architectures)
+  const macosUrls = [
+    '/downloads/macos/PhoenixDashboard-macOS-arm64.zip',
+    '/downloads/macos/PhoenixDashboard-macOS-x86_64.zip',
+    '/downloads/macos/PhoenixDashboard-macOS.zip'
+  ];
+  
+  let macosFound = false;
+  for (const url of macosUrls) {
     try {
-      const response = await fetch(installerLink.href, { method: 'HEAD' });
-      if (!response.ok) {
-        installerLink.classList.add('opacity-50', 'cursor-not-allowed');
-        installerLink.title = 'Installer not built yet. Run build_windows_installer.bat to create it.';
-        const statusEl = document.getElementById('installer-status');
-        if (statusEl) {
-          statusEl.textContent = 'Installer (not built yet)';
-          statusEl.classList.add('text-yellow-500');
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        // Update link to point to the actual file
+        const link = document.getElementById('macos-download-link');
+        if (link) {
+          link.href = url;
+          link.download = url.split('/').pop();
         }
+        macosFound = true;
+        break;
       }
-    } catch (error) {
-      installerLink.classList.add('opacity-50', 'cursor-not-allowed');
-      installerLink.title = 'Installer not built yet. Run build_windows_installer.bat to create it.';
+    } catch (e) {
+      continue;
     }
+  }
+  
+  if (!macosFound) {
+    await checkFileExists(
+      '/downloads/macos/PhoenixDashboard-macOS.zip',
+      'macos-download-link',
+      'macos-status',
+      'macos-not-built',
+      'macOS'
+    );
+  } else {
+    // File exists, show normal status
+    const status = document.getElementById('macos-status');
+    const notBuilt = document.getElementById('macos-not-built');
+    if (status) status.classList.remove('hidden');
+    if (notBuilt) notBuilt.classList.add('hidden');
   }
 });
 </script>

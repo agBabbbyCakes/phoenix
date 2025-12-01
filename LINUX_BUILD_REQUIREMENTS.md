@@ -138,3 +138,4 @@ Tested and working on:
 - WebKitGTK is the only system dependency required at runtime
 - All Python dependencies are bundled in the executable
 
+

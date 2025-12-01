@@ -127,11 +127,35 @@ EOF
 echo "Creating zip archive..."
 cd dist
 rm -f "PhoenixDashboard-Linux-${ARCH}.zip"
-zip -r "PhoenixDashboard-Linux-${ARCH}.zip" "PhoenixDashboard-Linux-${ARCH}"
+if command -v zip &> /dev/null; then
+    zip -r "PhoenixDashboard-Linux-${ARCH}.zip" "PhoenixDashboard-Linux-${ARCH}"
+else
+    echo "WARNING: zip command not found, trying to install..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get install -y zip
+        zip -r "PhoenixDashboard-Linux-${ARCH}.zip" "PhoenixDashboard-Linux-${ARCH}"
+    elif command -v dnf &> /dev/null; then
+        sudo dnf install -y zip
+        zip -r "PhoenixDashboard-Linux-${ARCH}.zip" "PhoenixDashboard-Linux-${ARCH}"
+    else
+        echo "ERROR: zip command not available and cannot auto-install"
+        echo "Please install zip: sudo apt install zip"
+        exit 1
+    fi
+fi
 cd ..
 
+# Ensure downloads/linux directory exists
+mkdir -p "downloads/linux"
+
 # Copy zip to downloads
-cp "dist/PhoenixDashboard-Linux-${ARCH}.zip" "downloads/linux/"
+if [ -f "dist/PhoenixDashboard-Linux-${ARCH}.zip" ]; then
+    cp "dist/PhoenixDashboard-Linux-${ARCH}.zip" "downloads/linux/"
+    echo "✅ Created: downloads/linux/PhoenixDashboard-Linux-${ARCH}.zip"
+else
+    echo "ERROR: ZIP file was not created"
+    exit 1
+fi
 
 # Copy standalone executable
 cp "dist/PhoenixDashboard" "downloads/PhoenixDashboard-Linux-${ARCH}"
