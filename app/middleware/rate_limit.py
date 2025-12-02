@@ -25,7 +25,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not settings.rate_limit_enabled:
             return await call_next(request)
         
-        # Skip rate limiting for health checks, static files, and SSE streams
+        # Skip rate limiting for health checks, static files, SSE streams, and API endpoints
         if (request.url.path in ["/health", "/healthz", "/favicon.ico"] or 
             request.url.path.startswith("/static") or
             request.url.path.startswith("/stream") or
@@ -33,11 +33,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             request.url.path.startswith("/logs/stream") or
             request.url.path.startswith("/advisor") or
             request.url.path.startswith("/charts/mini") or
-            request.url.path.startswith("/silverback/streaming-demo")):
+            request.url.path.startswith("/silverback/streaming-demo") or
+            request.url.path.startswith("/api/")):
             return await call_next(request)
         
-        # Get client IP
+        # Skip rate limiting for localhost in development
         client_ip = request.client.host if request.client else "unknown"
+        if client_ip in ["127.0.0.1", "localhost", "::1"] and settings.debug:
+            return await call_next(request)
         
         # Clean old entries (older than 1 minute)
         now = time.time()
