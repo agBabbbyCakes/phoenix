@@ -32,3 +32,4 @@ After building, you'll find:
 
 The app will open in a native desktop window (no browser needed!).
 
+

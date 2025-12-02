@@ -7,3 +7,4 @@ MAKE SURE DOCKER DESKTOP IS RUNNING FIRST!
 After it completes, verify with:
 Test-Path "downloads\linux\PhoenixDashboard-Linux-x86_64.zip"
 
+

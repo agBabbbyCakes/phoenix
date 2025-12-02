@@ -103,3 +103,4 @@ The build script automatically detects your Mac's architecture:
 
 The ZIP and DMG will be named accordingly.
 
+

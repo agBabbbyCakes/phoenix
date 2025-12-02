@@ -143,3 +143,4 @@ async def _on_shutdown() -> None:
         with contextlib.suppress(asyncio.CancelledError):
             await task
 
+

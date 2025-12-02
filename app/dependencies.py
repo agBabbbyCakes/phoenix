@@ -16,3 +16,4 @@ def get_broker(request: Request) -> SSEBroker:
     """Get SSEBroker from app state."""
     return request.app.state.broker
 
+

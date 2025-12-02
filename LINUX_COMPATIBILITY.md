@@ -196,3 +196,4 @@ For issues:
 3. Check WebKitGTK installation: `pkg-config --modversion webkit2gtk-4.0`
 
 
+

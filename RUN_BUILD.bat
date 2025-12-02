@@ -31,3 +31,4 @@ if exist "downloads\linux\PhoenixDashboard-Linux-x86_64.zip" (
 
 pause
 
+

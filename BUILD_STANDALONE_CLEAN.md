@@ -104,3 +104,4 @@ Each build creates:
 No installers needed - just simple, working executables! 🚀
 
 
+

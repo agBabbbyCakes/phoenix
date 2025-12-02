@@ -46,3 +46,4 @@ cp "dist/PhoenixDashboard-Linux-${ARCH}.zip" "downloads/linux/"
 
 echo "Build complete: downloads/linux/PhoenixDashboard-Linux-${ARCH}.zip"
 
+

@@ -62,3 +62,4 @@ if exist "dist\PhoenixDashboard-Setup.exe" (
 pause
 
 
+
