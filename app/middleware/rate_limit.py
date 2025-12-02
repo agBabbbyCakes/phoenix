@@ -25,8 +25,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not settings.rate_limit_enabled:
             return await call_next(request)
         
-        # Skip rate limiting for health checks and static files
-        if request.url.path in ["/health", "/healthz", "/favicon.ico"] or request.url.path.startswith("/static"):
+        # Skip rate limiting for health checks, static files, and SSE streams
+        if (request.url.path in ["/health", "/healthz", "/favicon.ico"] or 
+            request.url.path.startswith("/static") or
+            request.url.path.startswith("/stream") or
+            request.url.path.startswith("/events") or
+            request.url.path.startswith("/logs/stream") or
+            request.url.path.startswith("/advisor") or
+            request.url.path.startswith("/charts/mini") or
+            request.url.path.startswith("/silverback/streaming-demo")):
             return await call_next(request)
         
         # Get client IP

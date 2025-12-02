@@ -57,7 +57,7 @@ if PYDANTIC_AVAILABLE:
         
         # Rate limiting
         rate_limit_enabled: bool = Field(default=True, description="Enable rate limiting")
-        rate_limit_per_minute: int = Field(default=60, description="Requests per minute per IP")
+        rate_limit_per_minute: int = Field(default=120, description="Requests per minute per IP")
         
         # Logging
         log_level: str = Field(default="INFO", description="Logging level")
@@ -95,7 +95,7 @@ else:
             self.force_sample = os.getenv("FORCE_SAMPLE", "false").lower() in ("1", "true", "yes")
             self.clean_ui = os.getenv("CLEAN_UI", "false").lower() in ("1", "true", "yes")
             self.rate_limit_enabled = os.getenv("RATE_LIMIT_ENABLED", "true").lower() in ("1", "true", "yes")
-            self.rate_limit_per_minute = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+            self.rate_limit_per_minute = int(os.getenv("RATE_LIMIT_PER_MINUTE", "120"))
             self.log_level = os.getenv("LOG_LEVEL", "INFO")
             self.log_file = os.getenv("LOG_FILE")
             self.eth_wss_url = os.getenv("ETH_WSS_URL")

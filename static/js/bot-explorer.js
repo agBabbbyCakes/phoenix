@@ -41,9 +41,84 @@ function botExplorerState() {
       'favorites': 'Favorites'
     },
     
+    // KPIs and Health Summary
+    kpis: {
+      avg_latency_ms: 0,
+      success_rate_pct: 0,
+      throughput_1m: 0
+    },
+    healthSummary: {
+      ok: 0,
+      slow: 0,
+      error: 0
+    },
+    
     init() {
       this.loadBots();
+      this.loadKPIs();
+      this.loadHealthSummary();
       this.setupAutoRefresh();
+    },
+    
+    async loadKPIs() {
+      try {
+        const response = await fetch('/api/charts/data');
+        const data = await response.json();
+        if (data.kpis) {
+          this.kpis = data.kpis;
+          this.updateSidebarStats();
+        }
+      } catch (e) {
+        console.error('Failed to load KPIs', e);
+      }
+    },
+    
+    async loadHealthSummary() {
+      try {
+        const response = await fetch('/api/bots/status');
+        const data = await response.json();
+        const bots = data.bots || [];
+        
+        this.healthSummary = { ok: 0, slow: 0, error: 0 };
+        
+        bots.forEach(bot => {
+          const latency = bot.latency_ms || bot.latency || 0;
+          const successRatio = bot.success_ratio || 100;
+          const status = bot.status || 'ok';
+          
+          if (status === 'error' || status === 'critical' || (bot.failure_count || 0) > 10) {
+            this.healthSummary.error++;
+          } else if (latency > 200 || successRatio < 80 || status === 'warning') {
+            this.healthSummary.slow++;
+          } else {
+            this.healthSummary.ok++;
+          }
+        });
+        
+        this.updateSidebarHealth();
+      } catch (e) {
+        console.error('Failed to load health summary', e);
+      }
+    },
+    
+    updateSidebarStats() {
+      const latencyEl = document.getElementById('sidebar-latency');
+      const successEl = document.getElementById('sidebar-success');
+      const throughputEl = document.getElementById('sidebar-throughput');
+      
+      if (latencyEl) latencyEl.textContent = (this.kpis.avg_latency_ms || 0) + 'ms';
+      if (successEl) successEl.textContent = (this.kpis.success_rate_pct || 0) + '%';
+      if (throughputEl) throughputEl.textContent = (this.kpis.throughput_1m || 0);
+    },
+    
+    updateSidebarHealth() {
+      const okEl = document.getElementById('sidebar-health-ok');
+      const slowEl = document.getElementById('sidebar-health-slow');
+      const errorEl = document.getElementById('sidebar-health-error');
+      
+      if (okEl) okEl.textContent = (this.healthSummary.ok || 0);
+      if (slowEl) slowEl.textContent = (this.healthSummary.slow || 0);
+      if (errorEl) errorEl.textContent = (this.healthSummary.error || 0);
     },
     
     async loadBots() {
@@ -158,6 +233,8 @@ function botExplorerState() {
     setupAutoRefresh() {
       setInterval(() => {
         this.loadBots();
+        this.loadKPIs();
+        this.loadHealthSummary();
       }, 5000);
     },
     

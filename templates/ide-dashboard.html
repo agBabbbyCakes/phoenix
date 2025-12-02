@@ -7,49 +7,8 @@
      x-data="ideDashboardState()" 
      x-init="init()">
   
-  <!-- LEFT SIDEBAR (Fixed) -->
-  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-12 z-20 overflow-y-auto"
-         style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5); scrollbar-width: thin; scrollbar-color: rgba(6, 182, 212, 0.3) transparent;">
-    
-    <!-- Logo & Title -->
-    <div class="p-3 border-b border-gray-800">
-      <h1 class="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-        🦍 Silverback
-      </h1>
-      <p class="text-xs text-gray-500 mt-0.5">Bot Exchange</p>
-    </div>
-
-    <!-- Navigation Section -->
-    <div class="p-3">
-      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Navigation</div>
-      <nav class="space-y-0.5">
-        <a href="/" class="sidebar-nav-link active text-sm py-1.5">Dashboard</a>
-        <a href="/explorer" class="sidebar-nav-link text-sm py-1.5">Explorer</a>
-        <a href="/bots" class="sidebar-nav-link text-sm py-1.5">Bots</a>
-        <a href="/logs" class="sidebar-nav-link text-sm py-1.5">Logs</a>
-        <a href="/report" class="sidebar-nav-link text-sm py-1.5">Reports</a>
-      </nav>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="p-3 border-t border-gray-800">
-      <div class="text-xs uppercase text-gray-500 mb-2 tracking-wider">Live Stats</div>
-      <div class="space-y-2">
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-400">Latency</span>
-          <span class="text-xs font-semibold text-cyan-400" x-text="kpis.avg_latency_ms + 'ms'"></span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-400">Success</span>
-          <span class="text-xs font-semibold text-green-400" x-text="kpis.success_rate_pct + '%'"></span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-400">Throughput</span>
-          <span class="text-xs font-semibold text-yellow-400" x-text="kpis.throughput_1m"></span>
-        </div>
-      </div>
-    </div>
-  </aside>
+  <!-- LEFT SIDEBAR (Global) -->
+  {% include 'partials/global-sidebar.html' %}
 
   <!-- TOP BAR (Unified Global Navigation) -->
   <header class="header-compact fixed top-0 left-0 right-0 h-11 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-4"
@@ -174,35 +133,30 @@
         </a>
         <a href="/bots" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-lg">🤖</span>
             <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Bots</h3>
           </div>
           <p class="text-[10px] text-gray-500">Manage</p>
         </a>
         <a href="/logs" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-lg">📋</span>
             <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Logs</h3>
           </div>
           <p class="text-[10px] text-gray-500">View logs</p>
         </a>
         <a href="/chart-annotations" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-lg">📊</span>
             <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Annotate</h3>
           </div>
           <p class="text-[10px] text-gray-500">Chart tools</p>
         </a>
         <a href="/logic-builder" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-lg">🎨</span>
             <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Logic</h3>
           </div>
           <p class="text-[10px] text-gray-500">Workflows</p>
         </a>
         <a href="/report" class="glass-card rounded border border-gray-800/50 p-2.5 hover:border-cyan-500/50 transition-all cursor-pointer group">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-lg">📈</span>
             <h3 class="text-xs font-semibold text-gray-200 group-hover:text-cyan-400">Reports</h3>
           </div>
           <p class="text-[10px] text-gray-500">Analytics</p>

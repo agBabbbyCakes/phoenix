@@ -142,10 +142,22 @@ function ideDashboardState() {
         const data = await response.json();
         if (data.kpis) {
           this.kpis = data.kpis;
+          // Update global sidebar stats
+          this.updateSidebarStats();
         }
       } catch (e) {
         console.error('Failed to load KPIs', e);
       }
+    },
+    
+    updateSidebarStats() {
+      const latencyEl = document.getElementById('sidebar-latency');
+      const successEl = document.getElementById('sidebar-success');
+      const throughputEl = document.getElementById('sidebar-throughput');
+      
+      if (latencyEl) latencyEl.textContent = (this.kpis.avg_latency_ms || 0) + 'ms';
+      if (successEl) successEl.textContent = (this.kpis.success_rate_pct || 0) + '%';
+      if (throughputEl) throughputEl.textContent = (this.kpis.throughput_1m || 0);
     },
     
     async loadHealthSummary() {
@@ -169,9 +181,22 @@ function ideDashboardState() {
             this.healthSummary.ok++;
           }
         });
+        
+        // Update global sidebar health
+        this.updateSidebarHealth();
       } catch (e) {
         console.error('Failed to load health summary', e);
       }
+    },
+    
+    updateSidebarHealth() {
+      const okEl = document.getElementById('sidebar-health-ok');
+      const slowEl = document.getElementById('sidebar-health-slow');
+      const errorEl = document.getElementById('sidebar-health-error');
+      
+      if (okEl) okEl.textContent = (this.healthSummary.ok || 0);
+      if (slowEl) slowEl.textContent = (this.healthSummary.slow || 0);
+      if (errorEl) errorEl.textContent = (this.healthSummary.error || 0);
     },
     
     async loadAvailableBots() {

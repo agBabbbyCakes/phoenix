@@ -154,10 +154,7 @@
               onclick="window.dashboardUIHighlightRow(this)">
             <td class="code-data">{{ e.timestamp.strftime('%H:%M:%S') }}</td>
             <td>
-              <span class="bot-avatar" style="color: {{ 'var(--bot-color-' + e.bot_name + ')' if e.bot_name else '#888' }}">
-                {{ '🎯' if 'arb' in e.bot_name.lower() else '👁️' if 'mev' in e.bot_name.lower() else '⚡' if 'relay' in e.bot_name.lower() else '🛡️' if 'guard' in e.bot_name.lower() else '🤖' }}
-              </span>
-              <span class="font-semibold" style="margin-left: 8px;">{{ e.bot_name }}</span>
+              <span class="font-semibold">{{ e.bot_name }}</span>
             </td>
             <td class="code-data">-</td>
             <td class="code-data" 
