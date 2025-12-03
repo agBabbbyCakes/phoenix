@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+
+{% block title %}Silverback — Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-950 text-gray-100 font-mono" 
+     x-data="dashboardState()" 
+     x-init="init()"
+     :class="theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'">
+  
+  <!-- LEFT SIDEBAR (1/3) -->
+  <aside class="w-1/3 border-r border-gray-800 p-4 flex flex-col justify-between"
+         :class="theme === 'dark' ? 'border-gray-800 bg-gray-900' : 'border-gray-300 bg-white'">
+    
+    <!-- Top section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="flex items-center gap-3 mb-1">
+            <img src="/static/imgs/silverback-grey.png" 
+                 alt="Silverback Logo" 
+                 class="h-8 w-8 object-contain"
+                 style="filter: brightness(0.9);">
+            <h1 class="text-xl font-bold">Silverback</h1>
+          </div>
+          <p class="text-xs text-gray-400">Ethereum Bot Monitor</p>
+        </div>
+        <!-- Theme Toggle -->
+        <button @click="toggleTheme()" 
+                class="p-2 rounded-md hover:bg-gray-800 transition-colors"
+                :class="theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'"
+                title="Toggle theme">
+          <span x-show="theme === 'dark'">☀️</span>
+          <span x-show="theme === 'light'">🌙</span>
+        </button>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="space-y-3 mb-6">
+        <div class="p-3 rounded-lg border"
+             :class="theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'">
+          <h2 class="text-xs uppercase text-gray-400 mb-1">Avg Latency</h2>
+          <p class="text-lg font-semibold transition-colors duration-500"
+             :class="getLatencyColor(kpis.avg_latency_ms)"
+             x-text="kpis.avg_latency_ms + 'ms'"></p>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.avg_latency_ms||0)/500)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
+        </div>
+        <div class="p-3 rounded-lg border"
+             :class="theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'">
+          <h2 class="text-xs uppercase text-gray-400 mb-1">Success Rate</h2>
+          <p class="text-lg font-semibold transition-colors duration-500"
+             :class="getSuccessColor(kpis.success_rate_pct)"
+             x-text="kpis.success_rate_pct + '%'"></p>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.success_rate_pct||0)/100)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
+        </div>
+        <div class="p-3 rounded-lg border"
+             :class="theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'">
+          <h2 class="text-xs uppercase text-gray-400 mb-1">Throughput</h2>
+          <p class="text-lg font-semibold text-yellow-400"
+             :class="theme === 'light' ? 'text-yellow-600' : ''"
+             x-text="kpis.throughput_1m + '/min'"></p>
+          <div class="mt-2" :style="`--value:${Math.min(1, (kpis.throughput_1m||0)/60)}`">
+            {% include 'components/css_bar_chart.html' %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Summary Chips -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Health Status</h2>
+        <div class="flex gap-2 flex-wrap items-center">
+          <div class="px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+               x-text="'🟢 ' + healthSummary.ok + ' OK'"></div>
+          <div class="px-3 py-1 rounded-full text-xs font-semibold border border-yellow-500/30 bg-yellow-500/10 text-yellow-400"
+               x-text="'🟡 ' + healthSummary.slow + ' Slow'"></div>
+          <div class="px-3 py-1 rounded-full text-xs font-semibold border border-red-500/30 bg-red-500/10 text-red-400"
+               x-text="'🔴 ' + healthSummary.error + ' Errors'"></div>
+          <div class="ml-2"
+               :style="(() => { const t=(healthSummary.ok+healthSummary.slow+healthSummary.error)||1; const ok=Math.round(100*healthSummary.ok/t); const slow=Math.round(100*healthSummary.slow/t); const err=100-ok-slow; return `--ok:${ok};--slow:${slow};--err:${err}`; })()">
+            {% include 'components/css_status_ring.html' %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Streaming Event Feed -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Live Event Feed</h2>
+        <div id="sidebar-event-feed-container" class="h-32 overflow-y-auto border border-gray-700 rounded p-2">
+          <div id="sidebar-event-feed"></div>
+        </div>
+        <div hx-get="/events" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-event-feed"></div>
+      </div>
+
+      <!-- Bot Filter Buttons (quick filter) -->
+      <div class="mb-4">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Bot Filter</h2>
+        <div class="flex gap-2">
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.length === 0 ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = []; localStorage.setItem('phoenix:selectedBots','[]'); applyFilters();">
+            All
+          </button>
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.includes('tx-relay') ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = ['tx-relay']; localStorage.setItem('phoenix:selectedBots', JSON.stringify(selectedBots)); applyFilters();">
+            tx-relay
+          </button>
+          <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                  :class="selectedBots.includes('eth-sniper') ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  @click="selectedBots = ['eth-sniper']; localStorage.setItem('phoenix:selectedBots', JSON.stringify(selectedBots)); applyFilters();">
+            eth-sniper
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Events (Auto-refresh via polling) -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Recent Events (Auto-refresh)</h2>
+        <div x-data="{
+               botFilter: 'all',
+               items: [],
+               init() {
+                 const load = async () => {
+                   try {
+                     console.log('[Sidebar] Poll /api/events/recent');
+                     const res = await fetch('/api/events/recent', { headers: { 'Accept': 'application/json' } });
+                     if (!res.ok) throw new Error('HTTP ' + res.status);
+                     const json = await res.json();
+                     console.log('[Sidebar] events returned', json);
+                     this.items = Array.isArray(json?.events) ? json.events.slice(0, 50) : [];
+                   } catch (e) {
+                     // Dummy fallback
+                     console.warn('[Sidebar] Using dummy recent events', e);
+                     const bots = ['tx-relay', 'eth-sniper', 'arb-scout'];
+                     const now = Date.now();
+                     this.items = Array.from({ length: 10 }).map((_, i) => ({
+                       ts: new Date(now - i * 1000).toLocaleTimeString('en-US', { hour12: false }),
+                       bot: bots[Math.floor(Math.random() * bots.length)],
+                       latency_ms: Math.round(150 + Math.random() * 250),
+                       status: Math.random() < 0.85 ? 'ok' : 'warning'
+                     }));
+                   }
+                 };
+                 load();
+                 setInterval(load, 5000);
+               }
+             }"
+             class="border border-gray-700 rounded p-2 max-h-48 overflow-y-auto">
+          <div class="flex gap-2 mb-2">
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'all'">All</button>
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'tx-relay' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'tx-relay'">tx-relay</button>
+            <button class="px-2 py-1 rounded text-xs border border-gray-700"
+                    :class="botFilter === 'eth-sniper' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    @click="botFilter = 'eth-sniper'">eth-sniper</button>
+          </div>
+          <ul class="text-xs space-y-1">
+            <template x-for="(item, i) in items" :key="i">
+              <li x-show="botFilter === 'all' || item.bot === botFilter"
+                  class="flex items-center justify-between">
+                <span class="opacity-60" x-text="item.ts"></span>
+                <span class="font-semibold" x-text="item.bot"></span>
+                <span class="font-mono" x-text="(item.latency_ms||0) + 'ms'"></span>
+                <span :class="item.status === 'ok' ? 'text-emerald-400' : item.status === 'warning' ? 'text-yellow-400' : 'text-red-400'"
+                      x-text="(item.status||'ok').toUpperCase()"></span>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+      <!-- Silverback Advisor Panel -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Silverback Advisor</h2>
+        <div id="sidebar-advisor-container" class="h-28 overflow-y-auto border border-gray-700 rounded p-2">
+          <div id="sidebar-advisor-feed"></div>
+        </div>
+        <div hx-get="/advisor" hx-trigger="load" hx-swap="afterend" hx-target="#sidebar-advisor-feed"></div>
+        <!-- Ask Advisor Form -->
+        <form class="mt-2 flex gap-2"
+              hx-post="/advisor"
+              hx-target="#sidebar-advisor-feed"
+              hx-swap="afterend">
+          <input name="q"
+                 type="text"
+                 placeholder="Ask the advisor…"
+                 class="flex-1 bg-gray-900 border border-gray-700 rounded-md p-2 text-xs text-gray-100"
+                 :class="theme === 'light' ? 'bg-white border-gray-300 text-gray-900' : ''" />
+          <button type="submit"
+                  class="px-3 py-2 text-xs rounded-md bg-blue-600 hover:bg-blue-700">
+            Ask
+          </button>
+        </form>
+      </div>
+
+      <!-- Mini Streaming Chart (Charts.css) -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Mini Chart</h2>
+        <div class="border border-gray-700 rounded p-2">
+          <ul id="sidebar-mini-chart" class="charts-css bar tiny show-data show-primary-axis">
+            <!-- Bars stream here -->
+          </ul>
+        </div>
+        <div hx-get="/charts/mini" hx-trigger="load" hx-swap="beforeend" hx-target="#sidebar-mini-chart"></div>
+      </div>
+
+      <!-- Bot Filter -->
+      <div class="mb-6">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Filter Bots</h2>
+        <div class="flex flex-wrap gap-2">
+          <button @click="selectedBots = []" 
+                  :class="selectedBots.length === 0 ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                  class="px-2 py-1 rounded text-xs border border-gray-700 hover:bg-gray-700 transition-colors">
+            All
+          </button>
+          <template x-for="bot in availableBots" :key="bot">
+            <button @click="toggleBot(bot)"
+                    :class="selectedBots.includes(bot) ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300'"
+                    class="px-2 py-1 rounded text-xs border border-gray-700 hover:bg-gray-700 transition-colors"
+                    x-text="getBotIcon(bot) + ' ' + bot"></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="mt-6">
+        <label class="block text-xs uppercase mb-1 text-gray-400">Live Chart</label>
+        <select x-model="selectedView" 
+                @change="updateChartView()"
+                class="w-full bg-gray-900 border border-gray-700 rounded-md p-2 text-sm text-gray-100"
+                :class="theme === 'light' ? 'bg-white border-gray-300 text-gray-900' : ''">
+          <option value="latency">Latency</option>
+          <option value="throughput">Throughput</option>
+          <option value="profit">Cumulative Profit</option>
+          <option value="heatmap">Latency Heatmap</option>
+          <option value="graph3d">3D Bot Network</option>
+          <option value="financial3d">3D Financial Chart</option>
+          <option value="pointcloud">Point Cloud</option>
+          <option value="sensors">Sensors</option>
+        </select>
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+        <input type="checkbox" 
+               x-model="showMovingAvg" 
+               @change="updateChartOptions()"
+               id="movingAvg" 
+               class="accent-blue-500">
+        <label for="movingAvg" class="text-sm text-gray-300" 
+               :class="theme === 'light' ? 'text-gray-700' : ''">Moving Avg</label>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-xs uppercase mb-1 text-gray-400">Alert if latency ≥</label>
+        <input type="number" 
+               x-model="alertLatencyThreshold"
+               @input="updateAlertThreshold()"
+               placeholder="300" 
+               class="w-full bg-gray-900 border border-gray-700 rounded-md p-2 text-sm text-gray-100"
+               :class="theme === 'light' ? 'bg-white border-gray-300 text-gray-900' : ''">
+        <button @click="saveAlert()" 
+                class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 rounded-md py-2 text-sm transition-colors">
+          Save Alert
+        </button>
+      </div>
+
+      <!-- Alert Rules List -->
+      <div class="mt-4" x-show="alertRules.length > 0">
+        <h2 class="text-xs uppercase text-gray-400 mb-2">Active Alerts</h2>
+        <div class="space-y-2 max-h-32 overflow-y-auto">
+          <template x-for="(rule, index) in alertRules" :key="index">
+            <div class="p-2 rounded bg-gray-800 border border-gray-700 text-xs"
+                 :class="theme === 'light' ? 'bg-gray-100 border-gray-300' : ''">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-semibold" x-text="'IF ' + rule.condition"></div>
+                  <div class="text-gray-400 text-xs mt-1" x-text="'THEN ' + rule.action"></div>
+                </div>
+                <button @click="removeAlert(index)" class="text-red-400 hover:text-red-300">×</button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom section -->
+    <div class="text-xs text-gray-500 mt-6"
+         :class="theme === 'light' ? 'text-gray-600' : ''">
+      <div>Auto-refreshing every <span class="text-gray-300" :class="theme === 'light' ? 'text-gray-700' : ''">5s</span></div>
+      <div class="mt-2">
+        <a href="/home" class="text-blue-400 hover:underline">🏠 Home</a> · 
+        <a href="/logs" class="text-blue-400 hover:underline">📋 Logs</a>
+      </div>
+      <div class="mt-2" x-show="connectionStatus === 'connected'">
+        <span class="text-emerald-400">●</span> Connected
+      </div>
+      <div class="mt-2" x-show="connectionStatus === 'disconnected'">
+        <span class="text-red-400">●</span> Disconnected
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT MAIN AREA (2/3) -->
+  <main class="w-2/3 flex flex-col overflow-hidden"
+        :class="theme === 'dark' ? 'bg-gray-950' : 'bg-gray-50'">
+    
+    <!-- TOP: CHART AREA with Carousel Controls -->
+    <section class="flex-1 border-b border-gray-800 p-4 overflow-auto"
+             :class="theme === 'dark' ? 'border-gray-800' : 'border-gray-300'">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-lg font-semibold">📊 Live Metrics</h2>
+        <div class="flex items-center gap-2">
+          <button @click="resetZoom()" 
+                  class="text-sm text-gray-400 border border-gray-700 rounded-md px-3 py-1 hover:bg-gray-800 transition-colors"
+                  :class="theme === 'light' ? 'text-gray-600 border-gray-300 hover:bg-gray-100' : ''">
+            Reset Zoom
+          </button>
+          <div class="hidden sm:flex items-center gap-1">
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Prev chart"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.prev()">‹</button>
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Next chart"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.next()">›</button>
+            <button class="text-sm text-gray-400 border border-gray-700 rounded-md px-2 py-1 hover:bg-gray-800"
+                    title="Toggle autoplay"
+                    onclick="window.dashboardCarousel && window.dashboardCarousel.toggle()">▶︎/⏸</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chart Container -->
+      <div class="h-64 bg-gray-900 rounded-lg"
+           :class="theme === 'light' ? 'bg-white border border-gray-300' : ''"
+           id="chart-container">
+        <div id="metrics-panel" hx-ext="sse" sse-connect="/stream" sse-swap="metrics_update" hx-swap="innerHTML">
+          {{ initial_metrics_html | safe }}
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM: TABLE + COMMANDS -->
+    <section class="flex-1 p-4 overflow-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-lg font-semibold">🧠 Recent Events</h2>
+        <button @click="showCommandPalette = !showCommandPalette" 
+                title="Command Palette (⌘K)"
+                class="border border-gray-700 text-gray-400 px-3 py-1 rounded-md hover:bg-gray-800 transition-colors"
+                :class="theme === 'light' ? 'border-gray-300 text-gray-600 hover:bg-gray-100' : ''">
+          ⌘K
+        </button>
+      </div>
+
+      <!-- Command Palette Modal -->
+      <div x-show="showCommandPalette" 
+           @click.away="showCommandPalette = false"
+           x-transition
+           class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+           style="display: none;">
+        <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 w-full max-w-2xl"
+             :class="theme === 'light' ? 'bg-white border-gray-300' : ''"
+             @click.stop>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Command Palette</h3>
+            <button @click="showCommandPalette = false" class="text-gray-400 hover:text-gray-300">×</button>
+          </div>
+          <input type="text" 
+                 x-model="commandInput"
+                 @keydown.enter="executeCommand()"
+                 @keydown.escape="showCommandPalette = false"
+                 placeholder="Type a command... (e.g., restart arb-scout, inspect tx-relay)"
+                 class="w-full bg-gray-800 border border-gray-700 rounded-md p-3 text-sm text-gray-100 mb-4"
+                 :class="theme === 'light' ? 'bg-gray-100 border-gray-300 text-gray-900' : ''"
+                 autofocus>
+          <div class="text-xs text-gray-400 space-y-1">
+            <div><code class="text-blue-400">restart &lt;bot&gt;</code> - Restart a bot</div>
+            <div><code class="text-blue-400">inspect &lt;bot&gt; &lt;time&gt;</code> - Inspect bot at time</div>
+            <div><code class="text-blue-400">filter &lt;bot&gt;</code> - Filter by bot</div>
+            <div><code class="text-blue-400">clear</code> - Clear filters</div>
+            <div><code class="text-blue-400">export</code> - Export data</div>
+            <div><code class="text-blue-400">theme</code> - Toggle theme</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-y-auto h-48 border border-gray-800 rounded-md mb-4"
+           :class="theme === 'light' ? 'border-gray-300' : ''">
+        <table class="w-full text-sm text-gray-300"
+               :class="theme === 'light' ? 'text-gray-700' : ''">
+          <thead class="bg-gray-800 text-gray-400 uppercase text-xs"
+                 :class="theme === 'light' ? 'bg-gray-100 text-gray-600' : ''">
+            <tr>
+              <th class="p-2 text-left">Time</th>
+              <th class="p-2 text-left">Bot</th>
+              <th class="p-2 text-left">Latency</th>
+              <th class="p-2 text-left">Status</th>
+              <th class="p-2 text-left">Tx</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800"
+                 :class="theme === 'light' ? 'divide-gray-200' : ''"
+                 id="events-table-body">
+            <!-- Events will be populated by HTMX/SSE -->
+            {% for e in last_events %}
+            <tr class="hover:bg-gray-800 transition-colors"
+                :class="theme === 'light' ? 'hover:bg-gray-100' : ''"
+                @click="highlightRow($el)"
+                data-bot-name="{{ e.bot_name }}">
+              <td class="p-2 font-mono">{{ e.timestamp.strftime('%H:%M:%S') }}</td>
+              <td class="p-2">
+                <span x-text="getBotIcon('{{ e.bot_name }}')"></span>
+                <span class="ml-1">{{ e.bot_name }}</span>
+              </td>
+              <td class="p-2 font-mono"
+                  :class="getLatencyColor({{ e.latency_ms }})">
+                {{ e.latency_ms }}ms
+                <div class="mt-1" style="--value: calc({{ e.latency_ms }} / 500)">
+                  {% include 'components/css_bar_chart.html' %}
+                </div>
+              </td>
+              <td class="p-2">
+                {% if e.error %}
+                <span class="text-red-400">Error</span>
+                {% else %}
+                <span class="text-emerald-400">OK</span>
+                {% endif %}
+              </td>
+              <td class="p-2">
+                {% if e.tx_hash %}
+                <a href="https://etherscan.io/tx/{{ e.tx_hash }}" 
+                   target="_blank"
+                   class="text-blue-400 hover:underline font-mono text-xs">{{ e.tx_hash[:10] }}...</a>
+                {% else %}-{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Live Event Feed (streaming via HTMX) -->
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold">📣 Live Event Feed</h3>
+        <div id="event-feed-container" class="mt-2 h-40 overflow-y-auto border border-gray-800 rounded p-2 autoscroll"
+             :class="theme === 'light' ? 'border-gray-300' : ''">
+          <div id="event-feed"></div>
+        </div>
+        <!-- Start streaming on load; each streamed div will be inserted after #event-feed anchor -->
+        <div hx-get="/events" hx-trigger="load" hx-swap="afterend" hx-target="#event-feed"></div>
+      </div>
+
+      <!-- Command bar -->
+      <div class="flex gap-2">
+        <input type="text" 
+               x-model="commandInput"
+               @keydown.enter="executeCommand()"
+               placeholder="Type command (e.g., restart arb-scout)" 
+               class="flex-1 bg-gray-900 border border-gray-700 rounded-md p-2 text-sm text-gray-100"
+               :class="theme === 'light' ? 'bg-white border-gray-300 text-gray-900' : ''" />
+        <button @click="executeCommand()" 
+                class="bg-blue-600 hover:bg-blue-700 rounded-md px-4 text-sm transition-colors">
+          Run
+        </button>
+      </div>
+      <div class="mt-2 text-xs text-gray-500"
+           :class="theme === 'light' ? 'text-gray-600' : ''">
+        Commands: <code class="text-blue-400">restart</code>, <code class="text-blue-400">inspect</code>, 
+        <code class="text-blue-400">filter</code>, <code class="text-blue-400">clear</code>, 
+        <code class="text-blue-400">export</code>, <code class="text-blue-400">theme</code>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="/static/js/BotHealthTable.js"></script>
+<script src="/static/js/financial3d.js"></script>
+<script src="/static/js/dashboard-ui.js"></script>
+<script src="/static/js/main.js"></script>
+<script src="/static/js/dashboard-alpine.js"></script>
+<script>
+  // Smooth scroll behavior for the feed container
+  (function () {
+    var feedContainer = document.getElementById('event-feed-container');
+    var sidebarEventContainer = document.getElementById('sidebar-event-feed-container');
+    var sidebarEventAnchor = document.getElementById('sidebar-event-feed');
+    var sidebarAdvisorContainer = document.getElementById('sidebar-advisor-container');
+    var sidebarAdvisorAnchor = document.getElementById('sidebar-advisor-feed');
+    if (!feedContainer) return;
+    // Auto-scroll on each HTMX swap (new chunk received)
+    document.addEventListener('htmx:afterSwap', function (evt) {
+      // Only scroll when the swap target relates to the event feed anchor
+      try {
+        var target = evt.detail && evt.detail.target;
+        if (!target) return;
+        var anchor = document.getElementById('event-feed');
+        if (!anchor) return;
+        // If the swap targeted our anchor or inserted adjacent to it, scroll the container
+        if (target === anchor || anchor.nextSibling === target || anchor.parentElement === target) {
+          // Scroll to bottom
+          requestAnimationFrame(function () {
+            feedContainer.scrollTop = feedContainer.scrollHeight;
+          });
+        }
+        // Sidebar Event Feed
+        if (sidebarEventContainer && sidebarEventAnchor && (target === sidebarEventAnchor || sidebarEventAnchor.nextSibling === target || sidebarEventAnchor.parentElement === target)) {
+          requestAnimationFrame(function () {
+            sidebarEventContainer.scrollTop = sidebarEventContainer.scrollHeight;
+          });
+        }
+        // Sidebar Advisor Feed
+        if (sidebarAdvisorContainer && sidebarAdvisorAnchor && (target === sidebarAdvisorAnchor || sidebarAdvisorAnchor.nextSibling === target || sidebarAdvisorAnchor.parentElement === target)) {
+          requestAnimationFrame(function () {
+            sidebarAdvisorContainer.scrollTop = sidebarAdvisorContainer.scrollHeight;
+          });
+        }
+      } catch (e) { /* noop */ }
+    });
+  })();
+</script>
+<script>
+  // Simple carousel that cycles the metrics view by changing #viewSelector
+  (function () {
+    var views = ['latency', 'throughput', 'profit', 'heatmap'];
+    var idx = 0;
+    var timer = null;
+    function setView(v) {
+      try {
+        var sel = document.getElementById('viewSelector') || (document.querySelector('#metrics-panel') && document.querySelector('#metrics-panel #viewSelector'));
+        if (!sel) return;
+        sel.value = v;
+        sel.dispatchEvent(new Event('change'));
+      } catch {}
+    }
+    window.dashboardCarousel = {
+      next: function () { idx = (idx + 1) % views.length; setView(views[idx]); },
+      prev: function () { idx = (idx - 1 + views.length) % views.length; setView(views[idx]); },
+      autoplayOn: function () { if (timer) return; timer = setInterval(function () { window.dashboardCarousel.next(); }, 5000); },
+      autoplayOff: function () { if (!timer) return; clearInterval(timer); timer = null; },
+      toggle: function () { if (timer) this.autoplayOff(); else this.autoplayOn(); }
+    };
+    // Optionally start autoplay by default:
+    // window.dashboardCarousel.autoplayOn();
+  })();
+</script>
+{% endblock %}
+
+

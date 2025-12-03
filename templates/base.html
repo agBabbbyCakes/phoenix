@@ -768,6 +768,11 @@
             max-height: 100vh;
           }
         }
+        /* Force monochrome white logo regardless of source image tone */
+        .logo-white {
+          filter: brightness(0) invert(1) contrast(1.05) saturate(0);
+          opacity: 0.92;
+        }
       </style>
     <link rel="stylesheet" href="/static/css/theme.css" />
     <link rel="stylesheet" href="/static/css/dashboard-enhancements.css" />

@@ -252,6 +252,13 @@ async def downloads_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("downloads.html", {"request": request, "version": version})
 
 
+@app.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request) -> HTMLResponse:
+    """About page with tech stack overview."""
+    version = BUILD_INFO.get("version_string", os.getenv("APP_VERSION", "0.1.0"))
+    return templates.TemplateResponse("about.html", {"request": request, "version": version})
+
+
 @app.get("/report", response_class=HTMLResponse)
 async def report(request: Request) -> HTMLResponse:
     summary = store.daily_summary()

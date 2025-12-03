@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}About — Silverback{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-950 text-gray-100 font-mono">
+  <!-- Header -->
+  <header class="sticky top-0 z-20 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img src="/static/imgs/silverback-grey.png" alt="Silverback" class="h-5 w-5 logo-white opacity-90">
+      <h1 class="text-sm font-semibold tracking-wide">About Silverback</h1>
+    </div>
+    <nav class="text-xs flex items-center gap-3">
+      <a href="/" class="text-gray-400 hover:text-cyan-400 transition-colors">Dashboard</a>
+      <a href="/explorer" class="text-gray-400 hover:text-cyan-400 transition-colors">Explorer</a>
+      <a href="/bots" class="text-gray-400 hover:text-cyan-400 transition-colors">Bots</a>
+      <a href="/logs" class="text-gray-400 hover:text-cyan-400 transition-colors">Logs</a>
+      <a href="/report" class="text-gray-400 hover:text-cyan-400 transition-colors">Reports</a>
+      <a href="/downloads" class="text-gray-400 hover:text-cyan-400 transition-colors">Downloads</a>
+    </nav>
+  </header>
+
+  <!-- Body -->
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <section class="glass-card rounded border border-gray-800/60 p-5 mb-5">
+      <h2 class="text-sm font-semibold mb-2">Overview</h2>
+      <p class="text-xs text-gray-300 leading-5">
+        Silverback is a real-time dashboard for monitoring Ethereum bots, built with a lightweight, streaming-first stack.
+      </p>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="glass-card rounded border border-gray-800/60 p-5">
+        <h3 class="text-sm font-semibold mb-2">Backend</h3>
+        <ul class="text-xs text-gray-300 space-y-1 leading-5">
+          <li>• FastAPI — web framework and routing</li>
+          <li>• Uvicorn — ASGI server</li>
+          <li>• Jinja2 — server-rendered templates and partials</li>
+          <li>• SSE (sse-starlette) — server-sent events for live updates</li>
+          <li>• DataStore — in-memory aggregation of metrics/events</li>
+          <li>• Endpoints: JSON APIs for charts and bot health</li>
+        </ul>
+      </div>
+
+      <div class="glass-card rounded border border-gray-800/60 p-5">
+        <h3 class="text-sm font-semibold mb-2">Frontend</h3>
+        <ul class="text-xs text-gray-300 space-y-1 leading-5">
+          <li>• Tailwind CSS (CDN) + DaisyUI — styling</li>
+          <li>• Alpine.js — lightweight UI state and interactivity</li>
+          <li>• HTMX + SSE — streaming HTML swaps for live metrics</li>
+          <li>• Chart.js (+ zoom, matrix, annotation plugins) — charts & heatmaps</li>
+          <li>• Charts.css — CSS-only tiny bar/sparkline visuals</li>
+          <li>• Three.js — 3D network/financial/point-cloud views</li>
+        </ul>
+      </div>
+
+      <div class="glass-card rounded border border-gray-800/60 p-5">
+        <h3 class="text-sm font-semibold mb-2">Templates & Pages</h3>
+        <ul class="text-xs text-gray-300 space-y-1 leading-5">
+          <li>• IDE Dashboard (`ide-dashboard.html`) — default landing view</li>
+          <li>• TV Mode (`index.html`) — widescreen display view</li>
+          <li>• Explorer, Bots, Logs, Reports, Settings pages</li>
+          <li>• Global Sidebar (`partials/global-sidebar.html`) — unified nav</li>
+        </ul>
+      </div>
+
+      <div class="glass-card rounded border border-gray-800/60 p-5">
+        <h3 class="text-sm font-semibold mb-2">Live Data Flow</h3>
+        <ul class="text-xs text-gray-300 space-y-1 leading-5">
+          <li>• Bot logs or mock publisher feed the DataStore</li>
+          <li>• SSE broker pushes partial HTML to the client</li>
+          <li>• Charts pull JSON from `/api/live/{metric}` when needed</li>
+          <li>• 3D canvases render via Three.js modules</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="glass-card rounded border border-gray-800/60 p-5 mt-4">
+      <h3 class="text-sm font-semibold mb-2">Packaging & Desktop</h3>
+      <ul class="text-xs text-gray-300 space-y-1 leading-5">
+        <li>• Briefcase config present — browser-based UI (native packaging optional)</li>
+        <li>• Dockerfile and Render configs for deployment</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="sticky bottom-0 bg-gray-950/95 border-t border-gray-800 px-4 py-3 text-xs text-gray-400">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <span>Silverback</span>
+      <div class="flex items-center gap-3">
+        <a href="/" class="hover:text-cyan-400 transition-colors">Dashboard</a>
+        <a href="/downloads" class="hover:text-cyan-400 transition-colors">Downloads</a>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+
