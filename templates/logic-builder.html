@@ -14,9 +14,15 @@
     
     <!-- Logo & Title -->
     <div class="p-4 border-b border-gray-800/50">
-      <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-        🦍 Silverback
-      </h1>
+      <div class="flex items-center gap-3 mb-2">
+        <img src="/static/imgs/silverback-grey.png" 
+             alt="Silverback Logo" 
+             class="h-8 w-8 object-contain"
+             style="filter: brightness(0.9);">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          Silverback
+        </h1>
+      </div>
       <p class="text-xs text-gray-500 mt-1">Logic Builder</p>
     </div>
 
@@ -33,34 +39,81 @@
       </nav>
     </div>
 
-    <!-- Tools Palette -->
+    <!-- Investment Strategies Palette -->
     <div class="p-4 border-t border-gray-800/50">
-      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Components</div>
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Investment Strategies</div>
       <div class="space-y-2">
         <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
              draggable="true"
-             data-type="trigger">
-          <div class="text-xs font-semibold text-cyan-400">⚡ Trigger</div>
-          <div class="text-[10px] text-gray-500">Event condition</div>
+             data-type="arbitrage">
+          <div class="text-xs font-semibold text-cyan-400">💱 Arbitrage</div>
+          <div class="text-[10px] text-gray-500">Cross-DEX price diff</div>
         </div>
         <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
              draggable="true"
-             data-type="action">
-          <div class="text-xs font-semibold text-emerald-400">▶️ Action</div>
-          <div class="text-[10px] text-gray-500">Bot function</div>
+             data-type="liquidity">
+          <div class="text-xs font-semibold text-emerald-400">💧 Liquidity</div>
+          <div class="text-[10px] text-gray-500">LP provision</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="yield">
+          <div class="text-xs font-semibold text-yellow-400">🌾 Yield Farm</div>
+          <div class="text-[10px] text-gray-500">Staking rewards</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="mev">
+          <div class="text-xs font-semibold text-purple-400">⚡ MEV</div>
+          <div class="text-[10px] text-gray-500">Max extract value</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="lending">
+          <div class="text-xs font-semibold text-blue-400">🏦 Lending</div>
+          <div class="text-[10px] text-gray-500">Lend/borrow</div>
+        </div>
+        <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
+             draggable="true"
+             data-type="trigger">
+          <div class="text-xs font-semibold text-orange-400">⚡ Trigger</div>
+          <div class="text-[10px] text-gray-500">Price/event condition</div>
         </div>
         <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
              draggable="true"
              data-type="condition">
-          <div class="text-xs font-semibold text-yellow-400">🔀 Condition</div>
+          <div class="text-xs font-semibold text-pink-400">🔀 Condition</div>
           <div class="text-[10px] text-gray-500">If/else logic</div>
         </div>
         <div class="component-drag bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded-lg p-2 cursor-move hover:border-cyan-500/50 transition-all"
              draggable="true"
-             data-type="delay">
-          <div class="text-xs font-semibold text-purple-400">⏱️ Delay</div>
-          <div class="text-[10px] text-gray-500">Wait timer</div>
+             data-type="risk">
+          <div class="text-xs font-semibold text-red-400">🛡️ Risk Check</div>
+          <div class="text-[10px] text-gray-500">Slippage/limit</div>
         </div>
+      </div>
+    </div>
+    
+    <!-- Code Examples -->
+    <div class="p-4 border-t border-gray-800/50">
+      <div class="text-xs uppercase text-gray-500 mb-3 tracking-wider">Code Examples</div>
+      <div class="space-y-2">
+        <button @click="showCodeExample('arbitrage')"
+                class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+          💱 Arbitrage Bot
+        </button>
+        <button @click="showCodeExample('liquidity')"
+                class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+          💧 LP Strategy
+        </button>
+        <button @click="showCodeExample('yield')"
+                class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+          🌾 Yield Farm
+        </button>
+        <button @click="showCodeExample('mev')"
+                class="w-full text-left px-2 py-1.5 rounded text-xs bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-all">
+          ⚡ MEV Bot
+        </button>
       </div>
     </div>
 
@@ -89,7 +142,7 @@
         <a href="/bots" class="nav-link">Bots</a>
       </nav>
     </div>
-    <div class="flex items-center gap-4 text-xs mr-80">
+    <div class="flex items-center gap-4 text-xs mr-96">
       <button @click="saveWorkflow()"
               class="px-3 py-1.5 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all backdrop-blur-sm">
         💾 Save
@@ -106,98 +159,285 @@
   </header>
 
   <!-- RIGHT SIDEBAR -->
-  <aside class="w-80 border-l border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto">
-    <div class="p-4 border-b border-gray-800/50">
-      <h2 class="text-sm font-semibold text-gray-300">Properties</h2>
+  <aside class="w-96 border-l border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-hidden">
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-800/50">
+      <button @click="activeTab = 'properties'" 
+              :class="activeTab === 'properties' ? 'border-b-2 border-cyan-500 text-cyan-400' : 'text-gray-500'"
+              class="flex-1 px-4 py-2 text-xs font-semibold hover:text-gray-300 transition-colors">
+        Properties
+      </button>
+      <button @click="activeTab = 'code'" 
+              :class="activeTab === 'code' ? 'border-b-2 border-cyan-500 text-cyan-400' : 'text-gray-500'"
+              class="flex-1 px-4 py-2 text-xs font-semibold hover:text-gray-300 transition-colors">
+        Code Preview
+      </button>
     </div>
-    <div class="p-4" x-show="selectedNode">
-      <template x-if="selectedNode">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs text-gray-400 mb-2">Node Type</label>
-            <div class="text-sm font-semibold text-cyan-400" x-text="selectedNode.type"></div>
+    
+    <!-- Properties Tab -->
+    <div class="flex-1 overflow-y-auto" x-show="activeTab === 'properties'">
+      <div class="p-4" x-show="selectedNode">
+        <template x-if="selectedNode">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">Strategy Type</label>
+              <div class="text-sm font-semibold text-cyan-400" x-text="selectedNode.type"></div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-2">Label</label>
+              <input type="text" x-model="selectedNode.label"
+                     @input="updateCodePreview()"
+                     class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+            </div>
+            
+            <!-- Arbitrage Strategy -->
+            <template x-if="selectedNode.type === 'arbitrage'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Token Pair</label>
+                  <input type="text" x-model="selectedNode.tokenPair" placeholder="ETH/USDC"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Min Profit %</label>
+                  <input type="number" x-model="selectedNode.minProfit" placeholder="0.5"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">DEX A</label>
+                  <select x-model="selectedNode.dexA"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="uniswap">Uniswap V3</option>
+                    <option value="sushiswap">SushiSwap</option>
+                    <option value="curve">Curve</option>
+                    <option value="balancer">Balancer</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">DEX B</label>
+                  <select x-model="selectedNode.dexB"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="uniswap">Uniswap V3</option>
+                    <option value="sushiswap">SushiSwap</option>
+                    <option value="curve">Curve</option>
+                    <option value="balancer">Balancer</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Max Slippage %</label>
+                  <input type="number" x-model="selectedNode.maxSlippage" placeholder="0.1"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Gas Limit</label>
+                  <input type="number" x-model="selectedNode.gasLimit" placeholder="300000"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <!-- Liquidity Strategy -->
+            <template x-if="selectedNode.type === 'liquidity'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Pool Address</label>
+                  <input type="text" x-model="selectedNode.poolAddress" placeholder="0x..."
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Token A Amount</label>
+                  <input type="number" x-model="selectedNode.tokenAAmount" placeholder="1.0"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Token B Amount</label>
+                  <input type="number" x-model="selectedNode.tokenBAmount" placeholder="3000.0"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Fee Tier</label>
+                  <select x-model="selectedNode.feeTier"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="500">0.05%</option>
+                    <option value="3000">0.3%</option>
+                    <option value="10000">1%</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Price Range (Lower)</label>
+                  <input type="number" x-model="selectedNode.priceLower" placeholder="1800"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Price Range (Upper)</label>
+                  <input type="number" x-model="selectedNode.priceUpper" placeholder="2200"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <!-- Yield Farming Strategy -->
+            <template x-if="selectedNode.type === 'yield'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Protocol</label>
+                  <select x-model="selectedNode.protocol"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="aave">Aave</option>
+                    <option value="compound">Compound</option>
+                    <option value="yearn">Yearn</option>
+                    <option value="curve">Curve Gauge</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Token</label>
+                  <input type="text" x-model="selectedNode.token" placeholder="USDC"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Amount</label>
+                  <input type="number" x-model="selectedNode.amount" placeholder="10000"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Min APY %</label>
+                  <input type="number" x-model="selectedNode.minAPY" placeholder="5.0"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <!-- MEV Strategy -->
+            <template x-if="selectedNode.type === 'mev'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">MEV Type</label>
+                  <select x-model="selectedNode.mevType"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="frontrun">Front-run</option>
+                    <option value="backrun">Back-run</option>
+                    <option value="sandwich">Sandwich</option>
+                    <option value="arbitrage">MEV Arbitrage</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Min Profit (ETH)</label>
+                  <input type="number" x-model="selectedNode.minProfitETH" placeholder="0.01"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Gas Price (Gwei)</label>
+                  <input type="number" x-model="selectedNode.gasPrice" placeholder="50"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <!-- Trigger -->
+            <template x-if="selectedNode.type === 'trigger'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Trigger Type</label>
+                  <select x-model="selectedNode.triggerType"
+                          @change="updateCodePreview()"
+                          class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                    <option value="price">Price Threshold</option>
+                    <option value="volume">Volume Spike</option>
+                    <option value="liquidity">Liquidity Change</option>
+                    <option value="gas">Gas Price</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Threshold</label>
+                  <input type="number" x-model="selectedNode.threshold"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Token Address</label>
+                  <input type="text" x-model="selectedNode.tokenAddress" placeholder="0x..."
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <!-- Risk Check -->
+            <template x-if="selectedNode.type === 'risk'">
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Max Slippage %</label>
+                  <input type="number" x-model="selectedNode.maxSlippage" placeholder="0.5"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Max Gas Cost (ETH)</label>
+                  <input type="number" x-model="selectedNode.maxGasCost" placeholder="0.05"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-2">Min Profit Margin %</label>
+                  <input type="number" x-model="selectedNode.minProfitMargin" placeholder="1.0"
+                         @input="updateCodePreview()"
+                         class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
+                </div>
+              </div>
+            </template>
+            
+            <button @click="deleteNode(selectedNode.id)"
+                    class="w-full px-3 py-2 rounded border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all backdrop-blur-sm text-xs mt-4">
+              Delete Node
+            </button>
           </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-2">Label</label>
-            <input type="text" x-model="selectedNode.label"
-                   class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-          </div>
-          <template x-if="selectedNode.type === 'trigger'">
-            <div class="space-y-2">
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Event Type</label>
-                <select x-model="selectedNode.eventType"
-                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-                  <option value="latency">Latency Threshold</option>
-                  <option value="success">Success Rate</option>
-                  <option value="error">Error Detected</option>
-                  <option value="volume">Volume Spike</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Threshold</label>
-                <input type="number" x-model="selectedNode.threshold"
-                       class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-              </div>
-            </div>
-          </template>
-          <template x-if="selectedNode.type === 'action'">
-            <div class="space-y-2">
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Action Type</label>
-                <select x-model="selectedNode.actionType"
-                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-                  <option value="restart">Restart Bot</option>
-                  <option value="stop">Stop Bot</option>
-                  <option value="alert">Send Alert</option>
-                  <option value="trade">Execute Trade</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Target Bot</label>
-                <select x-model="selectedNode.targetBot"
-                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-                  <option value="">Select bot...</option>
-                  <template x-for="bot in availableBots" :key="bot">
-                    <option :value="bot" x-text="bot"></option>
-                  </template>
-                </select>
-              </div>
-            </div>
-          </template>
-          <template x-if="selectedNode.type === 'condition'">
-            <div class="space-y-2">
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Condition</label>
-                <select x-model="selectedNode.condition"
-                        class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-                  <option value="gt">Greater Than</option>
-                  <option value="lt">Less Than</option>
-                  <option value="eq">Equals</option>
-                  <option value="ne">Not Equals</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs text-gray-400 mb-2">Value</label>
-                <input type="number" x-model="selectedNode.value"
-                       class="w-full bg-gray-800/30 border border-gray-700/50 backdrop-blur-sm rounded px-3 py-2 text-sm text-gray-100">
-              </div>
-            </div>
-          </template>
-          <button @click="deleteNode(selectedNode.id)"
-                  class="w-full px-3 py-2 rounded border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all backdrop-blur-sm text-xs">
-            Delete Node
+        </template>
+        <div x-show="!selectedNode" class="text-xs text-gray-500 text-center py-8">
+          Select a node to edit
+        </div>
+      </div>
+    </div>
+    
+    <!-- Code Preview Tab -->
+    <div class="flex-1 overflow-y-auto" x-show="activeTab === 'code'">
+      <div class="p-4">
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-300">Generated Code</h3>
+          <button @click="copyCode()"
+                  class="px-2 py-1 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all text-xs">
+            Copy
           </button>
         </div>
-      </template>
-      <div x-show="!selectedNode" class="text-xs text-gray-500 text-center py-8">
-        Select a node to edit
+        <pre class="bg-gray-950/80 border border-gray-800/50 rounded p-3 text-xs text-gray-300 overflow-x-auto" 
+             x-text="generatedCode"></pre>
+        <div x-show="selectedNode && selectedNode.type" class="mt-4">
+          <div class="text-xs text-gray-500 mb-2">Example for: <span class="text-cyan-400" x-text="selectedNode.type"></span></div>
+        </div>
       </div>
     </div>
   </aside>
 
   <!-- Main Canvas -->
-  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950/50 p-6">
+  <main class="flex-1 ml-64 mr-96 mt-14 mb-16 overflow-auto bg-gray-950/50 p-6">
     <div class="max-w-full">
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-200">Visual Logic Builder</h1>
@@ -225,16 +465,24 @@
             <div class="node-container bg-gray-800/40 border border-gray-700/50 backdrop-blur-xl rounded-lg p-3 min-w-[150px]"
                  :class="{
                    'border-cyan-500/50': selectedNode && selectedNode.id === node.id,
-                   'border-emerald-500/50': node.type === 'action',
-                   'border-yellow-500/50': node.type === 'condition',
-                   'border-purple-500/50': node.type === 'delay'
+                   'border-cyan-500/50': node.type === 'arbitrage',
+                   'border-emerald-500/50': node.type === 'liquidity' || node.type === 'yield',
+                   'border-purple-500/50': node.type === 'mev',
+                   'border-blue-500/50': node.type === 'lending',
+                   'border-orange-500/50': node.type === 'trigger',
+                   'border-pink-500/50': node.type === 'condition',
+                   'border-red-500/50': node.type === 'risk'
                  }">
               <div class="flex items-center gap-2 mb-2">
                 <span class="text-lg">
+                  <template x-if="node.type === 'arbitrage'">💱</template>
+                  <template x-if="node.type === 'liquidity'">💧</template>
+                  <template x-if="node.type === 'yield'">🌾</template>
+                  <template x-if="node.type === 'mev'">⚡</template>
+                  <template x-if="node.type === 'lending'">🏦</template>
                   <template x-if="node.type === 'trigger'">⚡</template>
-                  <template x-if="node.type === 'action'">▶️</template>
                   <template x-if="node.type === 'condition'">🔀</template>
-                  <template x-if="node.type === 'delay'">⏱️</template>
+                  <template x-if="node.type === 'risk'">🛡️</template>
                 </span>
                 <div class="text-xs font-semibold text-gray-200" x-text="node.label || node.type"></div>
               </div>
@@ -310,6 +558,8 @@ function logicBuilderState() {
     availableBots: [],
     savedWorkflows: JSON.parse(localStorage.getItem('phoenix:savedWorkflows') || '[]'),
     nodeIdCounter: 0,
+    activeTab: 'properties',
+    generatedCode: '// Select a node to see generated code\n// Or click "Code Examples" in the sidebar',
     
     init() {
       this.loadBots();
@@ -361,14 +611,46 @@ function logicBuilderState() {
         label: type.charAt(0).toUpperCase() + type.slice(1),
         x: x,
         y: y,
+        // Arbitrage defaults
+        tokenPair: 'ETH/USDC',
+        minProfit: 0.5,
+        dexA: 'uniswap',
+        dexB: 'sushiswap',
+        maxSlippage: 0.1,
+        gasLimit: 300000,
+        // Liquidity defaults
+        poolAddress: '',
+        tokenAAmount: 1.0,
+        tokenBAmount: 3000.0,
+        feeTier: 3000,
+        priceLower: 1800,
+        priceUpper: 2200,
+        // Yield defaults
+        protocol: 'aave',
+        token: 'USDC',
+        amount: 10000,
+        minAPY: 5.0,
+        // MEV defaults
+        mevType: 'frontrun',
+        minProfitETH: 0.01,
+        gasPrice: 50,
+        // Trigger defaults
+        triggerType: 'price',
+        threshold: 2000,
+        tokenAddress: '',
+        // Risk defaults
+        maxGasCost: 0.05,
+        minProfitMargin: 1.0,
+        // Legacy
         eventType: 'latency',
-        threshold: 200,
         actionType: 'restart',
         targetBot: '',
         condition: 'gt',
         value: 0
       };
       this.nodes.push(node);
+      this.selectNode(node.id);
+      this.updateCodePreview();
     },
     
     startDrag(nodeId, e) {
@@ -413,9 +695,14 @@ function logicBuilderState() {
     },
     
     getNodeDescription(node) {
-      if (node.type === 'trigger') return `When ${node.eventType} > ${node.threshold}`;
-      if (node.type === 'action') return `${node.actionType} ${node.targetBot || 'bot'}`;
-      if (node.type === 'condition') return `${node.condition} ${node.value}`;
+      if (node.type === 'arbitrage') return `${node.tokenPair || 'Token'} | Min ${node.minProfit || 0.5}% profit`;
+      if (node.type === 'liquidity') return `LP ${node.tokenAAmount || 0}/${node.tokenBAmount || 0}`;
+      if (node.type === 'yield') return `${node.protocol || 'Protocol'} | ${node.token || 'Token'}`;
+      if (node.type === 'mev') return `${node.mevType || 'MEV'} | Min ${node.minProfitETH || 0} ETH`;
+      if (node.type === 'lending') return `Lend/borrow strategy`;
+      if (node.type === 'trigger') return `${node.triggerType || 'Trigger'} > ${node.threshold || 0}`;
+      if (node.type === 'condition') return `${node.condition || 'gt'} ${node.value || 0}`;
+      if (node.type === 'risk') return `Max slippage: ${node.maxSlippage || 0}%`;
       return 'Configure in properties';
     },
     
@@ -493,6 +780,339 @@ function logicBuilderState() {
       if (confirm('Deploy this workflow? It will start executing automatically.')) {
         alert('Workflow deployed! (This would activate the logic in production)');
       }
+    },
+    
+    updateCodePreview() {
+      if (!this.selectedNode) {
+        this.generatedCode = '// Select a node to see generated code';
+        return;
+      }
+      this.generatedCode = this.generateCodeForNode(this.selectedNode);
+    },
+    
+    generateCodeForNode(node) {
+      if (node.type === 'arbitrage') {
+        return `# Arbitrage Bot Strategy
+from web3 import Web3
+from decimal import Decimal
+
+class ArbitrageBot:
+    def __init__(self):
+        self.w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+        self.token_pair = "${node.tokenPair || 'ETH/USDC'}"
+        self.min_profit_pct = ${node.minProfit || 0.5}
+        self.dex_a = "${node.dexA || 'uniswap'}"
+        self.dex_b = "${node.dexB || 'sushiswap'}"
+        self.max_slippage = ${node.maxSlippage || 0.1}
+        self.gas_limit = ${node.gasLimit || 300000}
+    
+    def check_arbitrage_opportunity(self):
+        """Check for price difference between DEXes"""
+        price_a = self.get_price(self.dex_a)
+        price_b = self.get_price(self.dex_b)
+        
+        profit_pct = abs(price_a - price_b) / min(price_a, price_b) * 100
+        
+        if profit_pct >= self.min_profit_pct:
+            return self.execute_arbitrage(price_a, price_b)
+        return False
+    
+    def execute_arbitrage(self, price_a, price_b):
+        """Execute arbitrage trade"""
+        if price_a < price_b:
+            # Buy on DEX A, sell on DEX B
+            return self.trade(self.dex_a, 'buy') and self.trade(self.dex_b, 'sell')
+        else:
+            # Buy on DEX B, sell on DEX A
+            return self.trade(self.dex_b, 'buy') and self.trade(self.dex_a, 'sell')`;
+      }
+      
+      if (node.type === 'liquidity') {
+        return `# Liquidity Provision Strategy
+from web3 import Web3
+from decimal import Decimal
+
+class LiquidityProvider:
+    def __init__(self):
+        self.w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+        self.pool_address = "${node.poolAddress || '0x...'}"
+        self.token_a_amount = ${node.tokenAAmount || 1.0}
+        self.token_b_amount = ${node.tokenBAmount || 3000.0}
+        self.fee_tier = ${node.feeTier || 3000}  # 0.3%
+        self.price_lower = ${node.priceLower || 1800}
+        self.price_upper = ${node.priceUpper || 2200}
+    
+    def add_liquidity(self):
+        """Add liquidity to Uniswap V3 pool"""
+        pool = self.w3.eth.contract(
+            address=self.pool_address,
+            abi=UNISWAP_V3_POOL_ABI
+        )
+        
+        # Calculate tick range
+        tick_lower = self.price_to_tick(self.price_lower)
+        tick_upper = self.price_to_tick(self.price_upper)
+        
+        # Approve tokens
+        self.approve_token(self.token_a_address, self.token_a_amount)
+        self.approve_token(self.token_b_address, self.token_b_amount)
+        
+        # Add liquidity
+        tx = pool.functions.mint(
+            tick_lower,
+            tick_upper,
+            self.calculate_liquidity_amount(),
+            self.w3.to_checksum_address(self.w3.eth.default_account)
+        ).transact({'gas': 500000})
+        
+        return self.w3.eth.wait_for_transaction_receipt(tx)`;
+      }
+      
+      if (node.type === 'yield') {
+        return `# Yield Farming Strategy
+from web3 import Web3
+from decimal import Decimal
+
+class YieldFarmer:
+    def __init__(self):
+        self.w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+        self.protocol = "${node.protocol || 'aave'}"
+        self.token = "${node.token || 'USDC'}"
+        self.amount = ${node.amount || 10000}
+        self.min_apy = ${node.minAPY || 5.0}
+    
+    def find_best_yield(self):
+        """Find best yield opportunity across protocols"""
+        protocols = {
+            'aave': self.get_aave_apy(),
+            'compound': self.get_compound_apy(),
+            'yearn': self.get_yearn_apy(),
+            'curve': self.get_curve_apy()
+        }
+        
+        best_protocol = max(protocols, key=protocols.get)
+        best_apy = protocols[best_protocol]
+        
+        if best_apy >= self.min_apy:
+            return self.deposit(best_protocol, self.amount)
+        return False
+    
+    def deposit(self, protocol, amount):
+        """Deposit tokens to yield protocol"""
+        if protocol == 'aave':
+            return self.deposit_to_aave(amount)
+        elif protocol == 'compound':
+            return self.deposit_to_compound(amount)
+        # ... other protocols`;
+      }
+      
+      if (node.type === 'mev') {
+        return `# MEV Bot Strategy
+from web3 import Web3
+from eth_utils import to_hex
+
+class MEVBot:
+    def __init__(self):
+        self.w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+        self.mev_type = "${node.mevType || 'frontrun'}"
+        self.min_profit_eth = ${node.minProfitETH || 0.01}
+        self.gas_price = ${node.gasPrice || 50}  # Gwei
+    
+    def monitor_mempool(self):
+        """Monitor pending transactions in mempool"""
+        pending_txs = self.w3.eth.get_pending_transactions()
+        
+        for tx in pending_txs:
+            if self.is_profitable_opportunity(tx):
+                if self.mev_type == 'frontrun':
+                    return self.frontrun(tx)
+                elif self.mev_type == 'backrun':
+                    return self.backrun(tx)
+                elif self.mev_type == 'sandwich':
+                    return self.sandwich(tx)
+    
+    def frontrun(self, target_tx):
+        """Front-run a profitable transaction"""
+        # Calculate profit
+        profit = self.estimate_profit(target_tx)
+        
+        if profit < self.min_profit_eth:
+            return False
+        
+        # Build front-running transaction
+        frontrun_tx = self.build_frontrun_tx(target_tx)
+        
+        # Submit with higher gas price
+        frontrun_tx['gasPrice'] = self.w3.to_wei(self.gas_price, 'gwei')
+        signed = self.w3.eth.account.sign_transaction(frontrun_tx, private_key)
+        
+        return self.w3.eth.send_raw_transaction(signed.rawTransaction)`;
+      }
+      
+      if (node.type === 'trigger') {
+        return `# Price Trigger Strategy
+from web3 import Web3
+from decimal import Decimal
+
+class PriceTrigger:
+    def __init__(self):
+        self.w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+        self.trigger_type = "${node.triggerType || 'price'}"
+        self.threshold = ${node.threshold || 2000}
+        self.token_address = "${node.tokenAddress || '0x...'}"
+    
+    def check_trigger(self):
+        """Check if trigger condition is met"""
+        if self.trigger_type == 'price':
+            current_price = self.get_token_price(self.token_address)
+            return current_price >= self.threshold
+        
+        elif self.trigger_type == 'volume':
+            volume_24h = self.get_24h_volume(self.token_address)
+            return volume_24h >= self.threshold
+        
+        elif self.trigger_type == 'liquidity':
+            liquidity = self.get_pool_liquidity(self.token_address)
+            return liquidity >= self.threshold
+        
+        elif self.trigger_type == 'gas':
+            gas_price = self.w3.eth.gas_price
+            return gas_price <= self.w3.to_wei(self.threshold, 'gwei')`;
+      }
+      
+      if (node.type === 'risk') {
+        return `# Risk Management Check
+from web3 import Web3
+from decimal import Decimal
+
+class RiskManager:
+    def __init__(self):
+        self.max_slippage = ${node.maxSlippage || 0.5}  # %
+        self.max_gas_cost = ${node.maxGasCost || 0.05}  # ETH
+        self.min_profit_margin = ${node.minProfitMargin || 1.0}  # %
+    
+    def validate_trade(self, trade_params):
+        """Validate trade before execution"""
+        # Check slippage
+        estimated_slippage = self.estimate_slippage(trade_params)
+        if estimated_slippage > self.max_slippage:
+            return False, f"Slippage too high: {estimated_slippage}%"
+        
+        # Check gas cost
+        estimated_gas = self.estimate_gas_cost(trade_params)
+        if estimated_gas > self.max_gas_cost:
+            return False, f"Gas cost too high: {estimated_gas} ETH"
+        
+        # Check profit margin
+        estimated_profit = self.estimate_profit(trade_params)
+        profit_margin = (estimated_profit / trade_params['amount']) * 100
+        if profit_margin < self.min_profit_margin:
+            return False, f"Profit margin too low: {profit_margin}%"
+        
+        return True, "Trade validated"`;
+      }
+      
+      return `// ${node.type} node\n// Configure attributes in Properties tab`;
+    },
+    
+    showCodeExample(type) {
+      const examples = {
+        arbitrage: `# Complete Arbitrage Bot Example
+from web3 import Web3
+from decimal import Decimal
+import time
+
+w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+
+def check_arbitrage():
+    # Get prices from Uniswap and SushiSwap
+    uniswap_price = get_uniswap_price('ETH/USDC')
+    sushi_price = get_sushiswap_price('ETH/USDC')
+    
+    profit_pct = abs(uniswap_price - sushi_price) / min(uniswap_price, sushi_price) * 100
+    
+    if profit_pct >= 0.5:  # Min 0.5% profit
+        execute_arbitrage(uniswap_price, sushi_price)
+
+def execute_arbitrage(price_a, price_b):
+    if price_a < price_b:
+        # Buy on Uniswap, sell on SushiSwap
+        buy_tx = swap_on_uniswap('buy', amount)
+        sell_tx = swap_on_sushiswap('sell', amount)
+        return buy_tx and sell_tx
+    return False
+
+while True:
+    check_arbitrage()
+    time.sleep(1)`,
+        liquidity: `# Uniswap V3 Liquidity Provider
+from web3 import Web3
+from uniswap import Uniswap
+
+w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+uniswap = Uniswap(address, private_key, version=3)
+
+def add_liquidity():
+    # Add 1 ETH and 3000 USDC to pool
+    pool_address = '0x...'  # ETH/USDC pool
+    tick_lower = price_to_tick(1800)  # Lower price bound
+    tick_upper = price_to_tick(2200)  # Upper price bound
+    
+    tx = uniswap.add_liquidity(
+        token0='ETH',
+        token1='USDC',
+        amount0=1.0,
+        amount1=3000.0,
+        tick_lower=tick_lower,
+        tick_upper=tick_upper,
+        fee=3000  # 0.3% fee tier
+    )
+    return tx`,
+        yield: `# Yield Farming Bot
+from web3 import Web3
+from aave import Aave
+
+w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+aave = Aave(w3)
+
+def farm_yield():
+    # Check APY across protocols
+    aave_apy = aave.get_supply_apy('USDC')
+    compound_apy = compound.get_supply_apy('USDC')
+    
+    if aave_apy >= 5.0:  # Min 5% APY
+        # Deposit 10,000 USDC
+        tx = aave.supply('USDC', 10000)
+        return tx
+    
+    return None`,
+        mev: `# MEV Front-running Bot
+from web3 import Web3
+from flashbots import FlashbotsProvider
+
+w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY'))
+flashbots = FlashbotsProvider(w3)
+
+def monitor_mempool():
+    pending_txs = w3.eth.get_pending_transactions()
+    
+    for tx in pending_txs:
+        profit = estimate_mev_profit(tx)
+        
+        if profit >= 0.01:  # Min 0.01 ETH profit
+            # Build front-running transaction
+            frontrun_tx = build_frontrun_tx(tx)
+            flashbots.send_bundle([frontrun_tx, tx])
+            break`
+      };
+      
+      this.generatedCode = examples[type] || '// Code example not found';
+      this.activeTab = 'code';
+    },
+    
+    copyCode() {
+      navigator.clipboard.writeText(this.generatedCode);
+      alert('Code copied to clipboard!');
     }
   };
 }
