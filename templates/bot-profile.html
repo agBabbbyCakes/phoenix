@@ -8,7 +8,7 @@
      x-init="init()">
   
   <!-- LEFT SIDEBAR (Fixed) -->
-  <aside class="w-64 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
+  <aside class="w-56 border-r border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto"
          style="box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);">
     
     <!-- Logo & Title -->
@@ -86,51 +86,7 @@
   </aside>
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
-          style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
-    
-    <!-- Left: Navigation -->
-    <div class="flex items-center gap-8 ml-64">
-      <nav class="flex items-center gap-6">
-        <a href="/" class="nav-link">Dashboard</a>
-        <a href="/bots" class="nav-link active">Bots</a>
-        <a href="/logs" class="nav-link">Logs</a>
-        <a href="/report" class="nav-link">Reports</a>
-        <a href="/settings" class="nav-link">Settings</a>
-      </nav>
-    </div>
-
-    <!-- Right: Live Info & Controls -->
-    <div class="flex items-center gap-6 text-xs mr-80">
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Latency:</span>
-        <span class="text-cyan-400 font-semibold" x-text="bot.avg_latency + 'ms'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Success:</span>
-        <span class="text-green-400 font-semibold" x-text="bot.success_rate + '%'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Auto-refresh:</span>
-        <span class="text-gray-400">5s</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50"></div>
-        <span class="text-gray-400">Connected</span>
-      </div>
-      <button @click="toggleTheme()" 
-              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
-              title="Toggle theme">
-        <span x-show="theme === 'dark'">☀️</span>
-        <span x-show="theme === 'light'">🌙</span>
-      </button>
-      <button @click="showCommandPalette = !showCommandPalette" 
-              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
-              title="Command Palette (⌘K)">
-        ⌘K
-      </button>
-    </div>
-  </header>
+  {# Top bar provided by base.html include #}
 
   <!-- RIGHT SIDEBAR (Event Stream) -->
   <aside class="w-80 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto"
@@ -157,7 +113,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950 p-6">
+  <main class="flex-1 ml-56 mr-80 mt-11 mb-16 overflow-auto bg-gray-950 p-6">
     <div class="max-w-7xl mx-auto py-6">
       <!-- Bot Header -->
       <div class="mb-6">

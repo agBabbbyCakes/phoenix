@@ -1,50 +1,38 @@
-<!-- Unified Top Bar Component -->
-<header class="fixed top-0 left-64 right-80 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
-        style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
-  
-  <!-- Left: Brand & Navigation -->
-  <div class="flex items-center gap-8">
-    <div class="text-lg font-semibold text-cyan-400">Blockchain Bot Positions</div>
-    <nav class="flex items-center gap-6">
-      <a href="/" class="nav-link" :class="currentPage === 'dashboard' ? 'active' : ''">Dashboard</a>
-      <a href="/bots" class="nav-link" :class="currentPage === 'bots' ? 'active' : ''">Bots</a>
-      <a href="/logs" class="nav-link" :class="currentPage === 'logs' ? 'active' : ''">Logs</a>
-      <a href="/report" class="nav-link" :class="currentPage === 'reports' ? 'active' : ''">Reports</a>
-      <a href="/settings" class="nav-link" :class="currentPage === 'settings' ? 'active' : ''">Settings</a>
-    </nav>
-  </div>
-
-  <!-- Right: Live Info & Controls -->
-  <div class="flex items-center gap-6 text-xs">
-    <div class="flex items-center gap-2">
-      <span class="text-gray-500">Latency:</span>
-      <span class="text-cyan-400 font-semibold" x-text="(kpis && kpis.avg_latency_ms) ? kpis.avg_latency_ms + 'ms' : (bot && bot.avg_latency) ? bot.avg_latency + 'ms' : '0ms'"></span>
+<!-- Unified Top Bar Component (Thin) -->
+<header class="top-bar top-bar-shadow h-11">
+  <div class="flex items-center justify-between h-full px-4">
+    <!-- Left: Brand & Basic Navigation -->
+    <div class="flex items-center gap-6">
+      <a href="/" class="flex items-center gap-2">
+        <img src="/static/imgs/silverback-grey.png" alt="Silverback" class="h-6 w-6 object-contain logo-white">
+      </a>
+      <nav class="flex items-center gap-6 text-sm">
+        <a href="/" class="nav-link {{ 'active' if request and request.url.path == '/' else '' }}">Dashboard</a>
+        <a href="/bots" class="nav-link {{ 'active' if request and request.url.path.startswith('/bots') else '' }}">Bots</a>
+        <a href="/logs" class="nav-link {{ 'active' if request and request.url.path.startswith('/logs') else '' }}">Logs</a>
+        <a href="/report" class="nav-link {{ 'active' if request and request.url.path.startswith('/report') else '' }}">Reports</a>
+        <a href="/settings" class="nav-link {{ 'active' if request and request.url.path.startswith('/settings') else '' }}">Settings</a>
+      </nav>
     </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-500">Success:</span>
-      <span class="text-green-400 font-semibold" x-text="(kpis && kpis.success_rate_pct) ? kpis.success_rate_pct + '%' : (bot && bot.success_rate) ? bot.success_rate + '%' : '0%'"></span>
+    <!-- Right: Clock -->
+    <div class="text-xs text-gray-400 font-mono">
+      <span id="topnav-clock">--:--:--</span>
     </div>
-    <div class="flex items-center gap-2">
-      <span class="text-gray-500">Auto-refresh:</span>
-      <span class="text-gray-400">5s</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <div class="w-2 h-2 rounded-full"
-           :class="(connectionStatus === 'connected' || connectionStatus === undefined) ? 'bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50' : 'bg-red-400'"></div>
-      <span class="text-gray-400" 
-            x-text="(connectionStatus === 'connected' || connectionStatus === undefined) ? 'Connected' : 'Disconnected'"></span>
-    </div>
-    <button @click="toggleTheme()" 
-            class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
-            title="Toggle theme">
-      <span x-show="theme === 'dark'">☀️</span>
-      <span x-show="theme === 'light'">🌙</span>
-    </button>
-    <button @click="showCommandPalette = !showCommandPalette" 
-            class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
-            title="Command Palette (⌘K)">
-      ⌘K
-    </button>
   </div>
 </header>
+<script>
+(function(){
+  function pad(n){return n.toString().padStart(2,'0');}
+  function updateClock(){
+    try {
+      var el = document.getElementById('topnav-clock');
+      if (!el) return;
+      var d = new Date();
+      el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    } catch(e){}
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>
 

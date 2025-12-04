@@ -77,3 +77,27 @@ html {
 .hover-glow:hover {
     box-shadow: 0 0 0 2px hsla(var(--p)/.25), 0 8px 24px rgba(0, 0, 0, .35);
 }
+
+/* Global top bar visual treatment (moved from inline style) */
+.top-bar-shadow {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Consolidated top bar layout (replaces long utility class list) */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px; /* tailwind h-11 */
+    background-color: rgba(17, 24, 39, 0.95); /* bg-gray-900/95 */
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px); /* backdrop-blur-xl */
+    border-bottom: 1px solid #1f2937; /* border-gray-800 */
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 1.5rem; /* px-6 */
+    padding-right: 1.5rem;
+}

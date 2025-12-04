@@ -10,7 +10,7 @@
      x-init="init()">
   
   <!-- LEFT SIDEBAR -->
-  <aside class="w-64 border-r border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto">
+  <aside class="w-56 border-r border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed left-0 top-11 bottom-16 z-20 overflow-y-auto">
     <div class="p-4 border-b border-gray-800/50">
       <div class="flex items-center gap-3">
         <img src="/static/imgs/silverback-grey.png" 
@@ -95,26 +95,7 @@
     </div>
   </aside>
 
-  <!-- TOP BAR -->
-  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/40 backdrop-blur-xl border-b border-gray-800/50 z-30 flex items-center justify-between px-6">
-    <div class="flex items-center gap-8 ml-64">
-      <nav class="flex items-center gap-6">
-        <a href="/" class="nav-link">Dashboard</a>
-        <a href="/chart-annotations" class="nav-link active">Annotations</a>
-        <a href="/logic-builder" class="nav-link">Logic Builder</a>
-      </nav>
-    </div>
-    <div class="flex items-center gap-4 text-xs mr-80">
-      <button @click="saveAnnotations()"
-              class="px-3 py-1.5 rounded border border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all backdrop-blur-sm">
-        💾 Save
-      </button>
-      <button @click="exportAnnotations()"
-              class="px-3 py-1.5 rounded border border-gray-700/50 bg-gray-800/30 text-gray-400 hover:text-cyan-400 transition-all backdrop-blur-sm">
-        📤 Export
-      </button>
-    </div>
-  </header>
+  {# Top bar provided by base.html include #}
 
   <!-- RIGHT SIDEBAR -->
   <aside class="w-80 border-l border-gray-800/50 bg-gray-900/40 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-16 z-20 overflow-y-auto">
@@ -153,7 +134,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 ml-64 mr-80 mt-14 mb-16 overflow-auto bg-gray-950/50 p-6">
+  <main class="flex-1 ml-56 mr-80 mt-11 mb-16 overflow-auto bg-gray-950/50 p-6">
     <div class="max-w-7xl mx-auto">
       <h1 class="text-2xl font-bold text-gray-200 mb-6">Chart Annotations & Event Triggers</h1>
       

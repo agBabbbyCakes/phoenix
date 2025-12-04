@@ -40,6 +40,8 @@ function botsPageState() {
         const response = await fetch('/api/bots/status');
         const data = await response.json();
         const apiBots = data.bots || [];
+        const assignments = JSON.parse(localStorage.getItem('phoenix:botWorkflowAssignments') || '{}');
+        const savedWorkflows = JSON.parse(localStorage.getItem('phoenix:savedWorkflows') || '[]');
         
         // Merge with stored bots (from localStorage for now)
         const storedBots = JSON.parse(localStorage.getItem('phoenix:registeredBots') || '[]');
@@ -47,8 +49,11 @@ function botsPageState() {
         // Create bot registry from API data + stored config
         this.bots = apiBots.map(apiBot => {
           const stored = storedBots.find(b => b.name === apiBot.bot_name);
+          const id = apiBot.bot_name.toLowerCase().replace(/\s+/g, '-');
+          const wfId = assignments[id];
+          const wfName = savedWorkflows.find(w => w.id === wfId)?.name;
           return {
-            id: apiBot.bot_name.toLowerCase().replace(/\s+/g, '-'),
+            id: id,
             name: apiBot.bot_name,
             status: this.determineStatus(apiBot),
             avg_latency: apiBot.latency_ms || 0,
@@ -57,15 +62,19 @@ function botsPageState() {
             address: stored?.address || '',
             enabled: stored?.enabled !== false,
             uptime: this.calculateUptime(apiBot.last_heartbeat),
-            last_heartbeat: apiBot.last_heartbeat
+            last_heartbeat: apiBot.last_heartbeat,
+            assigned_workflow_name: wfName || null
           };
         });
         
         // Add any stored bots not in API
         storedBots.forEach(stored => {
           if (!this.bots.find(b => b.name === stored.name)) {
+            const id = stored.name.toLowerCase().replace(/\s+/g, '-');
+            const wfId = assignments[id];
+            const wfName = savedWorkflows.find(w => w.id === wfId)?.name;
             this.bots.push({
-              id: stored.name.toLowerCase().replace(/\s+/g, '-'),
+              id: id,
               name: stored.name,
               status: 'idle',
               avg_latency: 0,
@@ -74,7 +83,8 @@ function botsPageState() {
               address: stored.address || '',
               enabled: stored.enabled !== false,
               uptime: 'N/A',
-              last_heartbeat: null
+              last_heartbeat: null,
+              assigned_workflow_name: wfName || null
             });
           }
         });

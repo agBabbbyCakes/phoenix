@@ -4,145 +4,115 @@
 
 {% block content %}
 <div class="flex h-screen bg-gray-950 text-gray-100 font-mono overflow-hidden"
-     x-data="ideDashboardState()" 
-     x-init="init()">
-  
+  x-data="ideDashboardState()"
+  x-init="init()">
+
   <!-- LEFT SIDEBAR (Unified Global) -->
   {% include 'partials/global-sidebar.html' %}
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="fixed top-0 left-0 right-0 h-14 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-6"
-          style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
-    
-    <!-- Left: Navigation -->
-    <div class="flex items-center gap-4">
-      <img src="/static/imgs/silverback-grey.png" alt="Silverback" class="h-6 w-6 opacity-90 logo-white">
-      <nav class="hidden lg:flex items-center gap-4">
-        <a href="/" class="nav-link">Dashboard</a>
-        <a href="/bots" class="nav-link">Bots</a>
-        <a href="/logs" class="nav-link">Logs</a>
-        <a href="/report" class="nav-link">Reports</a>
-        <a href="/settings" class="nav-link">Settings</a>
-      </nav>
-    </div>
-
-    <!-- Right: Live Info & Controls -->
-    <div class="flex items-center gap-6 text-xs mr-6">
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Latency:</span>
-        <span class="text-cyan-400 font-semibold" x-text="kpis.avg_latency_ms + 'ms'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Success:</span>
-        <span class="text-green-400 font-semibold" x-text="kpis.success_rate_pct + '%'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">Auto-refresh:</span>
-        <span class="text-gray-400">5s</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full"
-             :class="connectionStatus === 'connected' ? 'bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50' : 'bg-red-400'"></div>
-        <span class="text-gray-400" 
-              x-text="connectionStatus === 'connected' ? 'Connected' : 'Disconnected'"></span>
-      </div>
-      <!-- Avatar Placeholder -->
-      <div class="w-7 h-7 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-400 text-xs">
-        👤
-      </div>
-      <button @click="toggleTheme()" 
-              class="p-1.5 rounded hover:bg-gray-800 transition-colors text-gray-400 hover:text-yellow-400"
-              title="Toggle theme">
-        <span x-show="theme === 'dark'">☀️</span>
-        <span x-show="theme === 'light'">🌙</span>
-      </button>
-      <button @click="showCommandPalette = !showCommandPalette" 
-              class="px-3 py-1.5 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
-              title="Command Palette (⌘K)">
-        ⌘K
-      </button>
-    </div>
-  </header>
+  {# Top bar now included via base.html #}
 
   <!-- MAIN CONTENT AREA (Scrollable) - Professional Dashboard -->
-  <main class="flex-1 ml-0 md:ml-[260px] mt-14 mb-16 overflow-auto bg-gray-950 p-6">
+  <main class="flex-1 ml-0 md:ml-56 mt-11 mb-16 overflow-auto bg-gray-950 p-6">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
+
       <!-- Summary Stats Card -->
-      <section class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+      <section
+        class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <div
+          class="p-4 border-b border-gray-800 flex items-center justify-between">
           <h2 class="text-sm font-semibold">Summary</h2>
           <div class="text-xs text-gray-500">Live</div>
         </div>
         <div class="p-4 grid grid-cols-3 gap-4">
           <div class="p-3 rounded-lg border border-gray-800 bg-gray-900">
             <div class="text-xs text-gray-400 mb-1">Avg Latency</div>
-            <div class="text-xl font-semibold" x-text="kpis.avg_latency_ms + 'ms'"></div>
+            <div class="text-xl font-semibold"
+              x-text="kpis.avg_latency_ms + 'ms'"></div>
           </div>
           <div class="p-3 rounded-lg border border-gray-800 bg-gray-900">
             <div class="text-xs text-gray-400 mb-1">Success Rate</div>
-            <div class="text-xl font-semibold text-green-400" x-text="kpis.success_rate_pct + '%'"></div>
+            <div class="text-xl font-semibold text-green-400"
+              x-text="kpis.success_rate_pct + '%'"></div>
           </div>
           <div class="p-3 rounded-lg border border-gray-800 bg-gray-900">
             <div class="text-xs text-gray-400 mb-1">Throughput</div>
-            <div class="text-xl font-semibold text-yellow-400" x-text="kpis.throughput_1m + '/min'"></div>
+            <div class="text-xl font-semibold text-yellow-400"
+              x-text="kpis.throughput_1m + '/min'"></div>
           </div>
         </div>
       </section>
 
       <!-- Health Status Card -->
-      <section class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      <section
+        class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
         <div class="p-4 border-b border-gray-800">
           <h2 class="text-sm font-semibold">Health Status</h2>
         </div>
         <div class="p-4 grid grid-cols-3 gap-4">
-          <div class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
+          <div
+            class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
             <div class="text-xs text-gray-400 mb-1">OK</div>
-            <div class="text-emerald-400 text-xl font-semibold" x-text="healthSummary.ok"></div>
+            <div class="text-emerald-400 text-xl font-semibold"
+              x-text="healthSummary.ok"></div>
           </div>
-          <div class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
+          <div
+            class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
             <div class="text-xs text-gray-400 mb-1">Slow</div>
-            <div class="text-yellow-400 text-xl font-semibold" x-text="healthSummary.slow"></div>
+            <div class="text-yellow-400 text-xl font-semibold"
+              x-text="healthSummary.slow"></div>
           </div>
-          <div class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
+          <div
+            class="p-3 rounded-lg border border-gray-800 bg-gray-900 text-center">
             <div class="text-xs text-gray-400 mb-1">Error</div>
-            <div class="text-red-400 text-xl font-semibold" x-text="healthSummary.error"></div>
+            <div class="text-red-400 text-xl font-semibold"
+              x-text="healthSummary.error"></div>
           </div>
         </div>
       </section>
 
       <!-- Live Chart Card -->
-      <section class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+      <section
+        class="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <div
+          class="p-4 border-b border-gray-800 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <h2 class="text-sm font-semibold">Live Performance Chart</h2>
             <!-- Timeframe UI Pills (UI only; does not alter logic) -->
             <div class="hidden sm:flex items-center gap-1 text-xs">
-              <span class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">1m</span>
-              <span class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">5m</span>
-              <span class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">30m</span>
-              <span class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">1h</span>
-              <span class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">24h</span>
+              <span
+                class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">1m</span>
+              <span
+                class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">5m</span>
+              <span
+                class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">30m</span>
+              <span
+                class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">1h</span>
+              <span
+                class="px-2 py-0.5 border border-gray-700 rounded cursor-pointer hover:bg-gray-800">24h</span>
             </div>
           </div>
           <!-- Optional selector (UI only, preserves existing logic) -->
           <div class="flex items-center gap-2">
-            <select class="hidden md:block bg-gray-900 border border-gray-700 rounded-md px-2 py-1 text-xs text-gray-300">
+            <select
+              class="hidden md:block bg-gray-900 border border-gray-700 rounded-md px-2 py-1 text-xs text-gray-300">
               <option>Latency</option>
               <option>Throughput</option>
               <option>Profit</option>
               <option>Heatmap</option>
             </select>
-          <button @click="resetZoom()" 
-                  class="text-xs text-gray-400 border border-gray-700 rounded-md px-3 py-1 hover:bg-gray-800 transition-colors">
-            Reset Zoom
-          </button>
+            <button @click="resetZoom()"
+              class="text-xs text-gray-400 border border-gray-700 rounded-md px-3 py-1 hover:bg-gray-800 transition-colors">
+              Reset Zoom
+            </button>
           </div>
         </div>
         <div class="p-4">
           <div class="h-96 bg-gray-900 rounded-lg border border-gray-800">
             <div hx-ext="sse" sse-connect="/stream">
-              <div id="metrics-panel" sse-swap="metrics_update" hx-swap="innerHTML" class="h-full">
+              <div id="metrics-panel" sse-swap="metrics_update"
+                hx-swap="innerHTML" class="h-full">
                 {{ initial_metrics_html | safe }}
               </div>
             </div>
@@ -151,8 +121,10 @@
       </section>
 
       <!-- Recent Events Table Card -->
-      <section class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+      <section
+        class="bg-gray-900 border border-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <div
+          class="p-4 border-b border-gray-800 flex items-center justify-between">
           <h2 class="text-sm font-semibold">Recent Events</h2>
           <div class="text-xs text-gray-500">Latest</div>
         </div>
@@ -171,11 +143,13 @@
               <tbody class="divide-y divide-gray-800">
                 {% for e in last_events %}
                 <tr class="hover:bg-gray-800/40 odd:bg-gray-900/40">
-                  <td class="px-4 py-2 font-mono text-gray-400">{{ e.timestamp.strftime('%H:%M:%S') }}</td>
+                  <td class="px-4 py-2 font-mono text-gray-400">{{
+                    e.timestamp.strftime('%H:%M:%S') }}</td>
                   <td class="px-4 py-2">
                     <span class="ml-1">{{ e.bot_name }}</span>
                   </td>
-                  <td class="px-4 py-2 font-mono text-right">{{ e.latency_ms }}ms</td>
+                  <td class="px-4 py-2 font-mono text-right">{{ e.latency_ms
+                    }}ms</td>
                   <td class="px-4 py-2">
                     {% if e.error %}
                     <span class="text-red-400">Error</span>
@@ -185,9 +159,10 @@
                   </td>
                   <td class="px-4 py-2">
                     {% if e.tx_hash %}
-                    <a href="https://etherscan.io/tx/{{ e.tx_hash }}" 
-                       target="_blank"
-                       class="text-blue-400 hover:underline font-mono text-xs">{{ e.tx_hash[:10] }}...</a>
+                    <a href="https://etherscan.io/tx/{{ e.tx_hash }}"
+                      target="_blank"
+                      class="text-blue-400 hover:underline font-mono text-xs">{{
+                      e.tx_hash[:10] }}...</a>
                     {% else %}-{% endif %}
                   </td>
                 </tr>
@@ -202,12 +177,15 @@
   </main>
 
   <!-- BOTTOM BAR (Fixed) -->
-  <footer class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 z-20"
-          style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5), 0 -2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
-    <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
+  <footer
+    class="fixed bottom-0 left-0 right-0 h-16 bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 z-20"
+    style="box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5), 0 -2px 10px rgba(6, 182, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+    <div
+      class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50"></div>
+          <div
+            class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-lg shadow-cyan-400/50"></div>
           <span class="text-sm text-gray-400">Silverback v{{ version }}</span>
         </div>
         <div class="text-xs text-gray-500">
@@ -218,22 +196,28 @@
         </div>
       </div>
       <div class="flex items-center gap-4">
-        <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
+        <a href="/"
+          class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
           Dashboard
         </a>
-        <a href="/bots" class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
+        <a href="/bots"
+          class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
           Bots
         </a>
-        <a href="/logs" class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
+        <a href="/logs"
+          class="text-sm text-gray-400 hover:text-purple-400 transition-colors hover:shadow-lg hover:shadow-purple-400/20 px-3 py-1 rounded">
           Logs
         </a>
-        <a href="/report" class="text-sm text-gray-400 hover:text-green-400 transition-colors hover:shadow-lg hover:shadow-green-400/20 px-3 py-1 rounded">
+        <a href="/report"
+          class="text-sm text-gray-400 hover:text-green-400 transition-colors hover:shadow-lg hover:shadow-green-400/20 px-3 py-1 rounded">
           Reports
         </a>
-        <a href="/downloads" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
+        <a href="/downloads"
+          class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
           📥 Downloads
         </a>
-        <a href="/about" class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
+        <a href="/about"
+          class="text-sm text-gray-400 hover:text-cyan-400 transition-colors hover:shadow-lg hover:shadow-cyan-400/20 px-3 py-1 rounded">
           ℹ️ About
         </a>
       </div>
@@ -241,16 +225,18 @@
   </footer>
 
   <!-- Add Bot Modal -->
-  <div x-show="showAddBotModal" 
-       @click.away="showAddBotModal = false"
-       x-transition
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-       style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-xl"
-         @click.stop>
+  <div x-show="showAddBotModal"
+    @click.away="showAddBotModal = false"
+    x-transition
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+    style="display: none;">
+    <div
+      class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-xl"
+      @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Add New Bot</h3>
-        <button @click="showAddBotModal = false" class="text-gray-400 hover:text-gray-300">×</button>
+        <button @click="showAddBotModal = false"
+          class="text-gray-400 hover:text-gray-300">×</button>
       </div>
       <form @submit.prevent="addBot()" class="space-y-4">
         <div>
@@ -258,15 +244,15 @@
           <div class="flex items-center gap-2">
             <span class="text-gray-400">🤖</span>
             <input type="text" x-model="newBot.name" required
-                   class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+              class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
           </div>
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Address</label>
           <div class="flex items-center gap-2">
             <span class="text-gray-400">🏷️</span>
-            <input type="text" x-model="newBot.address" 
-                   class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
+            <input type="text" x-model="newBot.address"
+              class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
           </div>
         </div>
         <div>
@@ -274,29 +260,30 @@
           <div class="flex items-center gap-2">
             <span class="text-gray-400">🧭</span>
             <select x-model="newBot.strategy"
-                    class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
-            <option value="arbitrage">Arbitrage</option>
-            <option value="mev">MEV</option>
-            <option value="trading">Trading</option>
-            <option value="monitoring">Monitoring</option>
+              class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100">
+              <option value="arbitrage">Arbitrage</option>
+              <option value="mev">MEV</option>
+              <option value="trading">Trading</option>
+              <option value="monitoring">Monitoring</option>
             </select>
           </div>
         </div>
         <div>
-          <label class="block text-xs text-gray-400 mb-1">API Key (optional)</label>
+          <label class="block text-xs text-gray-400 mb-1">API Key
+            (optional)</label>
           <div class="flex items-center gap-2">
             <span class="text-gray-400">🔑</span>
             <input type="password" x-model="newBot.apiKey"
-                   class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
+              class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm text-gray-100 font-mono">
           </div>
         </div>
         <div class="flex gap-3">
-          <button type="submit" 
-                  class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm transition-colors shadow-sm">
+          <button type="submit"
+            class="flex-1 bg-cyan-600 hover:bg-cyan-700 rounded-md px-4 py-2 text-sm transition-colors shadow-sm">
             Add Bot
           </button>
           <button type="button" @click="showAddBotModal = false"
-                  class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md px-4 py-2 text-sm transition-colors">
+            class="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-md px-4 py-2 text-sm transition-colors">
             Cancel
           </button>
         </div>
@@ -305,28 +292,33 @@
   </div>
 
   <!-- Command Palette Modal -->
-  <div x-show="showCommandPalette" 
-       @click.away="showCommandPalette = false"
-       x-transition
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-       style="display: none;">
-    <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl shadow-xl"
-         @click.stop>
+  <div x-show="showCommandPalette"
+    @click.away="showCommandPalette = false"
+    x-transition
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+    style="display: none;">
+    <div
+      class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl shadow-xl"
+      @click.stop>
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-200">Command Palette</h3>
-        <button @click="showCommandPalette = false" class="text-gray-400 hover:text-gray-300">×</button>
+        <button @click="showCommandPalette = false"
+          class="text-gray-400 hover:text-gray-300">×</button>
       </div>
-      <input type="text" 
-             x-model="commandInput"
-             @keydown.enter="executeCommand()"
-             @keydown.escape="showCommandPalette = false"
-             placeholder="Type a command... (e.g., restart arb-scout, inspect tx-relay)"
-             class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-sm text-gray-100 mb-4"
-             autofocus>
+      <input type="text"
+        x-model="commandInput"
+        @keydown.enter="executeCommand()"
+        @keydown.escape="showCommandPalette = false"
+        placeholder="Type a command... (e.g., restart arb-scout, inspect tx-relay)"
+        class="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-sm text-gray-100 mb-4"
+        autofocus>
       <div class="text-xs text-gray-400 space-y-1">
-        <div><code class="text-cyan-400">restart &lt;bot&gt;</code> - Restart a bot</div>
-        <div><code class="text-cyan-400">inspect &lt;bot&gt; &lt;time&gt;</code> - Inspect bot at time</div>
-        <div><code class="text-cyan-400">filter &lt;bot&gt;</code> - Filter by bot</div>
+        <div><code class="text-cyan-400">restart &lt;bot&gt;</code> - Restart a
+          bot</div>
+        <div><code class="text-cyan-400">inspect &lt;bot&gt; &lt;time&gt;</code>
+          - Inspect bot at time</div>
+        <div><code class="text-cyan-400">filter &lt;bot&gt;</code> - Filter by
+          bot</div>
         <div><code class="text-cyan-400">clear</code> - Clear filters</div>
         <div><code class="text-cyan-400">export</code> - Export data</div>
         <div><code class="text-cyan-400">theme</code> - Toggle theme</div>
@@ -348,7 +340,8 @@
     if (el) el.classList.remove('hidden');
   }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+  defer></script>
 <script src="/static/js/BotHealthTable.js"></script>
 <script src="/static/js/financial3d.js"></script>
 <script src="/static/js/dashboard-ui.js"></script>

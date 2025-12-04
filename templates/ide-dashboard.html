@@ -11,44 +11,7 @@
   {% include 'partials/global-sidebar.html' %}
 
   <!-- TOP BAR (Unified Global Navigation) -->
-  <header class="header-compact fixed top-0 left-0 right-0 h-11 bg-gray-900/95 backdrop-blur-xl border-b border-gray-800 z-30 flex items-center justify-between px-4"
-          style="box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);">
-    
-    <!-- Left: Navigation -->
-    <div class="flex items-center gap-4">
-      <img src="/static/imgs/silverback-grey.png" alt="Silverback" class="h-5 w-5 opacity-90 logo-white">
-      <nav class="flex items-center gap-3 text-sm">
-        <a href="/" class="nav-link active text-xs">Dashboard</a>
-        <a href="/explorer" class="nav-link text-xs">Explorer</a>
-        <a href="/bots" class="nav-link text-xs">Bots</a>
-        <a href="/logs" class="nav-link text-xs">Logs</a>
-        <a href="/report" class="nav-link text-xs">Reports</a>
-      </nav>
-    </div>
-
-    <!-- Right: Live Ticker -->
-    <div class="flex items-center gap-4 text-xs mr-80">
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">LAT:</span>
-        <span class="text-cyan-400 font-mono font-semibold" x-text="kpis.avg_latency_ms + 'ms'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-gray-500">SUC:</span>
-        <span class="text-green-400 font-mono font-semibold" x-text="kpis.success_rate_pct + '%'"></span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="w-1.5 h-1.5 rounded-full"
-             :class="connectionStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'"></div>
-        <span class="text-gray-400 font-mono" 
-              x-text="connectionStatus === 'connected' ? 'LIVE' : 'OFF'"></span>
-      </div>
-      <button @click="showCommandPalette = !showCommandPalette" 
-              class="px-2 py-1 rounded border border-gray-700 hover:bg-gray-800 hover:border-cyan-500/50 text-gray-400 hover:text-cyan-400 transition-colors text-xs"
-              title="Command Palette (⌘K)">
-        ⌘K
-      </button>
-    </div>
-  </header>
+  {# Top bar now included via base.html #}
 
   <!-- RIGHT SIDEBAR (Event Stream) -->
   <aside class="w-72 border-l border-gray-800 bg-gray-900/95 backdrop-blur-xl flex flex-col fixed right-0 top-11 bottom-12 z-20 overflow-y-auto"
@@ -83,7 +46,7 @@
   </aside>
 
   <!-- MAIN CONTENT AREA (Scrollable) -->
-  <main class="flex-1 ml-64 mr-72 mt-11 mb-12 overflow-auto bg-gray-950 p-4">
+  <main class="flex-1 ml-56 mr-72 mt-11 mb-12 overflow-auto bg-gray-950 p-4">
     
     <!-- Compact Header -->
     <div class="mb-4">
