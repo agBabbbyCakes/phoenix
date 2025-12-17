@@ -27,6 +27,7 @@ from .config import settings
 from .logging_config import setup_logging
 from .middleware.rate_limit import RateLimitMiddleware
 from .middleware.error_handler import exception_handler_middleware
+from .database import get_database
 
 # Setup logging
 setup_logging()
@@ -72,12 +73,20 @@ app = FastAPI(
 )
 
 # Configure CORS with settings
-cors_origins = ["*"] if settings.cors_allow_all else settings.cors_origins
+# Security: Only allow all origins in development mode (debug=True)
+# In production, use specific origins from settings.cors_origins
+if settings.debug and settings.cors_allow_all:
+    # Development mode - allow all origins
+    cors_origins = ["*"]
+else:
+    # Production mode - use specific origins
+    cors_origins = settings.cors_origins if settings.cors_origins else ["http://localhost:8000"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=True if "*" not in cors_origins else False,  # Don't allow credentials with wildcard
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
@@ -1007,16 +1016,15 @@ async def rent_bot(request: RentalRequest) -> JSONResponse:
             expires_at=expires_at
         )
         
-        # Store rental in memory (in production, use database)
-        # For now, we'll use a simple in-memory store
-        if not hasattr(rent_bot, '_rentals_store'):
-            rent_bot._rentals_store = []
-        rent_bot._rentals_store.append(rental)
+        # Store rental in database
+        db = get_database()
+        rental_id = db.create_rental(rental)
+        rental.id = rental_id
         
         return JSONResponse({
             "status": "success",
             "rental": {
-                "id": f"rental_{request.bot_id}_{int(now.timestamp())}",
+                "id": rental_id,
                 "bot_id": rental.bot_id,
                 "bot_name": rental.bot_name,
                 "duration": rental.duration.value,
@@ -1038,37 +1046,42 @@ async def get_rentals() -> JSONResponse:
     Returns list of active bot rentals with performance metrics.
     """
     try:
-        # Get rentals from in-memory store (in production, query database)
+        # Get rentals from database
+        db = get_database()
+        # Expire old rentals first
+        db.expire_rentals()
+        
+        # Get active rentals (user_id can be added later for multi-user support)
+        active_rentals = db.get_active_rentals()
+        
+        now = datetime.now(timezone.utc)
         rentals = []
-        if hasattr(rent_bot, '_rentals_store'):
-            now = datetime.now(timezone.utc)
-            for rental in rent_bot._rentals_store:
-                # Check if rental is still active
-                if rental.expires_at > now and rental.status == RentalStatus.ACTIVE:
-                    # Get current bot performance
-                    bot_stats = {}
-                    events = list(store.events)
-                    for event in events:
-                        if event.bot_name.lower().replace(" ", "-") == rental.bot_id:
-                            bot_stats["success_rate"] = event.success_rate
-                            bot_stats["latency_ms"] = event.latency_ms
-                            break
-                    
-                    rentals.append({
-                        "id": rental.id or f"rental_{rental.bot_id}_{int(rental.rented_at.timestamp())}",
-                        "bot_id": rental.bot_id,
-                        "bot_name": rental.bot_name,
-                        "duration": rental.duration.value,
-                        "price": rental.price,
-                        "status": rental.status.value,
-                        "rented_at": rental.rented_at.isoformat(),
-                        "expires_at": rental.expires_at.isoformat(),
-                        "time_remaining": int((rental.expires_at - now).total_seconds()),
-                        "current_performance": {
-                            "success_rate": bot_stats.get("success_rate", 0),
-                            "latency_ms": bot_stats.get("latency_ms", 0)
-                        }
-                    })
+        
+        for rental in active_rentals:
+            # Get current bot performance
+            bot_stats = {}
+            events = list(store.events)
+            for event in events:
+                if event.bot_name.lower().replace(" ", "-") == rental.bot_id:
+                    bot_stats["success_rate"] = event.success_rate
+                    bot_stats["latency_ms"] = event.latency_ms
+                    break
+            
+            rentals.append({
+                "id": rental.id or f"rental_{rental.bot_id}_{int(rental.rented_at.timestamp())}",
+                "bot_id": rental.bot_id,
+                "bot_name": rental.bot_name,
+                "duration": rental.duration.value,
+                "price": rental.price,
+                "status": rental.status.value,
+                "rented_at": rental.rented_at.isoformat(),
+                "expires_at": rental.expires_at.isoformat(),
+                "time_remaining": int((rental.expires_at - now).total_seconds()),
+                "current_performance": {
+                    "success_rate": bot_stats.get("success_rate", 0),
+                    "latency_ms": bot_stats.get("latency_ms", 0)
+                }
+            })
         
         return JSONResponse({
             "status": "success",
@@ -1165,22 +1178,21 @@ async def cancel_rental(rental_id: str) -> JSONResponse:
     Marks rental as cancelled and processes refund if applicable.
     """
     try:
-        # Find and cancel rental (in production, update database)
-        if hasattr(rent_bot, '_rentals_store'):
-            for rental in rent_bot._rentals_store:
-                rental_identifier = rental.id or f"rental_{rental.bot_id}_{int(rental.rented_at.timestamp())}"
-                if rental_identifier == rental_id:
-                    rental.status = RentalStatus.CANCELLED
-                    return JSONResponse({
-                        "status": "success",
-                        "message": f"Rental {rental_id} cancelled successfully",
-                        "rental_id": rental_id
-                    })
+        # Cancel rental in database
+        db = get_database()
+        success = db.cancel_rental(rental_id)
         
-        return JSONResponse({
-            "status": "error",
-            "message": f"Rental {rental_id} not found"
-        }, status_code=404)
+        if success:
+            return JSONResponse({
+                "status": "success",
+                "message": f"Rental {rental_id} cancelled successfully",
+                "rental_id": rental_id
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": f"Rental {rental_id} not found"
+            }, status_code=404)
     except Exception as e:
         return JSONResponse({
             "status": "error",

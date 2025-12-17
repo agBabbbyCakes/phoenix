@@ -41,7 +41,13 @@ if PYDANTIC_AVAILABLE:
         )
         cors_allow_all: bool = Field(
             default=False,
-            description="Allow all origins (development only - security risk in production)"
+            description="Allow all origins (development only - security risk in production). Only works when debug=True."
+        )
+        
+        # Database settings
+        database_path: Optional[str] = Field(
+            default=None,
+            description="Path to SQLite database file. If None, uses 'rentals.db' in project root."
         )
         
         # Application settings

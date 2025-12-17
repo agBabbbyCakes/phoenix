@@ -4,12 +4,16 @@ This document lists all incomplete, placeholder, or half-baked implementations f
 
 ## 🔴 Critical - Production Blockers
 
-### 1. **Rental System - Database Persistence**
+### 1. **Rental System - Database Persistence** ✅ **COMPLETED**
 - **Location**: `app/main.py` lines 1009, 1040, 1167
 - **Issue**: Rental data stored in-memory only (`rent_bot._rentals_store`)
 - **Impact**: Data lost on server restart, no multi-instance support
-- **Status**: Has "In production, use database" comments
-- **Fix Needed**: Implement database storage (SQLite/PostgreSQL)
+- **Status**: ✅ **FIXED** - Implemented SQLite database persistence
+- **Changes**:
+  - Created `app/database.py` with `RentalDatabase` class
+  - Updated all rental endpoints to use database instead of in-memory store
+  - Added automatic rental expiration
+  - Database file: `rentals.db` in project root
 
 ### 2. **Payment Processing Integration**
 - **Location**: `app/main.py` line 956
@@ -18,12 +22,16 @@ This document lists all incomplete, placeholder, or half-baked implementations f
 - **Status**: Placeholder implementation
 - **Fix Needed**: Integrate Stripe, PayPal, or crypto payment gateway
 
-### 3. **CORS Security**
-- **Location**: `app/config.py` line 44
+### 3. **CORS Security** ✅ **COMPLETED**
+- **Location**: `app/config.py` line 44, `app/main.py` line 76
 - **Issue**: Allows all origins in development (security risk in production)
 - **Impact**: Security vulnerability if deployed without proper CORS configuration
-- **Status**: Comment warns about production risk
-- **Fix Needed**: Restrict to specific origins in production
+- **Status**: ✅ **FIXED** - CORS now restricted in production mode
+- **Changes**:
+  - CORS only allows wildcard (`*`) when `debug=True` AND `cors_allow_all=True`
+  - Production mode uses specific origins from `settings.cors_origins`
+  - Credentials disabled when using wildcard origins
+  - Restricted HTTP methods to safe set
 
 ### 4. **Rate Limiting - In-Memory Store**
 - **Location**: `app/middleware/rate_limit.py` line 17
