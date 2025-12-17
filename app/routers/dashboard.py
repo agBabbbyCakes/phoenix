@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.dependencies import get_store
+from app.data import DataStore
 
 # Get BUILD_INFO
 try:
@@ -178,4 +179,11 @@ async def pointcloud_viewer(request: Request) -> HTMLResponse:
     """Standalone 3D point cloud visualization page."""
     version = get_version()
     return templates.TemplateResponse("pointcloud.html", {"request": request, "version": version})
+
+
+@router.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request) -> HTMLResponse:
+    """About page with tech stack overview."""
+    version = get_version()
+    return templates.TemplateResponse("about.html", {"request": request, "version": version})
 
