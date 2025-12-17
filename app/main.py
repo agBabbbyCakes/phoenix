@@ -978,22 +978,41 @@ async def rent_bot(request: RentalRequest) -> JSONResponse:
         for event in events:
             if event.bot_name.lower().replace(" ", "-") == request.bot_id:
                 bot_stats["bot_name"] = event.bot_name
+                bot_stats["success_rate"] = event.success_rate
                 break
+        
+        # Calculate performance-based pricing
+        # Higher success rate = higher price
+        performance_multiplier = 1.0
+        if bot_stats.get("success_rate", 0) > 95:
+            performance_multiplier = 1.5  # Premium bots cost 50% more
+        elif bot_stats.get("success_rate", 0) > 90:
+            performance_multiplier = 1.25
+        elif bot_stats.get("success_rate", 0) > 80:
+            performance_multiplier = 1.0
+        else:
+            performance_multiplier = 0.8  # Lower performance = discount
+        
+        final_price = base_price * performance_multiplier
         
         # Create rental record
         rental = BotRental(
             bot_id=request.bot_id,
             bot_name=bot_stats.get("bot_name", request.bot_id),
             duration=request.duration,
-            price=base_price,
+            price=final_price,
             payment_method=request.payment_method,
             status=RentalStatus.ACTIVE,
             rented_at=now,
             expires_at=expires_at
         )
         
-        # In production, store in database
-        # For now, return success response
+        # Store rental in memory (in production, use database)
+        # For now, we'll use a simple in-memory store
+        if not hasattr(rent_bot, '_rentals_store'):
+            rent_bot._rentals_store = []
+        rent_bot._rentals_store.append(rental)
+        
         return JSONResponse({
             "status": "success",
             "rental": {
@@ -1001,7 +1020,8 @@ async def rent_bot(request: RentalRequest) -> JSONResponse:
                 "bot_id": rental.bot_id,
                 "bot_name": rental.bot_name,
                 "duration": rental.duration.value,
-                "price": rental.price,
+                "price": round(rental.price, 2),
+                "performance_multiplier": round(performance_multiplier, 2),
                 "status": rental.status.value,
                 "rented_at": rental.rented_at.isoformat(),
                 "expires_at": rental.expires_at.isoformat()
@@ -1015,14 +1035,48 @@ async def rent_bot(request: RentalRequest) -> JSONResponse:
 async def get_rentals() -> JSONResponse:
     """Get all active rentals for the current user.
     
-    Returns list of active bot rentals.
+    Returns list of active bot rentals with performance metrics.
     """
-    # In production, filter by user_id
-    # For now, return empty list (rentals stored client-side)
-    return JSONResponse({
-        "status": "success",
-        "rentals": []
-    })
+    try:
+        # Get rentals from in-memory store (in production, query database)
+        rentals = []
+        if hasattr(rent_bot, '_rentals_store'):
+            now = datetime.now(timezone.utc)
+            for rental in rent_bot._rentals_store:
+                # Check if rental is still active
+                if rental.expires_at > now and rental.status == RentalStatus.ACTIVE:
+                    # Get current bot performance
+                    bot_stats = {}
+                    events = list(store.events)
+                    for event in events:
+                        if event.bot_name.lower().replace(" ", "-") == rental.bot_id:
+                            bot_stats["success_rate"] = event.success_rate
+                            bot_stats["latency_ms"] = event.latency_ms
+                            break
+                    
+                    rentals.append({
+                        "id": rental.id or f"rental_{rental.bot_id}_{int(rental.rented_at.timestamp())}",
+                        "bot_id": rental.bot_id,
+                        "bot_name": rental.bot_name,
+                        "duration": rental.duration.value,
+                        "price": rental.price,
+                        "status": rental.status.value,
+                        "rented_at": rental.rented_at.isoformat(),
+                        "expires_at": rental.expires_at.isoformat(),
+                        "time_remaining": int((rental.expires_at - now).total_seconds()),
+                        "current_performance": {
+                            "success_rate": bot_stats.get("success_rate", 0),
+                            "latency_ms": bot_stats.get("latency_ms", 0)
+                        }
+                    })
+        
+        return JSONResponse({
+            "status": "success",
+            "rentals": rentals,
+            "count": len(rentals)
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
 
 
 @app.get("/api/bots/{bot_id}/rental-info")
@@ -1040,7 +1094,7 @@ async def get_bot_rental_info(bot_id: str) -> JSONResponse:
                 bot_stats["bot_name"] = event.bot_name
                 break
         
-        # Calculate pricing based on bot type/strategy
+        # Calculate pricing based on bot type/strategy and performance
         strategy = "arbitrage"  # Default
         if "mev" in bot_id.lower():
             strategy = "mev"
@@ -1058,9 +1112,30 @@ async def get_bot_rental_info(bot_id: str) -> JSONResponse:
             "nft": 0.4
         }
         
-        hourly_price = base_prices.get(strategy, 0.5)
+        # Get bot performance metrics
+        success_rate = 0
+        latency_ms = 0
+        events = list(store.events)
+        for event in events:
+            if event.bot_name.lower().replace(" ", "-") == bot_id:
+                success_rate = event.success_rate
+                latency_ms = event.latency_ms
+                break
+        
+        # Performance-based pricing multiplier
+        performance_multiplier = 1.0
+        if success_rate > 95:
+            performance_multiplier = 1.5  # Premium performance
+        elif success_rate > 90:
+            performance_multiplier = 1.25
+        elif success_rate > 80:
+            performance_multiplier = 1.0
+        else:
+            performance_multiplier = 0.8  # Discount for lower performance
+        
+        hourly_price = base_prices.get(strategy, 0.5) * performance_multiplier
         daily_price = hourly_price * 24
-        monthly_price = hourly_price * 24 * 30 * 0.8  # 20% discount
+        monthly_price = hourly_price * 24 * 30 * 0.8  # 20% discount for monthly
         
         return JSONResponse({
             "status": "success",
@@ -1069,7 +1144,13 @@ async def get_bot_rental_info(bot_id: str) -> JSONResponse:
             "pricing": {
                 "hourly": round(hourly_price, 2),
                 "daily": round(daily_price, 2),
-                "monthly": round(monthly_price, 2)
+                "monthly": round(monthly_price, 2),
+                "performance_multiplier": round(performance_multiplier, 2),
+                "base_strategy": strategy
+            },
+            "performance": {
+                "success_rate": round(success_rate, 2),
+                "latency_ms": latency_ms
             },
             "available": True
         })
@@ -1084,50 +1165,28 @@ async def cancel_rental(rental_id: str) -> JSONResponse:
     Marks rental as cancelled and processes refund if applicable.
     """
     try:
-        # In production, update rental status in database
+        # Find and cancel rental (in production, update database)
+        if hasattr(rent_bot, '_rentals_store'):
+            for rental in rent_bot._rentals_store:
+                rental_identifier = rental.id or f"rental_{rental.bot_id}_{int(rental.rented_at.timestamp())}"
+                if rental_identifier == rental_id:
+                    rental.status = RentalStatus.CANCELLED
+                    return JSONResponse({
+                        "status": "success",
+                        "message": f"Rental {rental_id} cancelled successfully",
+                        "rental_id": rental_id
+                    })
+        
         return JSONResponse({
-            "status": "success",
-            "message": f"Rental {rental_id} cancelled successfully"
-        })
+            "status": "error",
+            "message": f"Rental {rental_id} not found"
+        }, status_code=404)
     except Exception as e:
-        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
-
-
-@app.post("/api/bots/trade")
-async def trade_bot(request: Request) -> JSONResponse:
-    """Trade bot shares (buy/sell).
-    
-    Allows users to buy or sell shares of high-performing bots.
-    In production, this would integrate with a trading system.
-    """
-    try:
-        data = await request.json()
-        bot_id = data.get("bot_id")
-        trade_type = data.get("type")  # 'buy' or 'sell'
-        amount = float(data.get("amount", 0))
-        price = float(data.get("price", 0))
-        
-        if not bot_id or amount <= 0 or price <= 0:
-            return JSONResponse({"status": "error", "message": "Invalid trade parameters"}, status_code=400)
-        
-        total_cost = amount * price
-        
-        # In production, this would:
-        # 1. Validate user balance
-        # 2. Execute trade on exchange/marketplace
-        # 3. Update user portfolio
-        # 4. Record transaction
-        
         return JSONResponse({
-            "status": "success",
-            "trade": {
-                "bot_id": bot_id,
-                "type": trade_type,
-                "amount": amount,
-                "price": price,
-                "total": total_cost,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
+            "status": "error",
+            "message": str(e)
+        }, status_code=400)
+            "message": f"Rental {rental_id} cancelled successfully"
         })
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
@@ -1186,46 +1245,4 @@ async def get_live_metric(metric: str) -> JSONResponse:
     })
 
 
-@app.get("/api/bots/{bot_id}/trading-info")
-async def get_bot_trading_info(bot_id: str) -> JSONResponse:
-    """Get trading information for a bot (price, volume, market data).
-    
-    Returns current market price, 24h volume, and trading statistics.
-    """
-    try:
-        # Get bot stats
-        bot_stats = {}
-        events = list(store.events)
-        for event in events:
-            if event.bot_name.lower().replace(" ", "-") == bot_id:
-                bot_stats["bot_name"] = event.bot_name
-                bot_stats["success_rate"] = event.success_rate
-                break
-        
-        # Calculate market price based on performance
-        base_price = 0.5
-        if bot_stats.get("success_rate", 0) > 95:
-            base_price = 1.0
-        elif bot_stats.get("success_rate", 0) > 90:
-            base_price = 0.75
-        elif bot_stats.get("success_rate", 0) > 80:
-            base_price = 0.5
-        
-        share_price = base_price * 100  # Convert to share price
-        
-        return JSONResponse({
-            "status": "success",
-            "bot_id": bot_id,
-            "bot_name": bot_stats.get("bot_name", bot_id),
-            "market_data": {
-                "current_price": share_price,
-                "24h_volume": random.randint(10000, 1000000),
-                "24h_high": share_price * 1.1,
-                "24h_low": share_price * 0.9,
-                "market_cap": share_price * 1000000,  # Simulated
-                "available_shares": 1000000
-            }
-        })
-    except Exception as e:
-        return JSONResponse({"status": "error", "message": str(e)}, status_code=400)
 

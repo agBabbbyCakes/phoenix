@@ -211,10 +211,6 @@
                     <template x-if="bot.isSaved">💾 Saved</template>
                     <template x-if="!bot.isSaved">💾 Save</template>
                   </button>
-                  <button @click.stop="openTradeModal(bot)"
-                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-4 py-2 text-xs font-semibold transition-glass">
-                    Trade
-                  </button>
                   <button @click.stop="openRentModal(bot)"
                           class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-4 py-2 text-xs font-semibold transition-glass">
                     <template x-if="bot.isRented">Manage</template>
@@ -297,10 +293,6 @@
                     <template x-if="bot.isSaved">💾</template>
                     <template x-if="!bot.isSaved">💾</template>
                   </button>
-                  <button @click.stop="openTradeModal(bot)"
-                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-3 py-1.5 text-xs font-semibold transition-glass">
-                    Trade
-                  </button>
                   <button @click.stop="openRentModal(bot)"
                           class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-3 py-1.5 text-xs font-semibold transition-glass">
                     Rent
@@ -371,10 +363,6 @@
               <!-- Action Buttons -->
               <div class="pt-4 border-t border-gray-800 space-y-2">
                 <div class="flex gap-2">
-                  <button @click="openTradeModal(selectedBot)"
-                          class="flex-1 glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-4 py-2 text-sm font-semibold transition-glass">
-                    Trade
-                  </button>
                   <button @click="openRentModal(selectedBot)"
                           class="flex-1 glass-btn border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/20 rounded-lg px-4 py-2 text-sm font-semibold transition-glass">
                     Rent
@@ -393,67 +381,6 @@
       </div>
     </div>
   </main>
-
-  <!-- Trade Modal -->
-  <div x-show="showTradeModal" 
-       @click.away="showTradeModal = false"
-       x-transition
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-       style="display: none;">
-    <div class="modal-glass rounded-xl p-6 w-full max-w-md"
-         @click.stop>
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-200">Trade Bot</h3>
-        <button @click="showTradeModal = false" class="text-gray-400 hover:text-gray-300 text-xl">×</button>
-      </div>
-      
-      <template x-if="selectedBot">
-        <div>
-          <div class="glass-card rounded-lg p-4 mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <h4 class="font-semibold text-cyan-400" x-text="selectedBot.name"></h4>
-              <span class="text-xs text-gray-500" x-text="selectedBot.symbol"></span>
-            </div>
-            <div class="text-xs text-gray-400" x-text="selectedBot.description"></div>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs text-gray-400 mb-2">Trade Type</label>
-              <select x-model="tradeType"
-                      class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
-                <option value="buy">Buy Bot Shares</option>
-                <option value="sell">Sell Bot Shares</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-xs text-gray-400 mb-2">Amount</label>
-              <input type="number" x-model="tradeAmount" min="0" step="0.01"
-                     class="w-full glass rounded-md px-3 py-2 text-sm text-gray-100 transition-glass">
-            </div>
-            
-            <div class="glass-card rounded-lg p-3">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-gray-500">Price per Share</span>
-                <span class="text-cyan-400 font-semibold" x-text="formatPrice(selectedBot.rentalPrice * 100)"></span>
-              </div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-gray-500">Total Cost</span>
-                <span class="text-emerald-400 font-semibold" 
-                      x-text="formatPrice((selectedBot.rentalPrice * 100) * (tradeAmount || 0))"></span>
-              </div>
-            </div>
-            
-            <button @click="executeTrade()"
-                    class="w-full glass-btn border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 rounded-md px-4 py-2 text-sm font-semibold transition-glass">
-              Execute Trade
-            </button>
-          </div>
-        </div>
-      </template>
-    </div>
-  </div>
 
   <!-- Rent Modal -->
   <div x-show="showRentModal" 
@@ -479,6 +406,19 @@
               </div>
             </div>
             <p class="text-xs text-gray-400 mt-2" x-text="selectedBot.description"></p>
+            
+            <!-- Performance-based pricing indicator -->
+            <div class="mt-3 pt-3 border-t border-gray-700">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-500">Performance Multiplier</span>
+                <span class="text-cyan-400 font-semibold" x-text="(selectedBot.success_rate > 95 ? '1.5x' : selectedBot.success_rate > 90 ? '1.25x' : selectedBot.success_rate > 80 ? '1.0x' : '0.8x') + ' (Premium Pricing)'"></span>
+              </div>
+              <div class="flex items-center justify-between text-xs mt-1">
+                <span class="text-gray-500">Success Rate</span>
+                <span :class="selectedBot.success_rate >= 90 ? 'text-emerald-400' : selectedBot.success_rate >= 80 ? 'text-yellow-400' : 'text-red-400'"
+                      class="font-semibold" x-text="selectedBot.success_rate.toFixed(1) + '%'"></span>
+              </div>
+            </div>
           </div>
           
           <div class="space-y-2 mb-4">
@@ -682,10 +622,7 @@ function botExplorerPageState() {
     newBot: { name: '', address: '', strategy: 'arbitrage', apiKey: '' },
     
     selectedBot: null,
-    showTradeModal: false,
     showRentModal: false,
-    tradeType: 'buy',
-    tradeAmount: 0,
     performanceFilter: 'all',
     
     init() {
@@ -836,50 +773,9 @@ function botExplorerPageState() {
       window.location.href = `/bots/${botId}`;
     },
     
-    openTradeModal(bot) {
-      this.selectedBot = bot;
-      this.showTradeModal = true;
-    },
-    
     openRentModal(bot) {
       this.selectedBot = bot;
       this.showRentModal = true;
-    },
-    
-    async executeTrade() {
-      if (!this.selectedBot || !this.tradeAmount || this.tradeAmount <= 0) {
-        alert('Please enter a valid amount');
-        return;
-      }
-      
-      try {
-        const trade = {
-          bot_id: this.selectedBot.id,
-          bot_name: this.selectedBot.name,
-          type: this.tradeType,
-          amount: this.tradeAmount,
-          price: this.selectedBot.rentalPrice * 100,
-          total: (this.selectedBot.rentalPrice * 100) * this.tradeAmount
-        };
-        
-        const response = await fetch('/api/bots/trade', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(trade)
-        });
-        
-        const data = await response.json();
-        if (data.status === 'success') {
-          alert(`Trade ${this.tradeType === 'buy' ? 'purchase' : 'sale'} of ${this.tradeAmount} shares of ${this.selectedBot.name} executed!`);
-          this.showTradeModal = false;
-          this.tradeAmount = 0;
-        } else {
-          throw new Error(data.message || 'Trade failed');
-        }
-      } catch (e) {
-        console.error('Failed to execute trade', e);
-        alert('Failed to execute trade. Please try again.');
-      }
     },
     
     applyFilters() {
